@@ -15,6 +15,10 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
+import axios, { AxiosResponse, AxiosError } from "axios";
+import { ErrorInterface, ErrorResponse } from "../types/Error";
+import { transformError } from "../helpers";
+import { UserInterface, UserResponse } from "../types/User";
 
 interface IFormInput {
   username: string;
@@ -47,10 +51,15 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-function Login() {
+interface Props {
+  setUser: React.Dispatch<React.SetStateAction<UserInterface | null>>;
+}
+
+function Login({ setUser }: Props) {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const {
+    setError,
     formState: { errors },
     handleSubmit,
     control,
@@ -61,8 +70,31 @@ function Login() {
     },
   });
 
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+    try {
+      const response: AxiosResponse<UserResponse> = await axios.post(
+        "http://localhost:8000/login",
+        data
+      );
+      setUser(response.data.user);
+    } catch (err) {
+      const error = err as AxiosError;
+      const result = error.response?.data as ErrorResponse;
+      const errors: ErrorInterface[] = result.errors ?? [];
+      const formattedErrors = transformError(errors);
+      if (formattedErrors.password) {
+        setError("password", {
+          type: "server",
+          message: formattedErrors.password[0],
+        });
+      }
+      if (formattedErrors.username) {
+        setError("username", {
+          type: "server",
+          message: formattedErrors.username[0],
+        });
+      }
+    }
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -92,10 +124,6 @@ function Login() {
         control={control}
         rules={{
           required: "Username must be specified",
-          maxLength: {
-            value: 100,
-            message: "Username can't exceed 100 characters",
-          },
         }}
         render={({ field }) => (
           <CustomTextField
@@ -106,15 +134,16 @@ function Login() {
           />
         )}
       />
-      {true && (
-        <Typography
-          color="#f44336"
-          visibility={errors.username ? "visible" : "hidden"}
-        >
-          <WarningRoundedIcon />
-          {errors.username?.message}
-        </Typography>
-      )}
+      <Typography
+        sx={{
+          color: "#f44336",
+          visibility: `${errors.username ? "visible" : "hidden"}`,
+          textAlign: "center",
+        }}
+      >
+        <WarningRoundedIcon />
+        {errors.username?.message}
+      </Typography>
 
       <Controller
         name="password"
@@ -187,17 +216,16 @@ function Login() {
           </FormControl>
         )}
       />
-      {true && (
-        <Typography
-          color="#f44336"
-          sx={{
-            visibility: `${errors.password ? "visible" : "hidden"}`,
-          }}
-        >
-          <WarningRoundedIcon />
-          {errors.password?.message}
-        </Typography>
-      )}
+      <Typography
+        sx={{
+          color: "#f44336",
+          visibility: `${errors.password ? "visible" : "hidden"}`,
+          textAlign: "center",
+        }}
+      >
+        <WarningRoundedIcon />
+        {errors.password?.message}
+      </Typography>
 
       <Button
         type="submit"
