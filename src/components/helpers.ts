@@ -3,6 +3,7 @@ import { ErrorInterface } from "./types/Error";
 interface ErrorObject {
   password?: string[];
   username?: string[];
+  passwordConfirmation?: string[];
 }
 
 export function transformError(errorArray: ErrorInterface[]): ErrorObject {
