@@ -1,59 +1,104 @@
-import { Box, Container, GlobalStyles, Link, Typography } from "@mui/material";
+import {
+  Box,
+  Container,
+  GlobalStyles,
+  Link,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import WelcomeBox from "./GuestComponents/WelcomeBox";
 import Login from "./GuestComponents/Login";
 import { useState } from "react";
+import { UserInterface } from "./types/User";
+import SignUp from "./GuestComponents/SignUp";
 
 function Content() {
   const theme = useTheme();
   const [showLogin, setShowLogin] = useState(true);
+  const [user, setUser] = useState<UserInterface | null>(null);
+  const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <>
       <GlobalStyles styles={{ body: { backgroundColor: theme.creamy } }} />
-      <Container
-        maxWidth="xl"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "1rem",
-          height: "100vh",
-        }}
-        component="main"
-      >
-        <WelcomeBox />
-        <Box
+      {!user && (
+        <Container
+          maxWidth="xl"
           sx={{
-            boxShadow: 1,
-            p: 2,
-            borderRadius: 1,
-            bgcolor: theme.creamy,
-            display: "flex",
-            flexDirection: "column",
+            height: "100vh",
+            display: `${isMediumScreen ? "flex" : "block"}`,
+            alignItems: "center",
+            justifyContent: "center",
           }}
+          component="main"
         >
-          {showLogin && (
-            <>
-              <Login />
-              <Typography>
-                {"Don't"} have an account?{" "}
-                <Link
-                  sx={{ color: theme.deepBlue, fontWeight: "bold" }}
-                  href="#"
-                  underline="none"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowLogin(!showLogin);
-                  }}
-                >
-                  Sign up
-                </Link>
-              </Typography>
-            </>
-          )}
-        </Box>
-      </Container>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: `${isMediumScreen ? "row" : "column"}`,
+              gap: "4rem",
+            }}
+          >
+            <WelcomeBox />
+
+            <Box
+              sx={{
+                flex: "1",
+                boxShadow: 1,
+                p: 2,
+                borderRadius: 1,
+                bgcolor: theme.creamy,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                mb: 4,
+              }}
+            >
+              {showLogin && (
+                <>
+                  <Login setUser={setUser} />
+                  <Typography sx={{ textAlign: "center" }}>
+                    {"Don't"} have an account?{" "}
+                    <Link
+                      sx={{ color: theme.deepBlue, fontWeight: "bold" }}
+                      href="#"
+                      underline="none"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowLogin(false);
+                      }}
+                    >
+                      Sign up
+                    </Link>
+                  </Typography>
+                </>
+              )}
+              {!showLogin && (
+                <>
+                  <SignUp setUser={setUser} />
+                  <Typography sx={{ textAlign: "center" }}>
+                    Already have an account?{" "}
+                    <Link
+                      sx={{ color: theme.deepBlue, fontWeight: "bold" }}
+                      href="#"
+                      underline="none"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowLogin(true);
+                      }}
+                    >
+                      Login
+                    </Link>
+                  </Typography>
+                </>
+              )}
+            </Box>
+          </Box>
+        </Container>
+      )}
     </>
   );
 }
