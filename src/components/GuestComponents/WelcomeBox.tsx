@@ -7,6 +7,7 @@ function WelcomeBox() {
   return (
     <Box
       sx={{
+        flex: "1",
         display: "flex",
         flexDirection: "column",
         p: 2,
