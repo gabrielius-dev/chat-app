@@ -9,15 +9,34 @@ import {
 import { useTheme } from "@mui/material/styles";
 import WelcomeBox from "./GuestComponents/WelcomeBox";
 import Login from "./GuestComponents/Login";
-import { useState } from "react";
-import { UserInterface } from "./types/User";
+import { useEffect, useState } from "react";
+import { UserInterface, UserResponse } from "./types/User";
 import SignUp from "./GuestComponents/SignUp";
+import axios, { AxiosResponse } from "axios";
 
 function Content() {
   const theme = useTheme();
   const [showLogin, setShowLogin] = useState(true);
   const [user, setUser] = useState<UserInterface | null>(null);
   const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response: AxiosResponse<UserResponse> = await axios.get(
+          "http://localhost:8000/user",
+          {
+            withCredentials: true,
+          }
+        );
+        setUser(response.data.user);
+      } catch (err) {
+        /* empty */
+      }
+    };
+
+    void fetchUser();
+  }, []);
 
   return (
     <>
@@ -54,7 +73,7 @@ function Content() {
                 justifyContent: "center",
                 alignItems: "center",
                 width: "100%",
-                mb: 4,
+                mb: `${isMediumScreen ? 0 : 4}`,
               }}
             >
               {showLogin && (
