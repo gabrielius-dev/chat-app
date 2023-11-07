@@ -79,7 +79,8 @@ function SignUp({ setUser }: Props) {
     try {
       const response: AxiosResponse<UserResponse> = await axios.post(
         "http://localhost:8000/sign-up",
-        data
+        data,
+        { withCredentials: true }
       );
       setUser(response.data.user);
     } catch (err) {
