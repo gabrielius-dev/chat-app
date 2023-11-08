@@ -1,11 +1,4 @@
-import {
-  Box,
-  Container,
-  GlobalStyles,
-  Link,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
+import { Box, Container, Link, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import WelcomeBox from "./GuestComponents/WelcomeBox";
 import Login from "./GuestComponents/Login";
@@ -40,7 +33,6 @@ function Content() {
 
   return (
     <>
-      <GlobalStyles styles={{ body: { backgroundColor: theme.creamy } }} />
       {!user && (
         <Container
           maxWidth="xl"
@@ -67,7 +59,6 @@ function Content() {
                 boxShadow: 1,
                 p: 2,
                 borderRadius: 1,
-                bgcolor: theme.creamy,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",
