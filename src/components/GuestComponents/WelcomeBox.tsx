@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { Link } from "react-router-dom";
 
 function WelcomeBox() {
   const theme = useTheme();
@@ -22,7 +23,7 @@ function WelcomeBox() {
           color: theme.midnightNavy,
         }}
       >
-        Chat app
+        <Link to="/">Chat app</Link>
       </Typography>
       <img src="src\assets\illustrations\chat.svg" />
       <Typography
