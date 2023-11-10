@@ -142,10 +142,15 @@ function SignUp({ setUser }: Props) {
         control={control}
         rules={{
           required: "Username must be specified",
+          maxLength: {
+            value: 100,
+            message: "Username can't exceed 100 characters",
+          },
         }}
         render={({ field }) => (
           <CustomTextField
             {...field}
+            inputProps={{ maxLength: 100 }}
             label="Username"
             variant="outlined"
             error={errors.username ? true : false}
@@ -158,6 +163,7 @@ function SignUp({ setUser }: Props) {
           visibility: `${errors.username ? "visible" : "hidden"}`,
           textAlign: "center",
         }}
+        data-testid="username-error-element"
       >
         <WarningRoundedIcon />
         {errors.username?.message}
@@ -217,6 +223,7 @@ function SignUp({ setUser }: Props) {
             <OutlinedInput
               id="password"
               type={showPassword ? "text" : "password"}
+              inputProps={{ maxLength: 100 }}
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
@@ -240,6 +247,7 @@ function SignUp({ setUser }: Props) {
           visibility: `${errors.password ? "visible" : "hidden"}`,
           textAlign: "center",
         }}
+        data-testid="password-error-element"
       >
         <WarningRoundedIcon />
         {errors.password?.message}
@@ -301,10 +309,11 @@ function SignUp({ setUser }: Props) {
             <OutlinedInput
               id="passwordConfirmation"
               type={showPasswordConfirmation ? "text" : "password"}
+              inputProps={{ maxLength: 100 }}
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label="toggle password visibility"
+                    aria-label="toggle confirm password visibility"
                     onClick={handleClickShowPasswordConfirmation}
                     onMouseDown={handleMouseDownPasswordConfirmation}
                     edge="end"
@@ -328,6 +337,7 @@ function SignUp({ setUser }: Props) {
           visibility: `${errors.passwordConfirmation ? "visible" : "hidden"}`,
           textAlign: "center",
         }}
+        data-testid="passwordConfirmation-error-element"
       >
         <WarningRoundedIcon />
         {errors.passwordConfirmation?.message}

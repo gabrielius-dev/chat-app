@@ -132,6 +132,7 @@ function Login({ setUser }: Props) {
         }}
         render={({ field }) => (
           <CustomTextField
+            inputProps={{ maxLength: 100 }}
             {...field}
             label="Username"
             variant="outlined"
@@ -205,6 +206,7 @@ function Login({ setUser }: Props) {
             <OutlinedInput
               id="password"
               type={showPassword ? "text" : "password"}
+              inputProps={{ maxLength: 100 }}
               endAdornment={
                 <InputAdornment position="end">
                   <IconButton
