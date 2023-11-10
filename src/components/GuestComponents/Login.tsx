@@ -125,6 +125,10 @@ function Login({ setUser }: Props) {
         control={control}
         rules={{
           required: "Username must be specified",
+          maxLength: {
+            value: 100,
+            message: "Username can't exceed 100 characters",
+          },
         }}
         render={({ field }) => (
           <CustomTextField
@@ -141,6 +145,7 @@ function Login({ setUser }: Props) {
           visibility: `${errors.username ? "visible" : "hidden"}`,
           textAlign: "center",
         }}
+        data-testid="username-error-element"
       >
         <WarningRoundedIcon />
         {errors.username?.message}
@@ -223,6 +228,7 @@ function Login({ setUser }: Props) {
           visibility: `${errors.password ? "visible" : "hidden"}`,
           textAlign: "center",
         }}
+        data-testid="password-error-element"
       >
         <WarningRoundedIcon />
         {errors.password?.message}
