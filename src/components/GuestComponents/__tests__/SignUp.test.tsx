@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import SignUp from "../SignUp";
-import { MockedFunction, vi } from "vitest";
+import { MockedFunction, expect, test, vi } from "vitest";
 import axios from "axios";
 
 vi.mock("axios");
