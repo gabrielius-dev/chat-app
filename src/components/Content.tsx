@@ -1,4 +1,10 @@
-import { Box, Container, Link, Typography, useMediaQuery } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Link,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import WelcomeBox from "./GuestComponents/WelcomeBox";
 import Login from "./GuestComponents/Login";
@@ -44,18 +50,14 @@ function Content() {
           }}
           component="main"
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: `${isMediumScreen ? "row" : "column"}`,
-              gap: "4rem",
-            }}
-          >
+          <Grid container sx={{ marginY: 2 }}>
             <WelcomeBox />
 
-            <Box
+            <Grid
+              item
+              xs={true}
+              md={6}
               sx={{
-                flex: "1",
                 boxShadow: 1,
                 p: 2,
                 borderRadius: 1,
@@ -63,7 +65,6 @@ function Content() {
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                width: "100%",
                 mb: `${isMediumScreen ? 0 : 4}`,
               }}
             >
@@ -105,8 +106,8 @@ function Content() {
                   </Typography>
                 </>
               )}
-            </Box>
-          </Box>
+            </Grid>
+          </Grid>
         </Container>
       )}
     </>

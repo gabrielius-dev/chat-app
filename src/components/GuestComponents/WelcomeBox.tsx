@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 
@@ -6,9 +6,11 @@ function WelcomeBox() {
   const theme = useTheme();
 
   return (
-    <Box
+    <Grid
+      item
+      md={6}
+      xs={12}
       sx={{
-        flex: "1",
         display: "flex",
         flexDirection: "column",
         p: 2,
@@ -37,7 +39,7 @@ function WelcomeBox() {
         Welcome to our chat community! Join the conversation or sign up to
         connect with friends and make new ones.
       </Typography>
-    </Box>
+    </Grid>
   );
 }
 
