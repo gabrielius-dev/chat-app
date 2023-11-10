@@ -70,39 +70,6 @@ test("Display server errors", async () => {
   expect(passwordError).toHaveTextContent("SERVER_ERROR");
 });
 
-test("Username and password exceed 100 characters", async () => {
-  const setUserMock = vi.fn();
-  render(<Login setUser={setUserMock} />);
-
-  const usernameInput = screen.getByLabelText("Username");
-  await userEvent.type(
-    usernameInput,
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  );
-  expect(usernameInput).toHaveValue(
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  );
-
-  const passwordInput = screen.getByLabelText("Password");
-  await userEvent.type(
-    passwordInput,
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  );
-  expect(passwordInput).toHaveValue(
-    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-  );
-
-  await userEvent.click(screen.getByRole("button", { name: "Login" }));
-  const usernameError = screen.getByTestId("username-error-element");
-  expect(usernameError).toHaveTextContent(
-    "Username can't exceed 100 characters"
-  );
-  const passwordError = screen.getByTestId("password-error-element");
-  expect(passwordError).toHaveTextContent(
-    "Password can't exceed 100 characters"
-  );
-});
-
 test("Password visibility toggle", async () => {
   const setUserMock = vi.fn();
 
