@@ -19,6 +19,7 @@ import axios, { AxiosResponse, AxiosError } from "axios";
 import { ErrorInterface, ErrorResponse } from "../types/Error";
 import { transformError } from "../helpers";
 import { UserInterface, UserResponse } from "../types/User";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface IFormInput {
   username: string;
@@ -51,11 +52,7 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-interface Props {
-  setUser: React.Dispatch<React.SetStateAction<UserInterface | null>>;
-}
-
-function Login({ setUser }: Props) {
+function Login() {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -70,32 +67,49 @@ function Login({ setUser }: Props) {
     },
   });
 
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    try {
-      const response: AxiosResponse<UserResponse> = await axios.post(
-        "http://localhost:8000/login",
-        data,
-        { withCredentials: true }
-      );
-      setUser(response.data.user);
-    } catch (err) {
-      const error = err as AxiosError;
-      const result = error.response?.data as ErrorResponse;
-      const errors: ErrorInterface[] = result.errors ?? [];
-      const formattedErrors = transformError(errors);
-      if (formattedErrors.password) {
-        setError("password", {
-          type: "server",
-          message: formattedErrors.password[0],
-        });
-      }
-      if (formattedErrors.username) {
-        setError("username", {
-          type: "server",
-          message: formattedErrors.username[0],
-        });
-      }
+  const queryClient = useQueryClient();
+
+  const loginUser = async (data: IFormInput) => {
+    const response: AxiosResponse<UserResponse> = await axios.post(
+      "http://localhost:8000/login",
+      data,
+      { withCredentials: true }
+    );
+    return response.data.user;
+  };
+
+  const handleError = (err: unknown) => {
+    const error = err as AxiosError;
+    const result = error.response?.data as ErrorResponse;
+    const errors: ErrorInterface[] = result.errors ?? [];
+    const formattedErrors = transformError(errors);
+    if (formattedErrors.password) {
+      setError("password", {
+        type: "server",
+        message: formattedErrors.password[0],
+      });
     }
+    if (formattedErrors.username) {
+      setError("username", {
+        type: "server",
+        message: formattedErrors.username[0],
+      });
+    }
+  };
+
+  const handleSuccess = (data: UserInterface) => {
+    queryClient.setQueryData(["userData"], data);
+    console.log(queryClient.getQueryData(["userData"]));
+  };
+
+  const mutation = useMutation({
+    mutationFn: loginUser,
+    onError: handleError,
+    onSuccess: handleSuccess,
+  });
+
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    mutation.mutate(data);
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
