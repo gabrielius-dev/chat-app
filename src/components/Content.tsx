@@ -8,34 +8,32 @@ import {
 import { useTheme } from "@mui/material/styles";
 import WelcomeBox from "./GuestComponents/WelcomeBox";
 import Login from "./GuestComponents/Login";
-import { useEffect, useState } from "react";
-import { UserInterface, UserResponse } from "./types/User";
+import { useState } from "react";
+import { UserResponse } from "./types/User";
 import SignUp from "./GuestComponents/SignUp";
 import axios, { AxiosResponse } from "axios";
+import { useQuery } from "@tanstack/react-query";
 
 function Content() {
   const theme = useTheme();
   const [showLogin, setShowLogin] = useState(true);
-  const [user, setUser] = useState<UserInterface | null>(null);
   const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response: AxiosResponse<UserResponse> = await axios.get(
-          "http://localhost:8000/user",
-          {
-            withCredentials: true,
-          }
-        );
-        setUser(response.data.user);
-      } catch (err) {
-        /* empty */
+  const getUser = async () => {
+    const response: AxiosResponse<UserResponse> = await axios.get(
+      "http://localhost:8000/user",
+      {
+        withCredentials: true,
       }
-    };
+    );
+    return response.data.user;
+  };
 
-    void fetchUser();
-  }, []);
+  const { data: user } = useQuery({
+    queryKey: ["userData"],
+    queryFn: getUser,
+    retry: false,
+  });
 
   return (
     <>
@@ -70,7 +68,7 @@ function Content() {
             >
               {showLogin && (
                 <>
-                  <Login setUser={setUser} />
+                  <Login />
                   <Typography sx={{ textAlign: "center" }}>
                     {"Don't"} have an account?{" "}
                     <Link
@@ -89,7 +87,7 @@ function Content() {
               )}
               {!showLogin && (
                 <>
-                  <SignUp setUser={setUser} />
+                  <SignUp />
                   <Typography sx={{ textAlign: "center" }}>
                     Already have an account?{" "}
                     <Link
