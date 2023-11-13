@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Content from "../Content";
 import { MockedFunction, test, vi } from "vitest";
@@ -29,12 +29,10 @@ test("Change from Login to SignUp component", async () => {
     </MemoryRouter>
   );
 
-  expect(
-    screen.getByRole("heading", { level: 4, name: "Login" })
-  ).toBeInTheDocument();
-
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+  await waitFor(() => {
+    expect(
+      screen.getByRole("heading", { level: 4, name: "Login" })
+    ).toBeInTheDocument();
   });
 
   expect(
@@ -59,12 +57,10 @@ test("Change from SignUp to Login component", async () => {
     </MemoryRouter>
   );
 
-  expect(
-    screen.getByRole("heading", { level: 4, name: "Login" })
-  ).toBeInTheDocument();
-
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+  await waitFor(() => {
+    expect(
+      screen.getByRole("heading", { level: 4, name: "Login" })
+    ).toBeInTheDocument();
   });
 
   expect(
