@@ -19,6 +19,7 @@ import axios, { AxiosResponse, AxiosError } from "axios";
 import { ErrorInterface, ErrorResponse } from "../types/Error";
 import { transformError } from "../helpers";
 import { UserInterface, UserResponse } from "../types/User";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface IFormInput {
   username: string;
@@ -52,11 +53,7 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-interface Props {
-  setUser: React.Dispatch<React.SetStateAction<UserInterface | null>>;
-}
-
-function SignUp({ setUser }: Props) {
+function SignUp() {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
@@ -67,6 +64,7 @@ function SignUp({ setUser }: Props) {
     formState: { errors },
     handleSubmit,
     control,
+    watch,
   } = useForm({
     defaultValues: {
       username: "",
@@ -75,38 +73,55 @@ function SignUp({ setUser }: Props) {
     },
   });
 
-  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    try {
-      const response: AxiosResponse<UserResponse> = await axios.post(
-        "http://localhost:8000/sign-up",
-        data,
-        { withCredentials: true }
-      );
-      setUser(response.data.user);
-    } catch (err) {
-      const error = err as AxiosError;
-      const result = error.response?.data as ErrorResponse;
-      const errors: ErrorInterface[] = result.errors ?? [];
-      const formattedErrors = transformError(errors);
-      if (formattedErrors.password) {
-        setError("password", {
-          type: "server",
-          message: formattedErrors.password[0],
-        });
-      }
-      if (formattedErrors.username) {
-        setError("username", {
-          type: "server",
-          message: formattedErrors.username[0],
-        });
-      }
-      if (formattedErrors.passwordConfirmation) {
-        setError("passwordConfirmation", {
-          type: "server",
-          message: formattedErrors.passwordConfirmation[0],
-        });
-      }
+  const queryClient = useQueryClient();
+
+  const signUpUser = async (data: IFormInput) => {
+    const response: AxiosResponse<UserResponse> = await axios.post(
+      "http://localhost:8000/sign-up",
+      data,
+      { withCredentials: true }
+    );
+    return response.data.user;
+  };
+
+  const handleError = (err: unknown) => {
+    const error = err as AxiosError;
+    const result = error.response?.data as ErrorResponse;
+    const errors: ErrorInterface[] = result.errors ?? [];
+    const formattedErrors = transformError(errors);
+    if (formattedErrors.password) {
+      setError("password", {
+        type: "server",
+        message: formattedErrors.password[0],
+      });
     }
+    if (formattedErrors.username) {
+      setError("username", {
+        type: "server",
+        message: formattedErrors.username[0],
+      });
+    }
+    if (formattedErrors.passwordConfirmation) {
+      setError("passwordConfirmation", {
+        type: "server",
+        message: formattedErrors.passwordConfirmation[0],
+      });
+    }
+  };
+
+  const handleSuccess = (data: UserInterface) => {
+    queryClient.setQueryData(["userData"], data);
+    console.log(queryClient.getQueryData(["userData"]));
+  };
+
+  const mutation = useMutation({
+    mutationFn: signUpUser,
+    onError: handleError,
+    onSuccess: handleSuccess,
+  });
+
+  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+    mutation.mutate(data);
   };
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -262,6 +277,8 @@ function SignUp({ setUser }: Props) {
             value: 100,
             message: "Password confirmation can't exceed 100 characters",
           },
+          validate: (value) =>
+            value === watch("password") || "Passwords don't match",
         }}
         render={({ field }) => (
           <FormControl
