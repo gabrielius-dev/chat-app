@@ -99,7 +99,6 @@ function Login() {
 
   const handleSuccess = (data: UserInterface) => {
     queryClient.setQueryData(["userData"], data);
-    console.log(queryClient.getQueryData(["userData"]));
   };
 
   const mutation = useMutation({
