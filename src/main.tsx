@@ -13,6 +13,7 @@ declare module "@mui/material/styles" {
     deepBlue: string;
     orange: string;
     midnightNavy: string;
+    lightGray: string;
   }
   // allow configuration using `createTheme`
   interface ThemeOptions {
@@ -20,6 +21,7 @@ declare module "@mui/material/styles" {
     deepBlue?: string;
     orange?: string;
     midnightNavy?: string;
+    lightGray?: string;
   }
 }
 const theme = createTheme({
@@ -27,6 +29,7 @@ const theme = createTheme({
   deepBlue: "#1C768F",
   orange: "#FA991C",
   midnightNavy: "#032539",
+  lightGray: "#F5F5F5",
 });
 
 const queryClient = new QueryClient();
