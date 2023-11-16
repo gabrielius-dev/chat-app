@@ -7,8 +7,9 @@ import {
 } from "@mui/material";
 import { UserInterface } from "../types/User";
 import { Link } from "react-router-dom";
+import { memo } from "react";
 
-function Header({ user }: { user: UserInterface }) {
+const Header = memo(function Header({ user }: { user: UserInterface }) {
   const theme = useTheme();
   const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
 
@@ -45,6 +46,6 @@ function Header({ user }: { user: UserInterface }) {
       </div>
     </Box>
   );
-}
+});
 
 export default Header;
