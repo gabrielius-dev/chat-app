@@ -1,5 +1,4 @@
 import {
-  Box,
   Container,
   Grid,
   Link,
@@ -7,14 +6,15 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import WelcomeBox from "./GuestComponents/WelcomeBox";
-import Login from "./GuestComponents/Login";
 import { useState } from "react";
-import { UserResponse } from "./types/User";
-import SignUp from "./GuestComponents/SignUp";
+import { UserInterface, UserResponse } from "./types/User";
 import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { ClipLoader } from "react-spinners";
+import LoadingScreen from "./LoadingScreen";
+import WelcomeBox from "./GuestComponents/WelcomeBox";
+import Login from "./GuestComponents/Login";
+import SignUp from "./GuestComponents/SignUp";
+import Header from "./UserComponents/Header";
 
 function Content() {
   const theme = useTheme();
@@ -31,7 +31,7 @@ function Content() {
     return response.data.user;
   };
 
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading } = useQuery<UserInterface, Error>({
     queryKey: ["userData"],
     queryFn: getUser,
     retry: false,
@@ -70,67 +70,32 @@ function Content() {
                     mb: `${isMediumScreen ? 0 : 4}`,
                   }}
                 >
-                  {showLogin && (
-                    <>
-                      <Login />
-                      <Typography sx={{ textAlign: "center" }}>
-                        {"Don't"} have an account?{" "}
-                        <Link
-                          sx={{ color: theme.deepBlue, fontWeight: "bold" }}
-                          href="#"
-                          underline="none"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setShowLogin(false);
-                          }}
-                        >
-                          Sign up
-                        </Link>
-                      </Typography>
-                    </>
-                  )}
-                  {!showLogin && (
-                    <>
-                      <SignUp />
-                      <Typography sx={{ textAlign: "center" }}>
-                        Already have an account?{" "}
-                        <Link
-                          sx={{ color: theme.deepBlue, fontWeight: "bold" }}
-                          href="#"
-                          underline="none"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            setShowLogin(true);
-                          }}
-                        >
-                          Login
-                        </Link>
-                      </Typography>
-                    </>
-                  )}
+                  {showLogin && <Login />}
+                  {!showLogin && <SignUp />}
+                  <Typography sx={{ textAlign: "center" }}>
+                    {showLogin
+                      ? "Don't have an account?"
+                      : "Already have an account?"}{" "}
+                    <Link
+                      sx={{ color: theme.deepBlue, fontWeight: "bold" }}
+                      href="#"
+                      underline="none"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowLogin(!showLogin);
+                      }}
+                    >
+                      {showLogin ? "Sign up" : "Login"}
+                    </Link>
+                  </Typography>
                 </Grid>
               </Grid>
             </Container>
           )}
-          {user && <p>{user.username}</p>}
+          {user && <Header user={user} />}
         </>
       )}
-      {isLoading && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          <ClipLoader
-            loading={isLoading}
-            size={"20vw"}
-            color={theme.deepBlue}
-          />
-        </Box>
-      )}
+      {isLoading && <LoadingScreen />}
     </>
   );
 }
