@@ -38,7 +38,7 @@ const Header = memo(function Header({ user }: { user: UserInterface }) {
           <Avatar
             alt="Profile picture"
             src={user?.img}
-            sx={{ width: 40, height: 40 }}
+            sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
           >
             {!user?.img ? user?.username[0].toUpperCase() : null}
           </Avatar>
