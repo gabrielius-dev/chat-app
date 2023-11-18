@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { useEffect, useState, memo } from "react";
-import { User, UserInterface } from "../types/User";
+import { User } from "../types/User";
 import {
   Avatar,
   List,
@@ -14,7 +14,15 @@ import {
 } from "@mui/material";
 import TimeAgo from "react-timeago";
 
-const UserList = memo(function UserList({ user }: { user: UserInterface }) {
+type OnUserClickType = (user: User) => void;
+
+const UserList = memo(function UserList({
+  user,
+  onUserClick,
+}: {
+  user: User;
+  onUserClick: OnUserClickType;
+}) {
   const theme = useTheme();
   const [userList, setUserList] = useState<User[] | []>([]);
   const [loadOffset, setLoadOffset] = useState(1);
@@ -56,7 +64,7 @@ const UserList = memo(function UserList({ user }: { user: UserInterface }) {
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
         {userList.map((listUser) => (
           <ListItem key={listUser._id} disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={() => onUserClick(listUser)}>
               <ListItemAvatar>
                 <Avatar
                   alt="Profile picture"
@@ -82,11 +90,13 @@ const UserList = memo(function UserList({ user }: { user: UserInterface }) {
                     : `Say hi to ${listUser.username}!`
                 }
               />
-              <TimeAgo
-                date={listUser.latestMessage?.createdAt ?? ""}
-                minPeriod={60}
-                style={{ color: "rgba(0, 0, 0, 0.6)" }}
-              />
+              {listUser.latestMessage?.createdAt && (
+                <TimeAgo
+                  date={listUser.latestMessage?.createdAt}
+                  minPeriod={60}
+                  style={{ color: "rgba(0, 0, 0, 0.6)" }}
+                />
+              )}
             </ListItemButton>
           </ListItem>
         ))}
