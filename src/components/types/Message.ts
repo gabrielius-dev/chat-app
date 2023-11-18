@@ -5,3 +5,8 @@ export interface MessageInterface {
   sender: string;
   receiver: string;
 }
+
+export interface MessagesResponse {
+  data: MessageInterface[];
+  skipAmount: number;
+}
