@@ -18,7 +18,7 @@ import { useState } from "react";
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { ErrorInterface, ErrorResponse } from "../types/Error";
 import { transformError } from "../helpers";
-import { UserInterface, UserResponse } from "../types/User";
+import { User, UserResponse } from "../types/User";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface IFormInput {
@@ -109,7 +109,7 @@ function SignUp() {
     }
   };
 
-  const handleSuccess = (data: UserInterface) => {
+  const handleSuccess = (data: User) => {
     queryClient.setQueryData(["userData"], data);
   };
 
