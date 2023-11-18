@@ -10,16 +10,17 @@ import {
 } from "@mui/material";
 import { User } from "../types/User";
 import { Link } from "react-router-dom";
-import { Fragment, memo, useState } from "react";
+import { Fragment, useState } from "react";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 
-const Header = memo(function Header({ user }: { user: User }) {
+function Header() {
   const theme = useTheme();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const user: User | undefined = queryClient.getQueryData(["userData"]);
 
   async function handleLogout(popupState: PopupStateType) {
     try {
@@ -103,6 +104,6 @@ const Header = memo(function Header({ user }: { user: User }) {
       </Snackbar>
     </Box>
   );
-});
+}
 
 export default Header;

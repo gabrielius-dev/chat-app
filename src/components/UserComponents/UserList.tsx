@@ -13,16 +13,9 @@ import {
   Box,
 } from "@mui/material";
 import TimeAgo from "react-timeago";
+import { Link } from "react-router-dom";
 
-type OnUserClickType = (user: User) => void;
-
-const UserList = memo(function UserList({
-  user,
-  onUserClick,
-}: {
-  user: User;
-  onUserClick: OnUserClickType;
-}) {
+const UserList = memo(function UserList({ user }: { user: User }) {
   const theme = useTheme();
   const [userList, setUserList] = useState<User[] | []>([]);
   const [loadOffset, setLoadOffset] = useState(1);
@@ -67,45 +60,47 @@ const UserList = memo(function UserList({
       >
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
           {userList.map((listUser) => (
-            <ListItem key={listUser._id} disablePadding>
-              <ListItemButton onClick={() => onUserClick(listUser)}>
-                <ListItemAvatar>
-                  <Avatar
-                    alt="Profile picture"
-                    src={listUser?.img}
-                    sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
-                  >
-                    {!listUser?.img
-                      ? listUser?.username[0].toUpperCase()
-                      : null}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={listUser.username}
-                  secondary={
-                    listUser.latestMessage
-                      ? `${
-                          listUser.latestMessage?.sender === user._id
-                            ? "You: "
-                            : ""
-                        }${
-                          listUser.latestMessage?.message?.length > 20
-                            ? listUser.latestMessage.message.slice(0, 20) +
-                              "..."
-                            : listUser.latestMessage.message
-                        }`
-                      : `Say hi to ${listUser.username}!`
-                  }
-                />
-                {listUser.latestMessage?.createdAt && (
-                  <TimeAgo
-                    date={listUser.latestMessage?.createdAt}
-                    minPeriod={60}
-                    style={{ color: "rgba(0, 0, 0, 0.6)" }}
+            <Link key={listUser._id} to={`/messages/${listUser._id}`}>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemAvatar>
+                    <Avatar
+                      alt="Profile picture"
+                      src={listUser?.img}
+                      sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
+                    >
+                      {!listUser?.img
+                        ? listUser?.username[0].toUpperCase()
+                        : null}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={listUser.username}
+                    secondary={
+                      listUser.latestMessage
+                        ? `${
+                            listUser.latestMessage?.sender === user._id
+                              ? "You: "
+                              : ""
+                          }${
+                            listUser.latestMessage?.message?.length > 20
+                              ? listUser.latestMessage.message.slice(0, 20) +
+                                "..."
+                              : listUser.latestMessage.message
+                          }`
+                        : `Say hi to ${listUser.username}!`
+                    }
                   />
-                )}
-              </ListItemButton>
-            </ListItem>
+                  {listUser.latestMessage?.createdAt && (
+                    <TimeAgo
+                      date={listUser.latestMessage?.createdAt}
+                      minPeriod={60}
+                      style={{ color: "rgba(0, 0, 0, 0.6)" }}
+                    />
+                  )}
+                </ListItemButton>
+              </ListItem>
+            </Link>
           ))}
         </List>
         {moreUsersExist && (
