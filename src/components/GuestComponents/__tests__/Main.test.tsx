@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Content from "../Content";
+import Main from "../Main";
 import { MockedFunction, test, vi } from "vitest";
 import axios from "axios";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { createTestQueryClient } from "../utils/tests-utils";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { createTestQueryClient } from "../../utils/tests-utils";
 
 vi.mock("axios");
 
@@ -24,7 +24,7 @@ test("Change from Login to SignUp component", async () => {
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <Content />
+        <Main />
       </QueryClientProvider>
     </MemoryRouter>
   );
@@ -52,7 +52,7 @@ test("Change from SignUp to Login component", async () => {
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <Content />
+        <Main />
       </QueryClientProvider>
     </MemoryRouter>
   );
