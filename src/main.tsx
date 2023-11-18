@@ -29,7 +29,7 @@ const theme = createTheme({
   deepBlue: "#1C768F",
   orange: "#FA991C",
   midnightNavy: "#032539",
-  lightGray: "#F5F5F5",
+  lightGray: "#f1eeea",
 });
 
 const queryClient = new QueryClient();
