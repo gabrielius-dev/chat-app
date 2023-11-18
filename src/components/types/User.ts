@@ -12,3 +12,9 @@ export interface User {
   img?: string;
   latestMessage?: MessageInterface;
 }
+
+export interface DatabaseUserResponse {
+  success: boolean;
+  message: string;
+  user?: User;
+}
