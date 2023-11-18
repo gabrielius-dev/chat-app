@@ -84,12 +84,13 @@ const Header = memo(function Header({ user }: { user: UserInterface }) {
                       cursor: "pointer",
                     }}
                     {...bindTrigger(popupState)}
+                    data-testid="popup-open"
                   >
                     {!user?.img ? user?.username[0].toUpperCase() : null}
                   </Avatar>
                   <Menu {...bindMenu(popupState)}>
                     <MenuItem onClick={popupState.close}>
-                      <Link to={user._id}>My account</Link>
+                      <Link to="/profile">My account</Link>
                     </MenuItem>
                     <MenuItem onClick={() => void handleLogout(popupState)}>
                       Logout
