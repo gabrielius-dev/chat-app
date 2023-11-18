@@ -12,6 +12,7 @@ import {
   Button,
   Box,
 } from "@mui/material";
+import TimeAgo from "react-timeago";
 
 const UserList = memo(function UserList({ user }: { user: UserInterface }) {
   const theme = useTheme();
@@ -80,6 +81,11 @@ const UserList = memo(function UserList({ user }: { user: UserInterface }) {
                       }`
                     : `Say hi to ${listUser.username}!`
                 }
+              />
+              <TimeAgo
+                date={listUser.latestMessage?.createdAt ?? ""}
+                minPeriod={60}
+                style={{ color: "rgba(0, 0, 0, 0.6)" }}
               />
             </ListItemButton>
           </ListItem>
