@@ -9,7 +9,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { User } from "../types/User";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Fragment, useState } from "react";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
@@ -21,6 +21,7 @@ function Header() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const user: User | undefined = queryClient.getQueryData(["userData"]);
+  const navigate = useNavigate();
 
   async function handleLogout(popupState: PopupStateType) {
     try {
@@ -32,6 +33,7 @@ function Header() {
         }
       );
       queryClient.setQueryData(["userData"], null);
+      navigate("/");
     } catch (err) {
       setOpen(true);
     }
