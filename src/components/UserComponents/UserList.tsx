@@ -27,8 +27,10 @@ const UserList = memo(function UserList({
   const [userList, setUserList] = useState<User[] | []>([]);
   const [loadOffset, setLoadOffset] = useState(1);
   const [moreUsersExist, setMoreUsersExist] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     async function userListFetching() {
       const response: AxiosResponse<User[]> = await axios.get(
         "http://localhost:8000/userList",
@@ -46,6 +48,7 @@ const UserList = memo(function UserList({
       .then((res) => {
         if (loadOffset === 1) setUserList(res);
         else setUserList((currentUserList) => [...currentUserList, ...res]);
+        setIsLoading(false);
       })
       .catch((err) => console.error(err));
   }, [loadOffset, user._id]);
@@ -54,73 +57,78 @@ const UserList = memo(function UserList({
     setLoadOffset((currentLoadOffset) => currentLoadOffset + 1);
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        mb: 2,
-      }}
-    >
-      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-        {userList.map((listUser) => (
-          <ListItem key={listUser._id} disablePadding>
-            <ListItemButton onClick={() => onUserClick(listUser)}>
-              <ListItemAvatar>
-                <Avatar
-                  alt="Profile picture"
-                  src={listUser?.img}
-                  sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
-                >
-                  {!listUser?.img ? listUser?.username[0].toUpperCase() : null}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={listUser.username}
-                secondary={
-                  listUser.latestMessage
-                    ? `${
-                        listUser.latestMessage?.sender === user._id
-                          ? "You: "
-                          : ""
-                      }${
-                        listUser.latestMessage?.message?.length > 20
-                          ? listUser.latestMessage.message.slice(0, 20) + "..."
-                          : listUser.latestMessage.message
-                      }`
-                    : `Say hi to ${listUser.username}!`
-                }
-              />
-              {listUser.latestMessage?.createdAt && (
-                <TimeAgo
-                  date={listUser.latestMessage?.createdAt}
-                  minPeriod={60}
-                  style={{ color: "rgba(0, 0, 0, 0.6)" }}
+    !isLoading && (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          mb: 2,
+        }}
+      >
+        <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+          {userList.map((listUser) => (
+            <ListItem key={listUser._id} disablePadding>
+              <ListItemButton onClick={() => onUserClick(listUser)}>
+                <ListItemAvatar>
+                  <Avatar
+                    alt="Profile picture"
+                    src={listUser?.img}
+                    sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
+                  >
+                    {!listUser?.img
+                      ? listUser?.username[0].toUpperCase()
+                      : null}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={listUser.username}
+                  secondary={
+                    listUser.latestMessage
+                      ? `${
+                          listUser.latestMessage?.sender === user._id
+                            ? "You: "
+                            : ""
+                        }${
+                          listUser.latestMessage?.message?.length > 20
+                            ? listUser.latestMessage.message.slice(0, 20) +
+                              "..."
+                            : listUser.latestMessage.message
+                        }`
+                      : `Say hi to ${listUser.username}!`
+                  }
                 />
-              )}
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      {moreUsersExist && (
-        <Button
-          variant="outlined"
-          sx={{
-            color: theme.deepBlue,
-            fontWeight: "bold",
-            textTransform: "none",
-            "&:hover": {
+                {listUser.latestMessage?.createdAt && (
+                  <TimeAgo
+                    date={listUser.latestMessage?.createdAt}
+                    minPeriod={60}
+                    style={{ color: "rgba(0, 0, 0, 0.6)" }}
+                  />
+                )}
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+        {moreUsersExist && (
+          <Button
+            variant="outlined"
+            sx={{
+              color: theme.deepBlue,
+              fontWeight: "bold",
+              textTransform: "none",
+              "&:hover": {
+                border: 2,
+              },
+              borderRadius: 1,
               border: 2,
-            },
-            borderRadius: 1,
-            border: 2,
-            marginX: 1,
-          }}
-          onClick={loadMoreUsers}
-        >
-          Load more
-        </Button>
-      )}
-    </Box>
+              marginX: 1,
+            }}
+            onClick={loadMoreUsers}
+          >
+            Load more
+          </Button>
+        )}
+      </Box>
+    )
   );
 });
 
