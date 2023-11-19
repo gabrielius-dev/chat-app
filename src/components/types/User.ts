@@ -9,6 +9,8 @@ export interface UserResponse {
 export interface User {
   username: string;
   _id: string;
+  lastOnline: string;
+  online: boolean;
   img?: string;
   latestMessage?: MessageInterface;
 }
