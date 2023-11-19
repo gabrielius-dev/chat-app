@@ -15,6 +15,7 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import ChatLogo from "../../assets/illustrations/chat-logo.svg";
 
 function Header() {
   const theme = useTheme();
@@ -58,7 +59,7 @@ function Header() {
       }}
     >
       <Link to="/">
-        <img src="src\assets\illustrations\chat-logo.svg" width={"50px"} />
+        <img src={ChatLogo} width={"50px"} />
       </Link>
       <Link to="/">
         <Typography variant="h5" sx={{ color: theme.midnightNavy }}>
