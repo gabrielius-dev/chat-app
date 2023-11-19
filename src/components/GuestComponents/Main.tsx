@@ -15,6 +15,11 @@ function Main() {
   const theme = useTheme();
   const [showLogin, setShowLogin] = useState(true);
   const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setIsImageLoaded(true);
+  };
 
   return (
     <Container
@@ -27,8 +32,11 @@ function Main() {
       }}
       component="main"
     >
-      <Grid container sx={{ marginY: 2 }}>
-        <WelcomeBox />
+      <Grid
+        container
+        sx={{ marginY: 2, visibility: isImageLoaded ? "visible" : "hidden" }}
+      >
+        <WelcomeBox handleImageLoad={handleImageLoad} />
 
         <Grid
           item

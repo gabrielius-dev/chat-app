@@ -1,8 +1,15 @@
 import { Grid, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
+import Chat from "../../assets/illustrations/chat.svg";
 
-function WelcomeBox() {
+type handleImageLoadType = () => void;
+
+function WelcomeBox({
+  handleImageLoad,
+}: {
+  handleImageLoad: handleImageLoadType;
+}) {
   const theme = useTheme();
 
   return (
@@ -27,7 +34,7 @@ function WelcomeBox() {
       >
         <Link to="/">Chat app</Link>
       </Typography>
-      <img src="src\assets\illustrations\chat.svg" />
+      <img src={Chat} onLoad={handleImageLoad} alt="Chat Logo" />
       <Typography
         variant="body1"
         sx={{
