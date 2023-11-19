@@ -23,6 +23,11 @@ function Header() {
   const [open, setOpen] = useState(false);
   const user: User | undefined = queryClient.getQueryData(["userData"]);
   const navigate = useNavigate();
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  const handleImageLoad = () => {
+    setIsImageLoaded(true);
+  };
 
   async function handleLogout(popupState: PopupStateType) {
     try {
@@ -56,10 +61,11 @@ function Header() {
         display: "flex",
         alignItems: "center",
         gap: 1,
+        visibility: isImageLoaded ? "visible" : "hidden",
       }}
     >
       <Link to="/">
-        <img src={ChatLogo} width={"50px"} />
+        <img src={ChatLogo} width={"50px"} onLoad={handleImageLoad} />
       </Link>
       <Link to="/">
         <Typography variant="h5" sx={{ color: theme.midnightNavy }}>
