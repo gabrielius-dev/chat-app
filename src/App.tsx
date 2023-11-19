@@ -7,23 +7,11 @@ import LoadingScreen from "./components/LoadingScreen";
 import Index from "./components/Index";
 import Messaging from "./components/Messaging";
 import Sidebar from "./components/Sidebar";
-import { useEffect, useState } from "react";
+import { useContext } from "react";
+import WindowFocusContext from "./context/WindowsFocusContext";
 
 function App() {
-  const [isWindowFocused, setWindowFocused] = useState(true);
-
-  useEffect(() => {
-    const handleFocus = () => setWindowFocused(true);
-    const handleBlur = () => setWindowFocused(false);
-
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("blur", handleBlur);
-
-    return () => {
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("blur", handleBlur);
-    };
-  }, []);
+  const isWindowFocused = useContext(WindowFocusContext);
 
   const getUser = async () => {
     const response: AxiosResponse<UserResponse> = await axios.get(
