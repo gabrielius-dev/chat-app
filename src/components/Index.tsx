@@ -14,7 +14,7 @@ function Index() {
   return (
     <>
       {!user && <Main />}
-      {user && !isMediumScreen && <UserList user={user} />}
+      {user && !isMediumScreen && <UserList />}
     </>
   );
 }
