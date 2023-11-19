@@ -21,7 +21,7 @@ function Header() {
   const theme = useTheme();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const user: User | undefined = queryClient.getQueryData(["userData"]);
+  const user: User = queryClient.getQueryData(["userData"])!;
   const navigate = useNavigate();
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
@@ -96,7 +96,7 @@ function Header() {
               </Avatar>
               <Menu {...bindMenu(popupState)}>
                 <MenuItem onClick={popupState.close}>
-                  <Link to="/profile">My account</Link>
+                  <Link to={`/profile/${user._id}`}>My account</Link>
                 </MenuItem>
                 <MenuItem onClick={() => void handleLogout(popupState)}>
                   Logout
