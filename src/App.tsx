@@ -9,6 +9,7 @@ import Messaging from "./components/Messaging";
 import Sidebar from "./components/Sidebar";
 import { useContext } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
+import { Box } from "@mui/material";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -31,7 +32,13 @@ function App() {
   });
 
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+      }}
+    >
       {!isLoading && (
         <>
           {user && (
@@ -49,7 +56,7 @@ function App() {
         </>
       )}
       {isLoading && <LoadingScreen />}
-    </>
+    </Box>
   );
 }
 
