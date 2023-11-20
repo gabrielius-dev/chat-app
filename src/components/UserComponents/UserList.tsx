@@ -87,10 +87,10 @@ const UserList = memo(function UserList() {
                             ? "You: "
                             : ""
                         }${
-                          listUser.latestMessage?.message?.length > 20
-                            ? listUser.latestMessage.message.slice(0, 20) +
+                          listUser.latestMessage?.content?.length > 20
+                            ? listUser.latestMessage.content.slice(0, 20) +
                               "..."
-                            : listUser.latestMessage.message
+                            : listUser.latestMessage.content
                         }`
                       : `Say hi to ${listUser.username}!`
                   }
