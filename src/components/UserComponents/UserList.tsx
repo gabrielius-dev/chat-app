@@ -16,6 +16,7 @@ import {
 import TimeAgo from "react-timeago";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import socket from "../../socket/socket";
 
 const UserList = memo(function UserList() {
   const theme = useTheme();
@@ -49,6 +50,28 @@ const UserList = memo(function UserList() {
       })
       .catch((err) => console.error(err));
   }, [loadOffset]);
+
+  useEffect(() => {
+    socket.connect();
+    socket.emit("join-room", user._id);
+
+    function getNewUserHandler(returnedUser: User) {
+      setUserList((prevUserList) =>
+        prevUserList.map((user) => {
+          if (user._id === returnedUser._id) {
+            return returnedUser;
+          } else return user;
+        })
+      );
+    }
+
+    socket.on("get-new-user", getNewUserHandler);
+
+    return () => {
+      socket.off("get-user-list", getNewUserHandler);
+      socket.disconnect();
+    };
+  }, [user._id]);
 
   const loadMoreUsers = () =>
     setLoadOffset((currentLoadOffset) => currentLoadOffset + 1);
@@ -97,8 +120,9 @@ const UserList = memo(function UserList() {
                 />
                 {listUser.latestMessage?.createdAt && (
                   <TimeAgo
+                    key={listUser.latestMessage?.createdAt}
                     date={listUser.latestMessage?.createdAt}
-                    minPeriod={60}
+                    minPeriod={10}
                     style={{ color: "rgba(0, 0, 0, 0.6)" }}
                   />
                 )}
