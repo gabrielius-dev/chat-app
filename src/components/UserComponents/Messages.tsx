@@ -1,22 +1,35 @@
-import { MessagesResponse } from "../types/Message";
+import { MessageInterface } from "../types/Message";
 import Message from "./Message";
-import { Box } from "@mui/material";
+function Messages({
+  messages,
+  messagesEndRef,
+  messagesContainerRef,
+  handleScroll,
+}: {
+  messages: MessageInterface[];
+  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesContainerRef: React.RefObject<HTMLDivElement>;
 
-function Messages({ group }: { group: MessagesResponse }) {
+  handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+}) {
   return (
-    <Box
-      sx={{
+    <div
+      style={{
         display: "flex",
         flexDirection: "column",
-        p: 2,
+        padding: "1rem",
         overflowY: "auto",
         flex: 1,
       }}
+      onScroll={handleScroll}
+      ref={messagesContainerRef}
     >
-      {group.data.map((message) => (
-        <Message message={message} key={message._id} />
-      ))}
-    </Box>
+      {messages.length > 0 &&
+        messages.map((message) => (
+          <Message message={message} key={message._id} />
+        ))}
+      <div ref={messagesEndRef} />
+    </div>
   );
 }
 
