@@ -28,7 +28,9 @@ function Message({ message }: { message: MessageInterface }) {
           color: `${message.sender === user._id ? "white" : "black"}`,
           py: 2,
           px: 3,
-          boxShadow: 1,
+          boxShadow: 5,
+          ml: `${message.sender === user._id ? "auto" : "0"}`,
+          mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
         }}
       >
         <Typography
@@ -41,9 +43,7 @@ function Message({ message }: { message: MessageInterface }) {
           {message.content}
         </Typography>
       </Box>
-      <Typography
-        sx={{ color: "rgba(0, 0, 0, 0.6)", textAlign: "right", pr: 4 }}
-      >
+      <Typography sx={{ color: "rgba(0, 0, 0, 0.6)", textAlign: "right" }}>
         {formatCustomDate(message.createdAt)}
       </Typography>
     </Box>
