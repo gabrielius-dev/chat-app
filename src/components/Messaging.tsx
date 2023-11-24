@@ -1,14 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { MessageInterface } from "./types/Message";
-import {
-  Avatar,
-  Box,
-  Typography,
-  useTheme,
-  InputBase,
-  Button,
-} from "@mui/material";
+import { Avatar, Box, Typography, useTheme, InputBase } from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -24,6 +17,7 @@ import TimeAgo from "react-timeago";
 import WindowFocusContext from "../context/WindowsFocusContext";
 import Messages from "./UserComponents/Messages";
 import socket from "../socket/socket";
+import SendIcon from "../assets/illustrations/send.svg";
 
 function Messaging() {
   const theme = useTheme();
@@ -41,8 +35,8 @@ function Messaging() {
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<MessageInterface[]>([]);
-  // For useLayoutEffect to work properly
   const [newMessageAdded, setNewMessageAdded] = useState(false);
+  const [isMessageValid, setIsMessageValid] = useState(true);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -198,9 +192,20 @@ function Messaging() {
     }
   }, [messages.length, newMessageAdded, prevScrollHeight]);
 
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setMessage(e.target.value);
+      setIsMessageValid(true);
+    },
+    []
+  );
   const handleMessageSubmit = () => {
-    socket.emit("send-message", message, user._id, selectedUserId, roomId);
-    setMessage("");
+    if (message.trim() === "") {
+      setIsMessageValid(false);
+    } else {
+      socket.emit("send-message", message, user._id, selectedUserId, roomId);
+      setMessage("");
+    }
   };
 
   return (
@@ -274,23 +279,47 @@ function Messaging() {
             boxShadow: 5,
             p: 2,
             display: "flex",
+            alignItems: "center",
+            gap: 2,
           }}
         >
           <InputBase
             placeholder="Type a message here..."
             value={message}
-            onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setMessage(e.target.value)
-            }
+            onInput={handleInputChange}
             multiline
+            autoFocus
+            required
+            error={!isMessageValid}
+            inputProps={{ maxLength: 1000, spellCheck: false }}
             sx={{
               flex: 1,
               padding: 2,
               borderRadius: 10,
               boxShadow: 1,
+              border: "1px solid transparent",
+              "&.Mui-error": {
+                border: isMessageValid ? undefined : "1px solid red",
+              },
             }}
           />
-          <Button onClick={handleMessageSubmit}>Submit</Button>
+          <button
+            onClick={handleMessageSubmit}
+            style={{
+              width: 50,
+              height: 50,
+              backgroundColor: theme.midnightNavy,
+              borderRadius: 50,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={SendIcon}
+              style={{ color: "white", width: " 30px", height: "30px" }}
+            />
+          </button>
         </Box>
       </Box>
     )
