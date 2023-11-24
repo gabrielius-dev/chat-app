@@ -19,33 +19,42 @@ function Message({ message }: { message: MessageInterface }) {
         mb: 2,
       }}
     >
-      <Box
-        sx={{
-          borderRadius: 7,
-          backgroundColor: `${
-            message.sender === user._id ? theme.deepBlue : "white"
-          }`,
-          color: `${message.sender === user._id ? "white" : "black"}`,
-          py: 2,
-          px: 3,
-          boxShadow: 5,
-          ml: `${message.sender === user._id ? "auto" : "0"}`,
-          mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
-        }}
-      >
-        <Typography
-          variant="body1"
+      <Box sx={{ display: "flex", flexDirection: "column" }}>
+        <Box
           sx={{
-            wordBreak: "break-word",
-            overflowWrap: "break-word",
+            borderRadius: 7,
+            backgroundColor: `${
+              message.sender === user._id ? theme.deepBlue : "white"
+            }`,
+            color: `${message.sender === user._id ? "white" : "black"}`,
+            py: 2,
+            px: 3,
+            boxShadow: 5,
+            ml: `${message.sender === user._id ? "auto" : "0"}`,
+            mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
+            maxWidth: "max-content",
           }}
         >
-          {message.content}
+          <Typography
+            variant="body1"
+            sx={{
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+            }}
+          >
+            {message.content}
+          </Typography>
+        </Box>
+        <Typography
+          sx={{
+            color: "rgba(0, 0, 0, 0.6)",
+            ml: `${message.sender === user._id ? "auto" : "0"}`,
+            mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
+          }}
+        >
+          {formatCustomDate(message.createdAt)}
         </Typography>
       </Box>
-      <Typography sx={{ color: "rgba(0, 0, 0, 0.6)", textAlign: "right" }}>
-        {formatCustomDate(message.createdAt)}
-      </Typography>
     </Box>
   );
 }
