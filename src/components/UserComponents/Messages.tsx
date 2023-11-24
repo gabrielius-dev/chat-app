@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import { MessageInterface } from "../types/Message";
 import Message from "./Message";
+
 function Messages({
   messages,
   messagesEndRef,
@@ -9,9 +11,16 @@ function Messages({
   messages: MessageInterface[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
   messagesContainerRef: React.RefObject<HTMLDivElement>;
-
   handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
 }) {
+  const memoizedMessages = useMemo(
+    () =>
+      messages.map((message) => (
+        <Message message={message} key={message._id} />
+      )),
+    [messages]
+  );
+
   return (
     <div
       style={{
@@ -24,10 +33,7 @@ function Messages({
       onScroll={handleScroll}
       ref={messagesContainerRef}
     >
-      {messages.length > 0 &&
-        messages.map((message) => (
-          <Message message={message} key={message._id} />
-        ))}
+      {memoizedMessages.length > 0 && memoizedMessages}
       <div ref={messagesEndRef} />
     </div>
   );
