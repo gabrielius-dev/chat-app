@@ -18,6 +18,55 @@ import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import socket from "../../socket/socket";
 
+const MemoizedListItem = memo(function MemoizedListItem({
+  listUser,
+  user,
+}: {
+  listUser: User;
+  user: User;
+}) {
+  const theme = useTheme();
+  return (
+    <Link to={`/messages/${listUser._id}`}>
+      <ListItem disablePadding>
+        <ListItemButton>
+          <ListItemAvatar>
+            <Avatar
+              alt="Profile picture"
+              src={listUser?.img}
+              sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
+            >
+              {!listUser?.img ? listUser?.username[0].toUpperCase() : null}
+            </Avatar>
+          </ListItemAvatar>
+          <ListItemText
+            primary={listUser.username}
+            secondary={
+              listUser.latestMessage
+                ? `${
+                    listUser.latestMessage?.sender === user._id ? "You: " : ""
+                  }${
+                    listUser.latestMessage?.content?.length > 20
+                      ? listUser.latestMessage.content.slice(0, 20) + "..."
+                      : listUser.latestMessage.content
+                  }`
+                : `Say hi to ${listUser.username}!`
+            }
+          />
+          {listUser.latestMessage?.createdAt && (
+            <TimeAgo
+              key={listUser.latestMessage?.createdAt}
+              date={listUser.latestMessage?.createdAt}
+              minPeriod={10}
+              style={{ color: "rgba(0, 0, 0, 0.6)" }}
+            />
+          )}
+        </ListItemButton>
+      </ListItem>
+    </Link>
+  );
+});
+
 const UserList = memo(function UserList() {
   const theme = useTheme();
   const [userList, setUserList] = useState<User[] | []>([]);
@@ -87,48 +136,11 @@ const UserList = memo(function UserList() {
     >
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
         {userList.map((listUser) => (
-          <Link key={listUser._id} to={`/messages/${listUser._id}`}>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemAvatar>
-                  <Avatar
-                    alt="Profile picture"
-                    src={listUser?.img}
-                    sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
-                  >
-                    {!listUser?.img
-                      ? listUser?.username[0].toUpperCase()
-                      : null}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={listUser.username}
-                  secondary={
-                    listUser.latestMessage
-                      ? `${
-                          listUser.latestMessage?.sender === user._id
-                            ? "You: "
-                            : ""
-                        }${
-                          listUser.latestMessage?.content?.length > 20
-                            ? listUser.latestMessage.content.slice(0, 20) +
-                              "..."
-                            : listUser.latestMessage.content
-                        }`
-                      : `Say hi to ${listUser.username}!`
-                  }
-                />
-                {listUser.latestMessage?.createdAt && (
-                  <TimeAgo
-                    key={listUser.latestMessage?.createdAt}
-                    date={listUser.latestMessage?.createdAt}
-                    minPeriod={10}
-                    style={{ color: "rgba(0, 0, 0, 0.6)" }}
-                  />
-                )}
-              </ListItemButton>
-            </ListItem>
-          </Link>
+          <MemoizedListItem
+            key={listUser._id}
+            listUser={listUser}
+            user={user}
+          />
         ))}
       </List>
       {isLoading && <CircularProgress sx={{ color: theme.deepBlue }} />}
