@@ -65,6 +65,7 @@ function Main() {
                 e.preventDefault();
                 setShowLogin(!showLogin);
               }}
+              data-testid="sign-up-login-link"
             >
               {showLogin ? "Sign up" : "Login"}
             </Link>

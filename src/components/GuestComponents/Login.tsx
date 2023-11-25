@@ -130,6 +130,7 @@ function Login() {
           color: theme.deepBlue,
           fontWeight: "bold",
         }}
+        data-testid="login-heading"
       >
         Login
       </Typography>
