@@ -1,4 +1,4 @@
-import { ErrorInterface } from "./types/Error";
+import { ErrorInterface } from "../types/Error";
 
 interface ErrorObject {
   password?: string[];
