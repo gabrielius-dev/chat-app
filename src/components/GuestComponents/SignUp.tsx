@@ -17,9 +17,9 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import { useState } from "react";
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { ErrorInterface, ErrorResponse } from "../types/Error";
-import { transformError } from "../helpers";
 import { User, UserResponse } from "../types/User";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { transformError } from "../utils/transformError";
 
 interface IFormInput {
   username: string;
