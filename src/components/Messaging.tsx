@@ -18,6 +18,8 @@ import WindowFocusContext from "../context/WindowsFocusContext";
 import Messages from "./UserComponents/Messages";
 import socket from "../socket/socket";
 import SendIcon from "../assets/illustrations/send.svg";
+import Error from "./Error";
+import LoadingScreen from "./LoadingScreen";
 
 function Messaging() {
   const theme = useTheme();
@@ -37,6 +39,7 @@ function Messaging() {
   const [messages, setMessages] = useState<MessageInterface[]>([]);
   const [newMessageAdded, setNewMessageAdded] = useState(false);
   const [isMessageValid, setIsMessageValid] = useState(true);
+  const [selectedUserExists, setSelectedUserExists] = useState(true);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -88,6 +91,9 @@ function Messaging() {
       `http://localhost:8000/user/${selectedUserId}`,
       { withCredentials: true }
     );
+    if (!response.data.user) setSelectedUserExists(false);
+    else setSelectedUserExists(true);
+
     return response.data.user;
   }
 
@@ -98,43 +104,49 @@ function Messaging() {
     queryKey: ["databaseUserData"],
     queryFn: getDatabaseUser,
     retry: false,
-    refetchInterval: isWindowFocused ? 1000 * 60 : false,
+    refetchInterval: isWindowFocused && selectedUserExists ? 1000 * 60 : false,
   });
 
   useEffect(() => {
-    if (isLoadingSelectedUser) return;
+    if (!isLoadingSelectedUser && selectedUserExists && selectedUser) {
+      const fetchMessages = async () => {
+        const res: AxiosResponse<MessageInterface[]> = await axios.get(
+          "http://localhost:8000/messages",
+          {
+            params: {
+              user: user._id,
+              selectedUser: selectedUserId,
+              skipAmount: 0,
+            },
+            withCredentials: true,
+          }
+        );
+        return res.data;
+      };
 
-    const fetchMessages = async () => {
-      const res: AxiosResponse<MessageInterface[]> = await axios.get(
-        "http://localhost:8000/messages",
-        {
-          params: {
-            user: user._id,
-            selectedUser: selectedUserId,
-            skipAmount: 0,
-          },
-          withCredentials: true,
-        }
-      );
-      return res.data;
-    };
+      setInitialMessageFetching(true);
 
-    setInitialMessageFetching(true);
+      fetchMessages()
+        .then((res) => {
+          setMessages(res);
+          setMoreMessagesExist(res.length === 20);
+        })
+        .catch((err) => console.error(err))
+        .finally(() => {
+          setInitialMessageFetching(false);
+        });
 
-    fetchMessages()
-      .then((res) => {
-        setMessages(res);
-        setMoreMessagesExist(res.length === 20);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => {
+      return () => {
         setInitialMessageFetching(false);
-      });
-
-    return () => {
-      setInitialMessageFetching(false);
-    };
-  }, [isLoadingSelectedUser, selectedUserId, user._id]);
+      };
+    }
+  }, [
+    isLoadingSelectedUser,
+    selectedUser,
+    selectedUserExists,
+    selectedUserId,
+    user._id,
+  ]);
 
   // For the first load scroll to the bottom after messages are loaded
   useEffect(() => {
@@ -209,120 +221,121 @@ function Messaging() {
   };
 
   return (
-    !isInitialMessageFetching &&
-    isSocketConnected &&
-    selectedUser && (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          my: 2,
-          flex: 1,
-          overflow: "hidden",
-          // borderLeft: `1px solid ${theme.lightGray}`,
-          // borderRight: `1px solid ${theme.lightGray}`,
-        }}
-      >
+    <>
+      {!isInitialMessageFetching && isSocketConnected && selectedUser && (
         <Box
           sx={{
             display: "flex",
-            alignItems: "center",
-            borderBottom: `1px solid ${theme.lightGray}`,
-            p: 2,
-            gap: 2,
+            flexDirection: "column",
+            flex: 1,
+            overflow: "hidden",
           }}
         >
-          <Link to={`/profile/${selectedUser._id}`}>
-            <Avatar
-              alt="Profile picture"
-              src={selectedUser?.img}
-              sx={{
-                width: 50,
-                height: 50,
-                bgcolor: theme.deepBlue,
-              }}
-            >
-              {!selectedUser?.img
-                ? selectedUser?.username[0].toUpperCase()
-                : null}
-            </Avatar>
-          </Link>
-          <Box>
-            <Link to={`/profile/${selectedUser._id}`}>
-              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                {selectedUser.username}
-              </Typography>
-            </Link>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-              <Typography
-                variant="subtitle1"
-                sx={{ color: "rgba(0, 0, 0, 0.6)" }}
-              >
-                {selectedUser.online ? "Online" : "Offline"}
-              </Typography>
-              <TimeAgo
-                date={selectedUser.lastOnline}
-                minPeriod={60}
-                style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
-              />
-            </Box>
-          </Box>
-        </Box>
-        <Messages
-          messages={messages}
-          messagesEndRef={messagesEndRef}
-          handleScroll={handleScroll}
-          messagesContainerRef={messagesContainerRef}
-        />
-        <Box
-          sx={{
-            boxShadow: 5,
-            p: 2,
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-          }}
-        >
-          <InputBase
-            placeholder="Type a message here..."
-            value={message}
-            onInput={handleInputChange}
-            multiline
-            autoFocus
-            required
-            error={!isMessageValid}
-            inputProps={{ maxLength: 1000, spellCheck: false }}
+          <Box
             sx={{
-              flex: 1,
-              padding: 2,
-              borderRadius: 10,
-              boxShadow: 1,
-              border: "1px solid transparent",
-              "&.Mui-error": {
-                border: isMessageValid ? undefined : "1px solid red",
-              },
-            }}
-          />
-          <button
-            onClick={handleMessageSubmit}
-            style={{
-              width: 50,
-              height: 50,
-              backgroundColor: theme.midnightNavy,
-              borderRadius: 50,
               display: "flex",
-              justifyContent: "center",
               alignItems: "center",
+              borderBottom: `1px solid ${theme.lightGray}`,
+              p: 2,
+              gap: 2,
             }}
           >
-            <img
-              src={SendIcon}
-              style={{ color: "white", width: " 30px", height: "30px" }}
+            <Link to={`/profile/${selectedUser._id}`}>
+              <Avatar
+                alt="Profile picture"
+                src={selectedUser?.img}
+                sx={{
+                  width: 50,
+                  height: 50,
+                  bgcolor: theme.deepBlue,
+                }}
+              >
+                {!selectedUser?.img
+                  ? selectedUser?.username[0].toUpperCase()
+                  : null}
+              </Avatar>
+            </Link>
+            <Box>
+              <Link to={`/profile/${selectedUser._id}`}>
+                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  {selectedUser.username}
+                </Typography>
+              </Link>
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ color: "rgba(0, 0, 0, 0.6)" }}
+                >
+                  {selectedUser.online ? "Online" : "Offline"}
+                </Typography>
+                <TimeAgo
+                  date={selectedUser.lastOnline}
+                  minPeriod={60}
+                  style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
+                />
+              </Box>
+            </Box>
+          </Box>
+          <Messages
+            messages={messages}
+            messagesEndRef={messagesEndRef}
+            handleScroll={handleScroll}
+            messagesContainerRef={messagesContainerRef}
+          />
+          <Box
+            sx={{
+              boxShadow: 5,
+              p: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <InputBase
+              placeholder="Type a message here..."
+              value={message}
+              onInput={handleInputChange}
+              multiline
+              autoFocus
+              required
+              error={!isMessageValid}
+              inputProps={{ maxLength: 1000, spellCheck: false }}
+              sx={{
+                flex: 1,
+                padding: 2,
+                borderRadius: 10,
+                boxShadow: 1,
+                border: "1px solid transparent",
+                "&.Mui-error": {
+                  border: isMessageValid ? undefined : "1px solid red",
+                },
+              }}
             />
-          </button>
+            <button
+              onClick={handleMessageSubmit}
+              style={{
+                width: 50,
+                height: 50,
+                backgroundColor: theme.deepBlue,
+                borderRadius: 50,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <img
+                src={SendIcon}
+                style={{ color: "white", width: " 30px", height: "30px" }}
+              />
+            </button>
+          </Box>
         </Box>
-      </Box>
-    )
+      )}
+      {!selectedUser && !isLoadingSelectedUser && (
+        <Error errorMessage="User not found" />
+      )}
+      {isLoadingSelectedUser && isInitialMessageFetching && <LoadingScreen />}
+    </>
   );
 }
 
