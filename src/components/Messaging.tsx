@@ -129,7 +129,7 @@ function Messaging() {
       fetchMessages()
         .then((res) => {
           setMessages(res);
-          setMoreMessagesExist(res.length === 20);
+          setMoreMessagesExist(res.length === 30);
         })
         .catch((err) => console.error(err))
         .finally(() => {
@@ -162,7 +162,7 @@ function Messaging() {
         params: {
           user: user._id,
           selectedUser: selectedUserId,
-          skipAmount: skipAmount + 20,
+          skipAmount: skipAmount + 30,
         },
         withCredentials: true,
       }
@@ -179,7 +179,7 @@ function Messaging() {
         fetchMoreMessages()
           .then((messages) => {
             setMessages((prevMessages) => [...messages, ...prevMessages]);
-            setMoreMessagesExist(messages.length === 20);
+            setMoreMessagesExist(messages.length === 30);
           })
           .catch((err) => {
             console.error(err);
@@ -196,14 +196,14 @@ function Messaging() {
         fetchMoreMessages()
           .then((messages) => {
             setMessages((prevMessages) => [...messages, ...prevMessages]);
-            setMoreMessagesExist(messages.length === 20);
+            setMoreMessagesExist(messages.length === 30);
           })
           .catch((err) => {
             console.error(err);
           });
 
         setNewMessageAdded(false);
-        setSkipAmount((prevSkipAmount) => prevSkipAmount + 20);
+        setSkipAmount((prevSkipAmount) => prevSkipAmount + 30);
       }
     },
     [fetchMoreMessages, moreMessagesExist]
@@ -214,7 +214,7 @@ function Messaging() {
     if (
       messagesContainer &&
       prevScrollHeight &&
-      messages.length > 20 &&
+      messages.length > 30 &&
       !newMessageAdded
     ) {
       messagesContainer.scrollTop =
