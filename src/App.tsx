@@ -10,6 +10,7 @@ import Sidebar from "./components/Sidebar";
 import { useContext } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
 import { Box } from "@mui/material";
+import Error from "./components/Error";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -52,6 +53,7 @@ function App() {
             {user && (
               <Route path="/messages/:selectedUserId" element={<Messaging />} />
             )}
+            <Route path="*" element={<Error errorMessage="Page not found" />} />
           </Routes>
         </>
       )}
