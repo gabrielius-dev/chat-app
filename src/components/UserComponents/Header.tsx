@@ -96,7 +96,7 @@ function Header() {
               </Avatar>
               <Menu {...bindMenu(popupState)}>
                 <MenuItem onClick={popupState.close}>
-                  <Link to={`/profile/${user._id}`}>My account</Link>
+                  <Link to={`/profile/${user?._id}`}>My account</Link>
                 </MenuItem>
                 <MenuItem onClick={() => void handleLogout(popupState)}>
                   Logout
