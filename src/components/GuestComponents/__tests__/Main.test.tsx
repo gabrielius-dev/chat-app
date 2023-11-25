@@ -1,8 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Main from "../Main";
-import { MockedFunction, test, vi } from "vitest";
-import axios from "axios";
+import { test, vi } from "vitest";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -17,10 +16,6 @@ afterEach(() => {
 });
 
 test("Change from Login to SignUp component", async () => {
-  (axios.get as MockedFunction<typeof axios.get>).mockResolvedValue({
-    data: { user: null },
-  });
-
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
@@ -29,26 +24,15 @@ test("Change from Login to SignUp component", async () => {
     </MemoryRouter>
   );
 
-  await waitFor(() => {
-    expect(
-      screen.getByRole("heading", { level: 4, name: "Login" })
-    ).toBeInTheDocument();
-  });
+  const loginHeading = screen.getByTestId("login-heading");
+  expect(loginHeading).toBeInTheDocument();
 
-  expect(
-    screen.getByRole("heading", { level: 4, name: "Login" })
-  ).toBeInTheDocument();
-
-  await userEvent.click(screen.getByRole("link", { name: "Sign up" }));
+  await userEvent.click(screen.getByTestId("sign-up-login-link"));
 
   expect(screen.getByText("Already have an account?")).toBeInTheDocument();
 });
 
 test("Change from SignUp to Login component", async () => {
-  (axios.get as MockedFunction<typeof axios.get>).mockResolvedValue({
-    data: { user: null },
-  });
-
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
@@ -57,21 +41,14 @@ test("Change from SignUp to Login component", async () => {
     </MemoryRouter>
   );
 
-  await waitFor(() => {
-    expect(
-      screen.getByRole("heading", { level: 4, name: "Login" })
-    ).toBeInTheDocument();
-  });
+  const loginHeading = screen.getByTestId("login-heading");
+  expect(loginHeading).toBeInTheDocument();
 
-  expect(
-    screen.getByRole("heading", { level: 4, name: "Login" })
-  ).toBeInTheDocument();
-
-  await userEvent.click(screen.getByRole("link", { name: "Sign up" }));
+  await userEvent.click(screen.getByTestId("sign-up-login-link"));
 
   expect(screen.getByText("Already have an account?")).toBeInTheDocument();
 
-  await userEvent.click(screen.getByRole("link", { name: "Login" }));
+  await userEvent.click(screen.getByTestId("sign-up-login-link"));
 
   expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
 });

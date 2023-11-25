@@ -3,7 +3,6 @@ import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 import { MockedFunction, expect, test, vi } from "vitest";
 import axios from "axios";
-
 import { QueryClientProvider } from "@tanstack/react-query";
 import Login from "../../GuestComponents/Login";
 import Header from "../Header";
@@ -12,19 +11,19 @@ import { MemoryRouter } from "react-router-dom";
 vi.mock("axios");
 
 const queryClient = createTestQueryClient();
+const userMock = { _id: "ID", username: "Username", password: "Password" };
+queryClient.setQueryData(["userData"], userMock);
 
 afterEach(() => {
   queryClient.clear();
 });
 
 test("Logs out successfully", async () => {
-  const userMock = { _id: "ID", username: "Username", password: "Password" };
-
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
         <Login />
-        <Header user={userMock} />
+        <Header />
       </QueryClientProvider>
     </MemoryRouter>
   );
@@ -36,10 +35,6 @@ test("Logs out successfully", async () => {
   const passwordInput = screen.getByLabelText("Password");
   await userEvent.type(passwordInput, "test");
   expect(passwordInput).toHaveValue("test");
-
-  (axios.post as MockedFunction<typeof axios.post>).mockResolvedValueOnce({
-    data: { user: userMock },
-  });
 
   await userEvent.click(screen.getByRole("button", { name: "Login" }));
 
@@ -54,6 +49,6 @@ test("Logs out successfully", async () => {
   const logoutButton = screen.getByText("Logout");
   expect(logoutButton).toBeInTheDocument();
   await userEvent.click(logoutButton);
-  const emptyUser = await queryClient.getQueryData(["userData"]);
+  const emptyUser = queryClient.getQueryData(["userData"]);
   expect(emptyUser).toEqual(null);
 });
