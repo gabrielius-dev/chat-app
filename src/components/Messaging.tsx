@@ -155,25 +155,43 @@ function Messaging() {
     }
   }, [isInitialMessageFetching, skipAmount]);
 
+  const fetchMoreMessages = useCallback(async () => {
+    const res: AxiosResponse<MessageInterface[]> = await axios.get(
+      "http://localhost:8000/messages",
+      {
+        params: {
+          user: user._id,
+          selectedUser: selectedUserId,
+          skipAmount: skipAmount + 20,
+        },
+        withCredentials: true,
+      }
+    );
+    return res.data;
+  }, [selectedUserId, skipAmount, user._id]);
+
+  useEffect(() => {
+    const messagesContainer = messagesContainerRef.current;
+    if (messagesContainer && messages.length && selectedUser) {
+      const hasVerticalScrollbar =
+        messagesContainer.scrollHeight > messagesContainer.clientHeight;
+      if (!hasVerticalScrollbar) {
+        fetchMoreMessages()
+          .then((messages) => {
+            setMessages((prevMessages) => [...messages, ...prevMessages]);
+            setMoreMessagesExist(messages.length === 20);
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
+    }
+  }, [fetchMoreMessages, messages.length, selectedUser]);
+
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
       if (e.currentTarget.scrollTop === 0 && moreMessagesExist) {
         setPrevScrollHeight(e.currentTarget.scrollHeight);
-
-        const fetchMoreMessages = async () => {
-          const res: AxiosResponse<MessageInterface[]> = await axios.get(
-            "http://localhost:8000/messages",
-            {
-              params: {
-                user: user._id,
-                selectedUser: selectedUserId,
-                skipAmount: skipAmount + 20,
-              },
-              withCredentials: true,
-            }
-          );
-          return res.data;
-        };
 
         fetchMoreMessages()
           .then((messages) => {
@@ -188,7 +206,7 @@ function Messaging() {
         setSkipAmount((prevSkipAmount) => prevSkipAmount + 20);
       }
     },
-    [moreMessagesExist, selectedUserId, skipAmount, user._id]
+    [fetchMoreMessages, moreMessagesExist]
   );
 
   useLayoutEffect(() => {
