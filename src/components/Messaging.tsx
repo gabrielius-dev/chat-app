@@ -40,6 +40,13 @@ function Messaging() {
   const [newMessageAdded, setNewMessageAdded] = useState(false);
   const [isMessageValid, setIsMessageValid] = useState(true);
   const [selectedUserExists, setSelectedUserExists] = useState(true);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowLoadingScreen(true);
+    }, 1000);
+  }, []);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -352,7 +359,9 @@ function Messaging() {
       {!selectedUser && !isLoadingSelectedUser && (
         <Error errorMessage="User not found" />
       )}
-      {isLoadingSelectedUser && isInitialMessageFetching && <LoadingScreen />}
+      {isLoadingSelectedUser &&
+        isInitialMessageFetching &&
+        showLoadingScreen && <LoadingScreen />}
     </>
   );
 }
