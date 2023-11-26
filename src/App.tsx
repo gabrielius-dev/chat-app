@@ -6,7 +6,6 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./components/LoadingScreen";
 import Index from "./components/Index";
 import Messaging from "./components/Messaging";
-import Sidebar from "./components/Sidebar";
 import { useContext } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
 import { Box } from "@mui/material";
@@ -42,12 +41,7 @@ function App() {
     >
       {!isLoading && (
         <>
-          {user && (
-            <>
-              <Header />
-              <Sidebar />
-            </>
-          )}
+          {user && <Header />}
           <Routes>
             <Route path="/" element={<Index />} />
             {user && (
