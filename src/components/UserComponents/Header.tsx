@@ -48,10 +48,9 @@ function Header() {
   return (
     <Box
       sx={{
-        boxShadow: 1,
         p: 1,
-        m: 1,
-        borderRadius: 50,
+        borderBottom: `1px solid ${theme.lightGray}`,
+
         display: "flex",
         alignItems: "center",
         gap: 1,
