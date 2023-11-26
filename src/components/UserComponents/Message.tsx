@@ -3,12 +3,17 @@ import { MessageInterface } from "../types/Message";
 import { User } from "../types/User";
 import { Box, useTheme, Typography } from "@mui/material";
 import formatCustomDate from "../utils/formatDate";
+import { useParams } from "react-router-dom";
 
 function Message({ message }: { message: MessageInterface }) {
+  const { selectedUserId } = useParams();
   const queryClient = useQueryClient();
   const theme = useTheme();
   const user: User = queryClient.getQueryData(["userData"])!;
-  const selectedUser: User = queryClient.getQueryData(["databaseUserData"])!;
+  const selectedUser: User = queryClient.getQueryData([
+    "databaseUserData",
+    selectedUserId,
+  ])!;
 
   return (
     <Box
