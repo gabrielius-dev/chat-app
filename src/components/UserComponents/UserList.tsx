@@ -29,7 +29,7 @@ const MemoizedListItem = memo(function MemoizedListItem({
   return (
     <Link to={`/messages/${listUser._id}`}>
       <ListItem disablePadding>
-        <ListItemButton>
+        <ListItemButton sx={{ display: "flex", gap: 1 }}>
           <ListItemAvatar>
             <Avatar
               alt="Profile picture"
@@ -40,14 +40,15 @@ const MemoizedListItem = memo(function MemoizedListItem({
             </Avatar>
           </ListItemAvatar>
           <ListItemText
+            sx={{ wordBreak: "break-word" }}
             primary={listUser.username}
             secondary={
               listUser.latestMessage
                 ? `${
                     listUser.latestMessage?.sender === user._id ? "You: " : ""
                   }${
-                    listUser.latestMessage?.content?.length > 20
-                      ? listUser.latestMessage.content.slice(0, 20) + "..."
+                    listUser.latestMessage?.content?.length > 15
+                      ? listUser.latestMessage.content.slice(0, 15) + "..."
                       : listUser.latestMessage.content
                   }`
                 : `Say hi to ${listUser.username}!`
