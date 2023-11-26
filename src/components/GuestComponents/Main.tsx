@@ -23,7 +23,6 @@ function Main() {
 
   return (
     <Container
-      maxWidth="xl"
       sx={{
         height: "100vh",
         display: `${isMediumScreen ? "flex" : "block"}`,
@@ -34,7 +33,9 @@ function Main() {
     >
       <Grid
         container
-        sx={{ marginY: 2, visibility: isImageLoaded ? "visible" : "hidden" }}
+        sx={{
+          visibility: isImageLoaded ? "visible" : "hidden",
+        }}
       >
         <WelcomeBox handleImageLoad={handleImageLoad} />
 

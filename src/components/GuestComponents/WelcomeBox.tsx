@@ -1,4 +1,4 @@
-import { Grid, Typography } from "@mui/material";
+import { Grid, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import Chat from "../../assets/illustrations/chat.svg";
@@ -11,6 +11,7 @@ function WelcomeBox({
   handleImageLoad: handleImageLoadType;
 }) {
   const theme = useTheme();
+  const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <Grid
@@ -20,6 +21,8 @@ function WelcomeBox({
       sx={{
         display: "flex",
         flexDirection: "column",
+        justifyContent: isMediumScreen ? "initial" : "center",
+        alignItems: isMediumScreen ? "initial" : "center",
         p: 2,
         gap: 2,
       }}
@@ -34,7 +37,12 @@ function WelcomeBox({
       >
         <Link to="/">Chat app</Link>
       </Typography>
-      <img src={Chat} onLoad={handleImageLoad} alt="Chat Logo" />
+      <img
+        src={Chat}
+        onLoad={handleImageLoad}
+        alt="Chat Logo"
+        style={{ maxWidth: "60vw" }}
+      />
       <Typography
         variant="body1"
         sx={{
