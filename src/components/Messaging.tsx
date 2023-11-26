@@ -38,7 +38,7 @@ function Messaging() {
   const [messages, setMessages] = useState<MessageInterface[]>([]);
   const [newMessageAdded, setNewMessageAdded] = useState(false);
   const [isMessageValid, setIsMessageValid] = useState(true);
-  const [selectedUserExists, setSelectedUserExists] = useState(true);
+  const [selectedUserExists, setSelectedUserExists] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
 
   useEffect(() => {
@@ -97,8 +97,8 @@ function Messaging() {
       `http://localhost:8000/user/${selectedUserId}`,
       { withCredentials: true }
     );
-    if (!response.data.user) setSelectedUserExists(false);
-    else setSelectedUserExists(true);
+
+    setSelectedUserExists(!!response.data.user);
 
     return response.data.user;
   }
@@ -114,14 +114,14 @@ function Messaging() {
   });
 
   useEffect(() => {
-    if (!isLoadingSelectedUser && selectedUserExists && selectedUser) {
+    if (!isLoadingSelectedUser && selectedUser && selectedUserExists) {
       const fetchMessages = async () => {
         const res: AxiosResponse<MessageInterface[]> = await axios.get(
           "http://localhost:8000/messages",
           {
             params: {
               user: user._id,
-              selectedUser: selectedUserId,
+              selectedUser: selectedUser._id,
               skipAmount: 0,
             },
             withCredentials: true,
@@ -146,13 +146,7 @@ function Messaging() {
         setInitialMessageFetching(false);
       };
     }
-  }, [
-    isLoadingSelectedUser,
-    selectedUser,
-    selectedUserExists,
-    selectedUserId,
-    user._id,
-  ]);
+  }, [isLoadingSelectedUser, selectedUser, selectedUserExists, user._id]);
 
   // For the first load scroll to the bottom after messages are loaded
   useEffect(() => {
@@ -178,7 +172,12 @@ function Messaging() {
 
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current;
-    if (messagesContainer && messages.length && selectedUser) {
+    if (
+      messagesContainer &&
+      messages.length &&
+      selectedUser &&
+      moreMessagesExist
+    ) {
       const hasVerticalScrollbar =
         messagesContainer.scrollHeight > messagesContainer.clientHeight;
       if (!hasVerticalScrollbar) {
@@ -192,7 +191,7 @@ function Messaging() {
           });
       }
     }
-  }, [fetchMoreMessages, messages.length, selectedUser]);
+  }, [fetchMoreMessages, messages.length, moreMessagesExist, selectedUser]);
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
