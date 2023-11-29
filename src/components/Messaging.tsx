@@ -1,7 +1,14 @@
 import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { MessageInterface } from "./types/Message";
-import { Avatar, Box, Typography, useTheme, InputBase } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Typography,
+  useTheme,
+  InputBase,
+  useMediaQuery,
+} from "@mui/material";
 import { Link, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,15 +26,15 @@ import Messages from "./UserComponents/Messages";
 import socket from "../socket/socket";
 import Error from "./Error";
 import LoadingScreen from "./LoadingScreen";
+import Sidebar from "./Sidebar";
 
-function Messaging() {
+function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
   const theme = useTheme();
   const queryClient = useQueryClient();
   const user: User = queryClient.getQueryData(["userData"])!;
   const { selectedUserId } = useParams();
   const isWindowFocused = useContext(WindowFocusContext);
   const [message, setMessage] = useState("");
-  const [isSocketConnected, setIsSocketConnected] = useState(false);
   const roomId = [user._id, selectedUserId].sort().join("-");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialMessageFetching, setInitialMessageFetching] = useState(true);
@@ -40,6 +47,21 @@ function Messaging() {
   const [isMessageValid, setIsMessageValid] = useState(true);
   const [selectedUserExists, setSelectedUserExists] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
+  const [open, setOpen] = useState(isMediumScreen);
+
+  const toggleSidebar = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  useEffect(() => {
+    setOpen(isMediumScreen);
+  }, [isMediumScreen]);
+
+  useEffect(() => {
+    setOpen(isSmallScreen);
+  }, [isSmallScreen]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -68,29 +90,17 @@ function Messaging() {
   }, []);
 
   useEffect(() => {
-    function onSocketConnect() {
-      setIsSocketConnected(true);
-    }
-    socket.connect();
-    socket.on("connect", onSocketConnect);
     socket.emit("join-room", roomId);
 
-    return () => {
-      socket.off("connect", onSocketConnect);
-      socket.disconnect();
-    };
-  }, [roomId]);
-
-  useEffect(() => {
     const receiveMessageHandler = (message: MessageInterface) => {
       addNewMessage(message);
     };
-
     socket.on("receive-message", receiveMessageHandler);
+
     return () => {
       socket.off("receive-message", receiveMessageHandler);
     };
-  }, [addNewMessage]);
+  }, [addNewMessage, roomId]);
 
   async function getDatabaseUser() {
     const response: AxiosResponse<DatabaseUserResponse> = await axios.get(
@@ -107,7 +117,7 @@ function Messaging() {
     User | undefined,
     Error
   >({
-    queryKey: ["databaseUserData"],
+    queryKey: ["databaseUserData", selectedUserId],
     queryFn: getDatabaseUser,
     retry: false,
     refetchInterval: isWindowFocused && selectedUserExists ? 1000 * 60 : false,
@@ -214,6 +224,21 @@ function Messaging() {
     [fetchMoreMessages, moreMessagesExist]
   );
 
+  // Cleanup function when users from user list are selected (Messaging component doesn't unmount, just the selectedUserId changes)
+  useEffect(() => {
+    return () => {
+      setInitialMessageFetching(true);
+      setSkipAmount(0);
+      setMoreMessagesExist(true);
+      setPrevScrollHeight(0);
+      setMessages([]);
+      setNewMessageAdded(false);
+      setIsMessageValid(true);
+      setSelectedUserExists(false);
+      setShowLoadingScreen(false);
+    };
+  }, [selectedUserId]);
+
   useLayoutEffect(() => {
     const messagesContainer = messagesContainerRef.current;
     if (
@@ -249,130 +274,141 @@ function Messaging() {
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
-            flex: 1,
             overflow: "hidden",
+            height: "100%",
+            position: "relative",
           }}
         >
+          <Sidebar toggleSidebar={toggleSidebar} open={open} />
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              borderBottom: `1px solid ${theme.lightGray}`,
-              p: 2,
-              gap: 2,
+              display: open && !isSmallScreen ? "none" : "flex",
+              flexDirection: "column",
+              flex: 1,
+              height: "100%",
             }}
           >
-            <Link to={`/profile/${selectedUser._id}`}>
-              <Avatar
-                alt="Profile picture"
-                src={selectedUser?.img}
-                sx={{
-                  width: 50,
-                  height: 50,
-                  bgcolor: theme.deepBlue,
-                }}
-              >
-                {!selectedUser?.img
-                  ? selectedUser?.username[0].toUpperCase()
-                  : null}
-              </Avatar>
-            </Link>
-            <Box>
-              <Link to={`/profile/${selectedUser._id}`}>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  {selectedUser.username}
-                </Typography>
-              </Link>
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ color: "rgba(0, 0, 0, 0.6)" }}
-                >
-                  {selectedUser.online ? "Online" : "Offline"}
-                </Typography>
-                <TimeAgo
-                  date={selectedUser.lastOnline}
-                  minPeriod={60}
-                  style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
-                />
-              </Box>
-            </Box>
-          </Box>
-          <Messages
-            messages={messages}
-            messagesEndRef={messagesEndRef}
-            handleScroll={handleScroll}
-            messagesContainerRef={messagesContainerRef}
-          />
-          <Box
-            sx={{
-              boxShadow: 5,
-              p: 2,
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            <InputBase
-              placeholder="Type a message here..."
-              value={message}
-              onInput={handleInputChange}
-              multiline
-              autoFocus
-              required
-              error={!isMessageValid}
-              inputProps={{ maxLength: 1000, spellCheck: false }}
+            <Box
               sx={{
-                flex: 1,
-                padding: 2,
-                borderRadius: 10,
-                boxShadow: 1,
-                border: "1px solid transparent",
-                "&.Mui-error": {
-                  border: isMessageValid ? undefined : "1px solid red",
-                },
-              }}
-            />
-            <button
-              onClick={handleMessageSubmit}
-              style={{
-                width: 50,
-                height: 50,
-                backgroundColor: theme.deepBlue,
-                borderRadius: 50,
                 display: "flex",
-                justifyContent: "center",
                 alignItems: "center",
+
+                p: 2,
+                gap: 2,
+                borderBottom: `1px solid ${theme.lightGray}`,
               }}
             >
-              <svg
-                fill="#fff"
-                height="30px"
-                width="30px"
-                version="1.1"
-                id="Capa_1"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 495.003 495.003"
-                xmlSpace="preserve"
-              >
-                <g id="XMLID_51_">
-                  <path
-                    id="XMLID_53_"
-                    d="M164.711,456.687c0,2.966,1.647,5.686,4.266,7.072c2.617,1.385,5.799,1.207,8.245-0.468l55.09-37.616
-		l-67.6-32.22V456.687z"
+              <Link to={`/profile/${selectedUser._id}`}>
+                <Avatar
+                  alt="Profile picture"
+                  src={selectedUser?.img}
+                  sx={{
+                    width: 50,
+                    height: 50,
+                    bgcolor: theme.deepBlue,
+                  }}
+                >
+                  {!selectedUser?.img
+                    ? selectedUser?.username[0].toUpperCase()
+                    : null}
+                </Avatar>
+              </Link>
+              <Box>
+                <Link to={`/profile/${selectedUser._id}`}>
+                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                    {selectedUser.username}
+                  </Typography>
+                </Link>
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ color: "rgba(0, 0, 0, 0.6)" }}
+                  >
+                    {selectedUser.online ? "Online" : "Offline"}
+                  </Typography>
+                  <TimeAgo
+                    date={selectedUser.lastOnline}
+                    minPeriod={60}
+                    style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
                   />
-                  <path
-                    id="XMLID_52_"
-                    d="M492.431,32.443c-1.513-1.395-3.466-2.125-5.44-2.125c-1.19,0-2.377,0.264-3.5,0.816L7.905,264.422
+                </Box>
+              </Box>
+            </Box>
+            <Messages
+              messages={messages}
+              messagesEndRef={messagesEndRef}
+              handleScroll={handleScroll}
+              messagesContainerRef={messagesContainerRef}
+            />
+            <Box
+              sx={{
+                p: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                borderTop: `1px solid ${theme.lightGray}`,
+              }}
+            >
+              <InputBase
+                placeholder="Type a message here..."
+                value={message}
+                onInput={handleInputChange}
+                multiline
+                autoFocus
+                required
+                error={!isMessageValid}
+                inputProps={{ maxLength: 1000, spellCheck: false }}
+                sx={{
+                  flex: 1,
+                  padding: 2,
+                  borderRadius: 10,
+                  boxShadow: 1,
+                  border: "1px solid transparent",
+                  "&.Mui-error": {
+                    border: isMessageValid ? undefined : "1px solid red",
+                  },
+                }}
+              />
+              <button
+                onClick={handleMessageSubmit}
+                style={{
+                  width: 50,
+                  height: 50,
+                  backgroundColor: theme.deepBlue,
+                  borderRadius: 50,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <svg
+                  fill="#fff"
+                  height="30px"
+                  width="30px"
+                  version="1.1"
+                  id="Capa_1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  viewBox="0 0 495.003 495.003"
+                  xmlSpace="preserve"
+                >
+                  <g id="XMLID_51_">
+                    <path
+                      id="XMLID_53_"
+                      d="M164.711,456.687c0,2.966,1.647,5.686,4.266,7.072c2.617,1.385,5.799,1.207,8.245-0.468l55.09-37.616
+		l-67.6-32.22V456.687z"
+                    />
+                    <path
+                      id="XMLID_52_"
+                      d="M492.431,32.443c-1.513-1.395-3.466-2.125-5.44-2.125c-1.19,0-2.377,0.264-3.5,0.816L7.905,264.422
 		c-4.861,2.389-7.937,7.353-7.904,12.783c0.033,5.423,3.161,10.353,8.057,12.689l125.342,59.724l250.62-205.99L164.455,364.414
 		l156.145,74.4c1.918,0.919,4.012,1.376,6.084,1.376c1.768,0,3.519-0.322,5.186-0.977c3.637-1.438,6.527-4.318,7.97-7.956
 		L494.436,41.257C495.66,38.188,494.862,34.679,492.431,32.443z"
-                  />
-                </g>
-              </svg>
-            </button>
+                    />
+                  </g>
+                </svg>
+              </button>
+            </Box>
           </Box>
         </Box>
       )}
