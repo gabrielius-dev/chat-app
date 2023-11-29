@@ -6,13 +6,15 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./components/LoadingScreen";
 import Index from "./components/Index";
 import Messaging from "./components/Messaging";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
 import { Box } from "@mui/material";
 import Error from "./components/Error";
+import socket from "./socket/socket";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
 
   const getUser = async () => {
     const response: AxiosResponse<UserResponse> = await axios.get(
@@ -31,6 +33,22 @@ function App() {
     refetchInterval: isWindowFocused ? 1000 * 120 : false,
   });
 
+  useEffect(() => {
+    if (user) {
+      const handleSocketConnect = () => {
+        setIsSocketConnected(true);
+      };
+
+      socket.connect();
+      socket.on("connect", handleSocketConnect);
+
+      return () => {
+        socket.off("connect", handleSocketConnect);
+        socket.disconnect();
+      };
+    }
+  }, [user]);
+
   return (
     <Box
       sx={{
@@ -43,9 +61,15 @@ function App() {
         <>
           {user && <Header />}
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route
+              path="/"
+              element={<Index isSocketConnected={isSocketConnected} />}
+            />
             {user && (
-              <Route path="/messages/:selectedUserId" element={<Messaging />} />
+              <Route
+                path="/messages/:selectedUserId"
+                element={<Messaging isSocketConnected={isSocketConnected} />}
+              />
             )}
             <Route path="*" element={<Error errorMessage="Page not found" />} />
           </Routes>
