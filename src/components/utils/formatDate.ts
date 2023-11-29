@@ -1,31 +1,82 @@
-import { DateTime } from "luxon";
+function formatCustomDate(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
 
-function formatCustomDate(dateString: string): string {
-  const date: DateTime = DateTime.fromISO(dateString);
+  // Function to check if two dates have the same day
+  const isSameDay = (date1: Date, date2: Date) =>
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate();
 
-  const now: DateTime = DateTime.local();
+  // Function to check if a date is in the same week
+  function isSameWeek(date1: Date, date2: Date) {
+    const diff = (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
+    const days = diff;
+    const dayOfWeek = (date: Date) => ((date.getDay() + 6) % 7) + 1;
 
-  if (date.hasSame(now, "day")) {
-    return date.toFormat("HH:mm");
+    return Math.floor(days / 7) === 0 && dayOfWeek(date1) <= dayOfWeek(date2);
   }
 
-  if (date.hasSame(now.minus({ days: 1 }), "day")) {
-    return date.toFormat("'Yesterday' HH:mm");
+  if (isSameDay(date, now)) {
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    }).format(date);
   }
 
-  if (date.hasSame(now, "week")) {
-    return date.toFormat("EEEE HH:mm");
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  if (isSameDay(date, yesterday)) {
+    return `Yesterday ${new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    }).format(date)}`;
   }
 
-  if (date < now.startOf("week")) {
-    return date.toFormat("MMMM d HH:mm");
+  if (isSameWeek(date, now)) {
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    }).format(date);
   }
 
-  if (date < now.minus({ years: 1 })) {
-    return date.toFormat("yyyy-MMMM-d HH:mm ");
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // Calculate the start of the week
+
+  if (date < startOfWeek) {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    }).format(date);
   }
 
-  return date.toFormat("HH:mm");
+  const oneYearAgo = new Date(now);
+  oneYearAgo.setFullYear(now.getFullYear() - 1);
+
+  if (date < oneYearAgo) {
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    }).format(date);
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: false,
+  }).format(date);
 }
 
 export default formatCustomDate;
