@@ -7,7 +7,7 @@ import Main from "./GuestComponents/Main";
 import Sidebar from "./Sidebar";
 import { useState, useEffect } from "react";
 
-function Index() {
+function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
   const theme = useTheme();
   const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
   const queryClient = useQueryClient();
@@ -25,8 +25,8 @@ function Index() {
   return (
     <>
       {!user && <Main />}
-      {user && !isMediumScreen && <UserList />}
-      {user && isMediumScreen && (
+      {user && !isMediumScreen && isSocketConnected && <UserList />}
+      {user && isMediumScreen && isSocketConnected && (
         <Box sx={{ display: "flex", height: "100%" }}>
           <Sidebar open={open} toggleSidebar={toggleSidebar} />
         </Box>
