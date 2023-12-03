@@ -10,11 +10,24 @@ function formatCustomDate(dateString: string) {
 
   // Function to check if a date is in the same week
   function isSameWeek(date1: Date, date2: Date) {
-    const diff = (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
-    const days = diff;
-    const dayOfWeek = (date: Date) => ((date.getDay() + 6) % 7) + 1;
+    const firstDayOfWeek = 1; // 0 is Sunday, 1 is Monday, and so on...
 
-    return Math.floor(days / 7) === 0 && dayOfWeek(date1) <= dayOfWeek(date2);
+    const currentWeekStart = new Date(
+      date2.getFullYear(),
+      date2.getMonth(),
+      date2.getDate() - ((date2.getDay() - firstDayOfWeek + 7) % 7)
+    );
+
+    const currentWeekEnd = new Date(
+      currentWeekStart.getFullYear(),
+      currentWeekStart.getMonth(),
+      currentWeekStart.getDate() + 6
+    );
+
+    return (
+      date1.getTime() >= currentWeekStart.getTime() &&
+      date1.getTime() <= currentWeekEnd.getTime()
+    );
   }
 
   if (isSameDay(date, now)) {
