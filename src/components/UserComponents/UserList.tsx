@@ -102,7 +102,6 @@ const UserList = memo(function UserList() {
   }, [loadOffset]);
 
   useEffect(() => {
-    socket.connect();
     socket.emit("join-room", user._id);
 
     function getNewUserHandler(returnedUser: User) {
@@ -119,7 +118,6 @@ const UserList = memo(function UserList() {
 
     return () => {
       socket.off("get-user-list", getNewUserHandler);
-      socket.disconnect();
     };
   }, [user._id]);
 
