@@ -7,9 +7,11 @@ type toggleSidebarType = () => void;
 function Sidebar({
   toggleSidebar,
   open,
+  isSmallScreen,
 }: {
   toggleSidebar: toggleSidebarType;
   open: boolean;
+  isSmallScreen: boolean;
 }) {
   const theme = useTheme();
 
@@ -18,8 +20,8 @@ function Sidebar({
       sx={{
         display: "flex",
         flexDirection: "column",
-        width: open ? "50vw" : "max-content",
-        maxWidth: "500px",
+        width: open ? (!isSmallScreen ? "100vw" : "50vw") : "max-content",
+        maxWidth: !isSmallScreen ? "600px" : "500px",
         borderRight: `1px solid ${theme.lightGray}`,
         height: "100%",
       }}
