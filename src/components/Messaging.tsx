@@ -56,10 +56,6 @@ function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
   };
 
   useEffect(() => {
-    setOpen(isMediumScreen);
-  }, [isMediumScreen]);
-
-  useEffect(() => {
     setOpen(isSmallScreen);
   }, [isSmallScreen]);
 
@@ -236,6 +232,8 @@ function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
       setIsMessageValid(true);
       setSelectedUserExists(false);
       setShowLoadingScreen(false);
+      setMessage("");
+      setOpen(false);
     };
   }, [selectedUserId]);
 
@@ -279,7 +277,11 @@ function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
             position: "relative",
           }}
         >
-          <Sidebar toggleSidebar={toggleSidebar} open={open} />
+          <Sidebar
+            toggleSidebar={toggleSidebar}
+            open={open}
+            isSmallScreen={isSmallScreen}
+          />
           <Box
             sx={{
               display: open && !isSmallScreen ? "none" : "flex",
