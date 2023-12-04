@@ -133,7 +133,7 @@ const UserList = memo(function UserList() {
         alignItems: "center",
       }}
     >
-      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
+      <List sx={{ width: "100%", bgcolor: "background.paper", pt: 0 }}>
         {userList.map((listUser) => (
           <MemoizedListItem
             key={listUser._id}
