@@ -1,10 +1,11 @@
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import UserList from "../UtilityComponents/UserList";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
+import { memo } from "react";
 
 type toggleSidebarType = () => void;
 
-function Sidebar({
+const Sidebar = memo(function Sidebar({
   toggleSidebar,
   open,
   isSmallScreen,
@@ -52,6 +53,6 @@ function Sidebar({
       </Box>
     </Box>
   );
-}
+});
 
 export default Sidebar;
