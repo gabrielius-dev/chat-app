@@ -47,13 +47,21 @@ function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
   const [isMessageValid, setIsMessageValid] = useState(true);
   const [selectedUserExists, setSelectedUserExists] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
-  const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
-  const [open, setOpen] = useState(isMediumScreen);
+  const [open, setOpen] = useState(isSmallScreen);
 
   const toggleSidebar = () => {
     setOpen((prevOpen) => !prevOpen);
   };
+
+  // Cleanup function when users from user list are selected (Messaging component doesn't unmount, just the selectedUserId changes)
+  useEffect(() => {
+    return () => {
+      setSkipAmount(0);
+      setOpen(isSmallScreen);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUserId]);
 
   useEffect(() => {
     setOpen(isSmallScreen);
@@ -219,23 +227,6 @@ function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
     },
     [fetchMoreMessages, moreMessagesExist]
   );
-
-  // Cleanup function when users from user list are selected (Messaging component doesn't unmount, just the selectedUserId changes)
-  useEffect(() => {
-    return () => {
-      setInitialMessageFetching(true);
-      setSkipAmount(0);
-      setMoreMessagesExist(true);
-      setPrevScrollHeight(0);
-      setMessages([]);
-      setNewMessageAdded(false);
-      setIsMessageValid(true);
-      setSelectedUserExists(false);
-      setShowLoadingScreen(false);
-      setMessage("");
-      setOpen(false);
-    };
-  }, [selectedUserId]);
 
   useLayoutEffect(() => {
     const messagesContainer = messagesContainerRef.current;
