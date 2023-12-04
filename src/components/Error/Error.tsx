@@ -33,6 +33,7 @@ function Error({ errorMessage }: { errorMessage: string }) {
         height: "100%",
         justifyContent: "center",
         alignItems: "center",
+        width: "100vw",
       }}
     >
       <Box
