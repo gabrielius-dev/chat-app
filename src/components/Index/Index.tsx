@@ -5,7 +5,7 @@ import { User } from "../types/User";
 import { useTheme } from "@mui/material/styles";
 import Main from "./Main";
 import Sidebar from "../Sidebar/Sidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import NoChatsSelected from "../Messaging/NoChatsSelected";
 
 function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
@@ -15,16 +15,16 @@ function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
   const user: User | undefined = queryClient.getQueryData(["userData"]);
   const [open, setOpen] = useState(isMediumScreen);
 
-  const toggleSidebar = () => {
+  const toggleSidebar = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);
-  };
+  }, []);
 
   useEffect(() => {
     setOpen(isMediumScreen);
   }, [isMediumScreen]);
 
   return (
-    <>
+    <Box sx={{ width: "100vw" }}>
       {!user && <Main />}
       {user && !isMediumScreen && isSocketConnected && <UserList />}
       {user && isMediumScreen && isSocketConnected && (
@@ -58,7 +58,7 @@ function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
           </Box>
         </Box>
       )}
-    </>
+    </Box>
   );
 }
 
