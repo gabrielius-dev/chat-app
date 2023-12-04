@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { MockedFunction, expect, test, vi } from "vitest";
 import axios from "axios";
 import { QueryClientProvider } from "@tanstack/react-query";
-import Login from "../../GuestComponents/Login";
+import Login from "../../Index/Login";
 import Header from "../Header";
 import { createTestQueryClient } from "../../utils/tests-utils";
 import { MemoryRouter } from "react-router-dom";

@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { MessageInterface } from "./types/Message";
+import { MessageInterface } from "../types/Message";
 import {
   Avatar,
   Box,
@@ -19,14 +19,14 @@ import {
   useState,
   useLayoutEffect,
 } from "react";
-import { DatabaseUserResponse, User } from "./types/User";
+import { DatabaseUserResponse, User } from "../types/User";
 import TimeAgo from "react-timeago";
-import WindowFocusContext from "../context/WindowsFocusContext";
-import Messages from "./UserComponents/Messages";
-import socket from "../socket/socket";
-import Error from "./Error";
-import LoadingScreen from "./LoadingScreen";
-import Sidebar from "./Sidebar";
+import WindowFocusContext from "../../context/WindowsFocusContext";
+import Messages from "./Messages";
+import socket from "../../socket/socket";
+import Error from "../Error/Error";
+import LoadingScreen from "../UtilityComponents/LoadingScreen";
+import Sidebar from "../Sidebar/Sidebar";
 
 function Messaging({ isSocketConnected }: { isSocketConnected: boolean }) {
   const theme = useTheme();

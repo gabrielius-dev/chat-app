@@ -1,12 +1,12 @@
 import { useMediaQuery, Box, Typography } from "@mui/material";
-import UserList from "./UserComponents/UserList";
+import UserList from "../UtilityComponents/UserList";
 import { useQueryClient } from "@tanstack/react-query";
-import { User } from "./types/User";
+import { User } from "../types/User";
 import { useTheme } from "@mui/material/styles";
-import Main from "./GuestComponents/Main";
-import Sidebar from "./Sidebar";
+import Main from "./Main";
+import Sidebar from "../Sidebar/Sidebar";
 import { useState, useEffect } from "react";
-import NoChatsSelected from "./UserComponents/NoChatsSelected";
+import NoChatsSelected from "../Messaging/NoChatsSelected";
 
 function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
   const theme = useTheme();

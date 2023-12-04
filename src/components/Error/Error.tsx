@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import PageNotFound from "../assets/illustrations/page-not-found.svg";
+import PageNotFound from "../../assets/illustrations/page-not-found.svg";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

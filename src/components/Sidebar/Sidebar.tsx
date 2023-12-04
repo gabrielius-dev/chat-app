@@ -1,5 +1,5 @@
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import UserList from "./UserComponents/UserList";
+import UserList from "../UtilityComponents/UserList";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 
 type toggleSidebarType = () => void;

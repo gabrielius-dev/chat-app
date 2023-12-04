@@ -1,16 +1,16 @@
 import { Route, Routes } from "react-router-dom";
-import Header from "./components/UserComponents/Header";
+import Header from "./components/Header/Header";
 import axios, { AxiosResponse } from "axios";
 import { User, UserResponse } from "./components/types/User";
 import { useQuery } from "@tanstack/react-query";
-import LoadingScreen from "./components/LoadingScreen";
-import Index from "./components/Index";
-import Messaging from "./components/Messaging";
+import LoadingScreen from "./components/UtilityComponents/LoadingScreen";
+import Messaging from "./components/Messaging/Messaging";
 import { useContext, useEffect, useState } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
 import { Box } from "@mui/material";
-import Error from "./components/Error";
+import Error from "./components/Error/Error";
 import socket from "./socket/socket";
+import Index from "./components/Index/Index";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
