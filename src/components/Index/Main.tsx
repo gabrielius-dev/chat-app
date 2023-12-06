@@ -35,6 +35,7 @@ function Main() {
         container
         sx={{
           visibility: isImageLoaded ? "visible" : "hidden",
+          mb: `${!isMediumScreen ? "1rem" : undefined}`,
         }}
       >
         <WelcomeBox handleImageLoad={handleImageLoad} />
