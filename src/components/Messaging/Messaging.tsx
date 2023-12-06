@@ -27,15 +27,18 @@ import socket from "../../socket/socket";
 import LoadingScreen from "../UtilityComponents/LoadingScreen";
 
 type setOpenType = (open: boolean) => void;
+type setMessagingUserExistsType = (open: boolean) => void;
 
 function Messaging({
   isSocketConnected,
   open,
   setOpen,
+  setMessagingUserExists,
 }: {
   isSocketConnected: boolean;
   open: boolean;
   setOpen: setOpenType;
+  setMessagingUserExists: setMessagingUserExistsType;
 }) {
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -117,6 +120,7 @@ function Messaging({
     );
 
     setSelectedUserExists(!!response.data.user);
+    setMessagingUserExists(!!response.data.user);
 
     return response.data.user;
   }
