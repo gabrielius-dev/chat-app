@@ -24,7 +24,7 @@ function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
   }, [isMediumScreen]);
 
   return (
-    <Box sx={{ width: "100vw" }}>
+    <Box sx={{ width: "100vw", overflow: "auto" }}>
       {!user && <Main />}
       {user && !isMediumScreen && isSocketConnected && <UserList />}
       {user && isMediumScreen && isSocketConnected && (
