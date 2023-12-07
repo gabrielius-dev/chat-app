@@ -45,6 +45,7 @@ function Message({ message }: { message: MessageInterface }) {
             sx={{
               wordBreak: "break-word",
               overflowWrap: "break-word",
+              whiteSpace: "pre-line",
             }}
           >
             {message.content}
