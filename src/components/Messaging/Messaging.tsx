@@ -298,7 +298,7 @@ function Messaging({
               borderBottom: `1px solid ${theme.lightGray}`,
             }}
           >
-            <Link to={`/profile/${selectedUser._id}`}>
+            <Link to={`/user/${selectedUser._id}`}>
               <Avatar
                 alt="Profile picture"
                 src={selectedUser?.img}
@@ -314,7 +314,7 @@ function Messaging({
               </Avatar>
             </Link>
             <Box>
-              <Link to={`/profile/${selectedUser._id}`}>
+              <Link to={`/user/${selectedUser._id}`}>
                 <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                   {selectedUser.username}
                 </Typography>
