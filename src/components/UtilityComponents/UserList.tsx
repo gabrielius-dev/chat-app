@@ -106,11 +106,20 @@ const UserList = memo(function UserList() {
 
     function getNewUserHandler(returnedUser: User) {
       setUserList((prevUserList) =>
-        prevUserList.map((user) => {
-          if (user._id === returnedUser._id) {
-            return returnedUser;
-          } else return user;
-        })
+        prevUserList
+          .map((user) => {
+            if (user._id === returnedUser._id) {
+              return returnedUser;
+            }
+            return user;
+          })
+          .sort((a, b) => {
+            const aCreatedAt =
+              a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            const bCreatedAt =
+              b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            return bCreatedAt.localeCompare(aCreatedAt);
+          })
       );
     }
 
