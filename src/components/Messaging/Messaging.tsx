@@ -65,6 +65,11 @@ function Messaging({
   useEffect(() => {
     return () => {
       setSkipAmount(0);
+      setMessage("");
+      setNewMessageAdded(false);
+      setPrevScrollHeight(0);
+      setShowLoadingScreen(false);
+      setIsMessageValid(true);
       setOpen(isSmallScreen);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -349,6 +354,7 @@ function Messaging({
               value={message}
               onInput={handleInputChange}
               multiline
+              maxRows={3}
               autoFocus
               required
               error={!isMessageValid}
