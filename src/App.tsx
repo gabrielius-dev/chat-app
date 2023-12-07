@@ -1,7 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import Header from "./components/Header/Header";
 import axios, { AxiosResponse } from "axios";
-import { User, UserResponse } from "./components/types/User";
+import { User as UserType, UserResponse } from "./components/types/User";
 import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./components/UtilityComponents/LoadingScreen";
 import Messaging from "./components/Messaging/Messaging";
@@ -12,6 +12,7 @@ import Error from "./components/Error/Error";
 import socket from "./socket/socket";
 import Index from "./components/Index/Index";
 import Sidebar from "./components/Sidebar/Sidebar";
+import User from "./components/User/User";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -21,6 +22,7 @@ function App() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const [open, setOpen] = useState(isSmallScreen);
   const [messagingUserExists, setMessagingUserExists] = useState(false);
+  const [userProfileExists, setUserProfileExists] = useState(false);
 
   const toggleSidebar = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);
@@ -43,7 +45,7 @@ function App() {
     return response.data.user;
   }, []);
 
-  const { data: user, isLoading } = useQuery<User, Error>({
+  const { data: user, isLoading } = useQuery<UserType, Error>({
     queryKey: ["userData"],
     queryFn: getUser,
     retry: false,
@@ -85,8 +87,10 @@ function App() {
             }}
           >
             {user &&
-              location.pathname.startsWith("/messages/") &&
-              messagingUserExists && (
+              ((location.pathname.startsWith("/messages/") &&
+                messagingUserExists) ||
+                (location.pathname.startsWith("/user/") &&
+                  userProfileExists)) && (
                 <Sidebar
                   toggleSidebar={toggleSidebar}
                   open={open}
@@ -99,17 +103,25 @@ function App() {
                 element={<Index isSocketConnected={isSocketConnected} />}
               />
               {user && (
-                <Route
-                  path="/messages/:selectedUserId"
-                  element={
-                    <Messaging
-                      isSocketConnected={isSocketConnected}
-                      open={open}
-                      setOpen={memoizedSetOpen}
-                      setMessagingUserExists={setMessagingUserExists}
-                    />
-                  }
-                />
+                <>
+                  <Route
+                    path="/messages/:selectedUserId"
+                    element={
+                      <Messaging
+                        isSocketConnected={isSocketConnected}
+                        open={open}
+                        setOpen={memoizedSetOpen}
+                        setMessagingUserExists={setMessagingUserExists}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/user/:id"
+                    element={
+                      <User setUserProfileExists={setUserProfileExists} />
+                    }
+                  />
+                </>
               )}
               <Route
                 path="/user-not-found"
