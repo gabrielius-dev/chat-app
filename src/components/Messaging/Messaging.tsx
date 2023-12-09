@@ -60,6 +60,7 @@ function Messaging({
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const navigate = useNavigate();
+  const [selectedUserName, setSelectedUserName] = useState<string>("");
 
   // Cleanup function when users from user list are selected (Messaging component doesn't unmount, just the selectedUserId changes)
   useEffect(() => {
@@ -141,7 +142,13 @@ function Messaging({
   });
 
   useEffect(() => {
-    if (!isLoadingSelectedUser && selectedUser && selectedUserExists) {
+    if (
+      !isLoadingSelectedUser &&
+      selectedUser &&
+      selectedUserExists &&
+      (selectedUserName === "" || selectedUserName !== selectedUser.username)
+    ) {
+      setSelectedUserName(selectedUser.username);
       const fetchMessages = async () => {
         const res: AxiosResponse<MessageInterface[]> = await axios.get(
           "http://localhost:8000/messages",
@@ -173,7 +180,13 @@ function Messaging({
         setInitialMessageFetching(false);
       };
     }
-  }, [isLoadingSelectedUser, selectedUser, selectedUserExists, user._id]);
+  }, [
+    isLoadingSelectedUser,
+    selectedUser,
+    selectedUserExists,
+    selectedUserName,
+    user._id,
+  ]);
 
   // For the first load scroll to the bottom after messages are loaded
   useEffect(() => {
