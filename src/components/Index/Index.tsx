@@ -1,5 +1,5 @@
 import { useMediaQuery, Box, Typography } from "@mui/material";
-import UserList from "../UtilityComponents/UserList";
+import ChatList from "../UtilityComponents/ChatList";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/User";
 import { useTheme } from "@mui/material/styles";
@@ -26,7 +26,7 @@ function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
   return (
     <Box sx={{ width: "100vw", overflow: "auto" }}>
       {!user && <Main />}
-      {user && !isMediumScreen && isSocketConnected && <UserList />}
+      {user && !isMediumScreen && isSocketConnected && <ChatList />}
       {user && isMediumScreen && isSocketConnected && (
         <Box
           sx={{

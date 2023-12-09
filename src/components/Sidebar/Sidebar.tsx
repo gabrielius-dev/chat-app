@@ -1,5 +1,5 @@
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import UserList from "../UtilityComponents/UserList";
+import ChatList from "../UtilityComponents/ChatList";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import { memo } from "react";
 
@@ -19,6 +19,7 @@ const Sidebar = memo(function Sidebar({
   return (
     <Box
       sx={{
+        flexShrink: 0,
         display: "flex",
         flexDirection: "column",
         width: open ? (!isSmallScreen ? "100vw" : "50vw") : "max-content",
@@ -38,7 +39,7 @@ const Sidebar = memo(function Sidebar({
       >
         {open && (
           <Typography variant="h5" sx={{ color: theme.midnightNavy }}>
-            User list
+            Chat list
           </Typography>
         )}
 
@@ -49,7 +50,7 @@ const Sidebar = memo(function Sidebar({
         </IconButton>
       </Box>
       <Box sx={{ overflow: "auto", display: open ? "block" : "none" }}>
-        <UserList />
+        <ChatList />
       </Box>
     </Box>
   );
