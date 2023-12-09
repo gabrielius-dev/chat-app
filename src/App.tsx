@@ -118,7 +118,10 @@ function App() {
                   <Route
                     path="/user/:id"
                     element={
-                      <User setUserProfileExists={setUserProfileExists} />
+                      <User
+                        setUserProfileExists={setUserProfileExists}
+                        setOpen={memoizedSetOpen}
+                      />
                     }
                   />
                 </>
