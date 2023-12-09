@@ -1,5 +1,3 @@
-import { MessageInterface } from "./Message";
-
 export interface UserResponse {
   success: boolean;
   message: string;
@@ -12,7 +10,6 @@ export interface User {
   lastOnline: string;
   online: boolean;
   img?: string;
-  latestMessage?: MessageInterface;
 }
 
 export interface DatabaseUserResponse {
