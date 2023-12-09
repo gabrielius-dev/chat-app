@@ -148,7 +148,6 @@ function Messaging({
       selectedUserExists &&
       (selectedUserName === "" || selectedUserName !== selectedUser.username)
     ) {
-      setSelectedUserName(selectedUser.username);
       const fetchMessages = async () => {
         const res: AxiosResponse<MessageInterface[]> = await axios.get(
           "http://localhost:8000/messages",
@@ -174,6 +173,7 @@ function Messaging({
         .catch((err) => console.error(err))
         .finally(() => {
           setInitialMessageFetching(false);
+          setSelectedUserName(selectedUser.username);
         });
 
       return () => {
