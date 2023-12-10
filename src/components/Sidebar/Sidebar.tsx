@@ -1,5 +1,5 @@
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import ChatList from "../UtilityComponents/ChatList";
+import ChatList from "../UtilityComponents/ChatList/ChatList";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
 import { memo } from "react";
 

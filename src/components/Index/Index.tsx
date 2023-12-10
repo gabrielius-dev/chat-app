@@ -1,5 +1,5 @@
 import { useMediaQuery, Box, Typography } from "@mui/material";
-import ChatList from "../UtilityComponents/ChatList";
+import ChatList from "../UtilityComponents/ChatList/ChatList";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/User";
 import { useTheme } from "@mui/material/styles";
