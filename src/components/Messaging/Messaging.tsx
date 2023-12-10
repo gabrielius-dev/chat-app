@@ -62,6 +62,29 @@ function Messaging({
   const navigate = useNavigate();
   const [selectedUserName, setSelectedUserName] = useState<string>("");
 
+  const {
+    data: selectedUser,
+    isLoading: isLoadingSelectedUser,
+    refetch,
+  } = useQuery<User | undefined, Error>({
+    queryKey: ["databaseUserData", selectedUserId],
+    queryFn: getDatabaseUser,
+    retry: false,
+    refetchInterval: isWindowFocused && selectedUserExists ? 1000 * 60 : false,
+  });
+
+  async function getDatabaseUser() {
+    const response: AxiosResponse<DatabaseUserResponse> = await axios.get(
+      `http://localhost:8000/user/${selectedUserId}`,
+      { withCredentials: true }
+    );
+
+    setSelectedUserExists(!!response.data.user);
+    setMessagingUserExists(!!response.data.user);
+
+    return response.data.user;
+  }
+
   // Cleanup function when users from user list are selected (Messaging component doesn't unmount, just the selectedUserId changes)
   useEffect(() => {
     return () => {
@@ -108,38 +131,19 @@ function Messaging({
 
   useEffect(() => {
     socket.emit("join-room", roomId);
+  }, [roomId]);
 
+  useEffect(() => {
     const receiveMessageHandler = (message: MessageInterface) => {
       addNewMessage(message);
+      void refetch();
     };
     socket.on("receive-message", receiveMessageHandler);
 
     return () => {
       socket.off("receive-message", receiveMessageHandler);
     };
-  }, [addNewMessage, roomId]);
-
-  async function getDatabaseUser() {
-    const response: AxiosResponse<DatabaseUserResponse> = await axios.get(
-      `http://localhost:8000/user/${selectedUserId}`,
-      { withCredentials: true }
-    );
-
-    setSelectedUserExists(!!response.data.user);
-    setMessagingUserExists(!!response.data.user);
-
-    return response.data.user;
-  }
-
-  const { data: selectedUser, isLoading: isLoadingSelectedUser } = useQuery<
-    User | undefined,
-    Error
-  >({
-    queryKey: ["databaseUserData", selectedUserId],
-    queryFn: getDatabaseUser,
-    retry: false,
-    refetchInterval: isWindowFocused && selectedUserExists ? 1000 * 60 : false,
-  });
+  }, [addNewMessage, refetch]);
 
   useEffect(() => {
     if (
@@ -327,11 +331,13 @@ function Messaging({
               </Avatar>
             </Link>
             <Box>
-              <Link to={`/user/${selectedUser._id}`}>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                  {selectedUser.username}
-                </Typography>
-              </Link>
+              <Box sx={{ maxWidth: "max-content" }}>
+                <Link to={`/user/${selectedUser._id}`}>
+                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                    {selectedUser.username}
+                  </Typography>
+                </Link>
+              </Box>
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <Typography
                   variant="subtitle1"
@@ -339,11 +345,14 @@ function Messaging({
                 >
                   {selectedUser.online ? "Online" : "Offline"}
                 </Typography>
-                <TimeAgo
-                  date={selectedUser.lastOnline}
-                  minPeriod={60}
-                  style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
-                />
+                {!selectedUser.online && (
+                  <TimeAgo
+                    date={selectedUser.lastOnline}
+                    minPeriod={10}
+                    style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
+                    key={selectedUser.lastOnline}
+                  />
+                )}
               </Box>
             </Box>
           </Box>
