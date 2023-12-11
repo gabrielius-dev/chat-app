@@ -4,6 +4,7 @@ interface ErrorObject {
   password?: string[];
   username?: string[];
   passwordConfirmation?: string[];
+  name?: string[];
 }
 
 export function transformError(errorArray: ErrorInterface[]): ErrorObject {
