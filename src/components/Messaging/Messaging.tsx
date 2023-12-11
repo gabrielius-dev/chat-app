@@ -25,6 +25,7 @@ import WindowFocusContext from "../../context/WindowsFocusContext";
 import Messages from "./Messages";
 import socket from "../../socket/socket";
 import LoadingScreen from "../UtilityComponents/LoadingScreen";
+import { formatDateString } from "../utils/formatDate";
 
 type setOpenType = (open: boolean) => void;
 type setMessagingUserExistsType = (open: boolean) => void;
@@ -351,6 +352,7 @@ function Messaging({
                     minPeriod={10}
                     style={{ color: "rgba(0, 0, 0, 0.6)", fontSize: "1rem" }}
                     key={selectedUser.lastOnline}
+                    title={formatDateString(selectedUser.lastOnline)}
                   />
                 )}
               </Box>
