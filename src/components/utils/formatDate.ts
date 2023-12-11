@@ -93,3 +93,19 @@ function formatCustomDate(dateString: string) {
 }
 
 export default formatCustomDate;
+
+export function formatDateString(inputDateString: string) {
+  const inputDate = new Date(inputDateString);
+
+  const formattedDate = `${inputDate.getFullYear()}-${(inputDate.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${inputDate
+    .getDate()
+    .toString()
+    .padStart(2, "0")} ${inputDate
+    .getHours()
+    .toString()
+    .padStart(2, "0")}:${inputDate.getMinutes().toString().padStart(2, "0")}`;
+
+  return formattedDate;
+}
