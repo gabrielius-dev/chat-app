@@ -23,6 +23,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AvatarEditor from "react-avatar-editor";
 import { MuiFileInput } from "mui-file-input";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
+import LoadingScreen from "../LoadingScreen";
 
 interface IFormInput {
   name: string;
@@ -42,6 +43,8 @@ const CreateGroupForm = memo(function CreateGroupForm({
   const imageEditor = useRef<AvatarEditor | null>(null);
   const [image, setImage] = useState<File | null>(null);
   const [imageErrorMessage, setImageErrorMessage] = useState("");
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const {
     setError,
@@ -71,10 +74,18 @@ const CreateGroupForm = memo(function CreateGroupForm({
       setShowGroupForm(false);
       return response.data;
     } catch (err) {
+      console.clear();
       const error = err as AxiosError;
       const result = error.response?.data as ErrorResponse;
       const errors: ErrorInterface[] = result.errors ?? [];
       const formattedErrors = transformError(errors);
+
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 0);
+
       if (formattedErrors.users) {
         setErrorMessage(formattedErrors.users[0]);
       }
@@ -87,6 +98,8 @@ const CreateGroupForm = memo(function CreateGroupForm({
       if (formattedErrors.image) {
         setImageErrorMessage(formattedErrors.image[0]);
       }
+    } finally {
+      setIsCreatingGroup(false);
     }
   };
 
@@ -97,6 +110,12 @@ const CreateGroupForm = memo(function CreateGroupForm({
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     let image1: File | null = null;
 
+    if (selectedUserList.length === 0) {
+      setErrorMessage("At least one user must be specified");
+      return;
+    }
+
+    setIsCreatingGroup(true);
     if (imageEditor.current) {
       const canvas: HTMLCanvasElement = imageEditor.current.getImage();
       const dataURL: string | null = canvas.toDataURL();
@@ -108,11 +127,6 @@ const CreateGroupForm = memo(function CreateGroupForm({
 
         image1 = new File([blob], originalFileName, { type: blob.type });
       }
-    }
-
-    if (selectedUserList.length === 0) {
-      setErrorMessage("At least one user must be specified");
-      return;
     }
 
     await createGroupChat(data, image1);
@@ -143,8 +157,14 @@ const CreateGroupForm = memo(function CreateGroupForm({
       <DialogTitle sx={{ borderBottom: `1px solid ${theme.lightGray}` }}>
         Create group chat
       </DialogTitle>
-      <DialogContent sx={{ p: 2, width: "100%" }}>
-        <form className="flex flex-col items-center pt-2">
+      <DialogContent
+        sx={{
+          p: 2,
+          width: "100%",
+          visibility: !isCreatingGroup ? "visible" : "hidden",
+        }}
+      >
+        <form className="flex flex-col items-center pt-2" ref={formRef}>
           <Controller
             name="name"
             control={control}
@@ -279,10 +299,12 @@ const CreateGroupForm = memo(function CreateGroupForm({
             borderRadius: 1,
             width: "100%",
           }}
+          disabled={isCreatingGroup}
         >
           Create
         </Button>
       </DialogActions>
+      {isCreatingGroup && <LoadingScreen />}
     </Dialog>
   );
 });
