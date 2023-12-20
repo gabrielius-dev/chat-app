@@ -10,6 +10,7 @@ export interface GroupChat {
   name: string;
   image?: string;
   users: User[];
+  createdAt: string;
   latestMessage: MessageInterface;
 }
 
