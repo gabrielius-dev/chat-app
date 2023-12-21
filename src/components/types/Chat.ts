@@ -13,16 +13,3 @@ export interface GroupChat {
   createdAt: string;
   latestMessage: MessageInterface;
 }
-
-interface GroupChatWithoutLatestMessage {
-  _id: string;
-  name: string;
-  users: User[];
-  image?: string;
-}
-
-export interface GroupChatResponse {
-  success: boolean;
-  message: string;
-  group: GroupChatWithoutLatestMessage;
-}
