@@ -13,8 +13,7 @@ import {
 } from "@mui/material";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import axios, { AxiosResponse, AxiosError } from "axios";
-import { GroupChatResponse } from "../../types/Chat";
+import axios, { AxiosError } from "axios";
 import { ErrorInterface, ErrorResponse } from "../../types/Error";
 import { transformError } from "../../utils/transformError";
 import UserList from "./UserList";
@@ -30,11 +29,14 @@ interface IFormInput {
 }
 
 type setShowGroupFormType = React.Dispatch<React.SetStateAction<boolean>>;
+type setNewGroupChatAddedType = React.Dispatch<React.SetStateAction<boolean>>;
 
 const CreateGroupForm = memo(function CreateGroupForm({
   setShowGroupForm,
+  setNewGroupChatAdded,
 }: {
   setShowGroupForm: setShowGroupFormType;
+  setNewGroupChatAdded: setNewGroupChatAddedType;
 }) {
   const theme = useTheme();
   const [selectedUserList, setSelectedUserList] = useState<string[]>([]);
@@ -66,13 +68,11 @@ const CreateGroupForm = memo(function CreateGroupForm({
         formData.append("image", image);
       }
 
-      const response: AxiosResponse<GroupChatResponse> = await axios.post(
-        "http://localhost:8000/group-chat",
-        formData,
-        { withCredentials: true }
-      );
+      await axios.post("http://localhost:8000/group-chat", formData, {
+        withCredentials: true,
+      });
+      setNewGroupChatAdded(true);
       setShowGroupForm(false);
-      return response.data;
     } catch (err) {
       console.clear();
       const error = err as AxiosError;
@@ -227,7 +227,10 @@ const CreateGroupForm = memo(function CreateGroupForm({
               title: "Remove",
               children: <CloseIcon fontSize="small" />,
             }}
-            sx={{ width: "100%" }}
+            sx={{
+              width: "100%",
+              display: !isCreatingGroup ? "inline-flex" : "none",
+            }}
           />
           <Typography
             sx={{
