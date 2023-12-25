@@ -13,6 +13,7 @@ import socket from "./socket/socket";
 import Index from "./components/Index/Index";
 import Sidebar from "./components/Sidebar/Sidebar";
 import User from "./components/User/User";
+import GroupChat from "./components/GroupChat/GroupChat";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -22,6 +23,7 @@ function App() {
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const [open, setOpen] = useState(isSmallScreen);
   const [messagingUserExists, setMessagingUserExists] = useState(false);
+  const [groupChatExists, setGroupChatExists] = useState(false);
   const [userProfileExists, setUserProfileExists] = useState(false);
 
   const toggleSidebar = useCallback(() => {
@@ -89,8 +91,9 @@ function App() {
             {user &&
               ((location.pathname.startsWith("/messages/") &&
                 messagingUserExists) ||
-                (location.pathname.startsWith("/user/") &&
-                  userProfileExists)) && (
+                (location.pathname.startsWith("/user/") && userProfileExists) ||
+                (location.pathname.startsWith("/group-chat/") &&
+                  groupChatExists)) && (
                 <Sidebar
                   toggleSidebar={toggleSidebar}
                   open={open}
@@ -116,6 +119,17 @@ function App() {
                     }
                   />
                   <Route
+                    path="/group-chat/:chatId"
+                    element={
+                      <GroupChat
+                        isSocketConnected={isSocketConnected}
+                        open={open}
+                        setOpen={memoizedSetOpen}
+                        setGroupChatExists={setGroupChatExists}
+                      />
+                    }
+                  />
+                  <Route
                     path="/user/:id"
                     element={
                       <User
@@ -129,6 +143,10 @@ function App() {
               <Route
                 path="/user-not-found"
                 element={<Error errorMessage="User not found" />}
+              />
+              <Route
+                path="/group-chat-not-found"
+                element={<Error errorMessage="Group chat not found" />}
               />
               <Route
                 path="*"
