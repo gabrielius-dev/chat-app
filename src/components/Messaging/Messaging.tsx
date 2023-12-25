@@ -86,20 +86,6 @@ function Messaging({
     return response.data.user;
   }
 
-  // Cleanup function when users from user list are selected (Messaging component doesn't unmount, just the selectedUserId changes)
-  useEffect(() => {
-    return () => {
-      setSkipAmount(0);
-      setMessage("");
-      setNewMessageAdded(false);
-      setPrevScrollHeight(0);
-      setShowLoadingScreen(false);
-      setIsMessageValid(true);
-      setOpen(isSmallScreen);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUserId]);
-
   useEffect(() => {
     setOpen(isSmallScreen);
   }, [isSmallScreen, setOpen]);
