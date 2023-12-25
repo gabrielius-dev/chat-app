@@ -124,7 +124,7 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
 }) {
   const theme = useTheme();
   return (
-    <Link to={`/messages/${chatListItem._id}`}>
+    <Link to={`/group-chat/${chatListItem._id}`}>
       <ListItem disablePadding>
         <ListItemButton sx={{ display: "flex", gap: 1 }}>
           <ListItemAvatar>
@@ -144,9 +144,9 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
             secondary={
               chatListItem.latestMessage
                 ? `${
-                    chatListItem.latestMessage?.sender === user._id
+                    chatListItem.latestMessage?.sender._id === user._id
                       ? "You: "
-                      : ""
+                      : `${chatListItem.latestMessage?.sender.username}: `
                   }${
                     chatListItem.latestMessage?.content?.length > 15
                       ? chatListItem.latestMessage.content.slice(0, 15) + "..."
@@ -185,6 +185,7 @@ const ChatList = memo(function ChatList() {
   const isWindowFocused = useContext(WindowFocusContext);
   const [showGroupForm, setShowGroupForm] = useState(false);
   const [newGroupChatAdded, setNewGroupChatAdded] = useState(false);
+  const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
 
   const chatListFetching = useCallback(async () => {
     const response: AxiosResponse<Chat[]> = await axios.get(
@@ -299,9 +300,47 @@ const ChatList = memo(function ChatList() {
     socket.on("get-new-chat", getNewChatHandler);
 
     return () => {
-      socket.off("get-chat-list", getNewChatHandler);
+      socket.off("get-new-chat", getNewChatHandler);
     };
   }, [user._id]);
+
+  useEffect(() => {
+    if (!groupChatList.length) return;
+
+    function handleJoinRoom(groupChatId: string) {
+      if (!joinedRooms.has(groupChatId)) {
+        socket.emit("join-room", groupChatId);
+        setJoinedRooms((prevRooms) => new Set(prevRooms).add(groupChatId));
+      }
+    }
+
+    groupChatList.forEach((groupChat) => handleJoinRoom(groupChat._id));
+
+    function getNewGroupChatHandler(returnedChat: GroupChat) {
+      setGroupChatList((prevChatList) =>
+        prevChatList
+          .map((chat) => {
+            if (chat._id === returnedChat._id) {
+              return returnedChat;
+            }
+            return chat;
+          })
+          .sort((a, b) => {
+            const aCreatedAt =
+              a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            const bCreatedAt =
+              b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            return bCreatedAt.localeCompare(aCreatedAt);
+          })
+      );
+    }
+
+    socket.on("get-new-group-chat", getNewGroupChatHandler);
+
+    return () => {
+      socket.off("get-new-group-chat", getNewGroupChatHandler);
+    };
+  }, [groupChatList, joinedRooms]);
 
   const loadMoreUsers = () =>
     setLoadOffset((currentLoadOffset) => currentLoadOffset + 1);
