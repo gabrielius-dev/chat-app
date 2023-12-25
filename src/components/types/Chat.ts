@@ -1,4 +1,4 @@
-import { MessageInterface } from "./Message";
+import { GroupMessageInterface, MessageInterface } from "./Message";
 import { User } from "./User";
 
 export interface Chat extends User {
@@ -11,7 +11,7 @@ export interface GroupChat {
   image?: string;
   users: User[];
   createdAt: string;
-  latestMessage: MessageInterface;
+  latestMessage: GroupMessageInterface;
 }
 
 export interface GroupChatWithoutLatestMessage {
