@@ -4,7 +4,6 @@ import axios, { AxiosResponse } from "axios";
 import { User as UserType, UserResponse } from "./components/types/User";
 import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./components/UtilityComponents/LoadingScreen";
-import Messaging from "./components/Messaging/Messaging";
 import { useContext, useEffect, useState, useCallback } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
 import { Box, useTheme, useMediaQuery } from "@mui/material";
@@ -13,7 +12,8 @@ import socket from "./socket/socket";
 import Index from "./components/Index/Index";
 import Sidebar from "./components/Sidebar/Sidebar";
 import User from "./components/User/User";
-import GroupChat from "./components/GroupChat/GroupChat";
+import GroupChatWrapper from "./components/GroupChat/GroupChatWrapper";
+import MessagingWrapper from "./components/Messaging/MessagingWrapper";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -110,7 +110,7 @@ function App() {
                   <Route
                     path="/messages/:selectedUserId"
                     element={
-                      <Messaging
+                      <MessagingWrapper
                         isSocketConnected={isSocketConnected}
                         open={open}
                         setOpen={memoizedSetOpen}
@@ -121,7 +121,7 @@ function App() {
                   <Route
                     path="/group-chat/:chatId"
                     element={
-                      <GroupChat
+                      <GroupChatWrapper
                         isSocketConnected={isSocketConnected}
                         open={open}
                         setOpen={memoizedSetOpen}
