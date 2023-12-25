@@ -6,7 +6,7 @@ import { useTheme } from "@mui/material/styles";
 import Main from "./Main";
 import Sidebar from "../Sidebar/Sidebar";
 import { useState, useEffect, useCallback } from "react";
-import NoChatsSelected from "../Messaging/NoChatsSelected";
+import NoChatsSelected from "../UtilityComponents/NoChatsSelected";
 
 function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
   const theme = useTheme();
