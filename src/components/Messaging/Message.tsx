@@ -3,24 +3,18 @@ import { MessageInterface } from "../types/Message";
 import { User } from "../types/User";
 import { Box, useTheme, Typography } from "@mui/material";
 import formatCustomDate from "../utils/formatDate";
-import { useParams } from "react-router-dom";
 
 function Message({ message }: { message: MessageInterface }) {
-  const { selectedUserId } = useParams();
   const queryClient = useQueryClient();
   const theme = useTheme();
   const user: User = queryClient.getQueryData(["userData"])!;
-  const selectedUser: User = queryClient.getQueryData([
-    "databaseUserData",
-    selectedUserId,
-  ])!;
 
   return (
     <Box
       sx={{
         maxWidth: "70%",
         ml: `${message.sender === user._id ? "auto" : "0"}`,
-        mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
+        mr: `${message.sender !== user._id ? "auto" : "0"}`,
         mb: 2,
       }}
     >
@@ -36,7 +30,7 @@ function Message({ message }: { message: MessageInterface }) {
             px: 3,
             boxShadow: 5,
             ml: `${message.sender === user._id ? "auto" : "0"}`,
-            mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
+            mr: `${message.sender !== user._id ? "auto" : "0"}`,
             maxWidth: "max-content",
           }}
         >
@@ -55,7 +49,7 @@ function Message({ message }: { message: MessageInterface }) {
           sx={{
             color: "rgba(0, 0, 0, 0.6)",
             ml: `${message.sender === user._id ? "auto" : "0"}`,
-            mr: `${message.sender === selectedUser._id ? "auto" : "0"}`,
+            mr: `${message.sender !== user._id ? "auto" : "0"}`,
           }}
         >
           {formatCustomDate(message.createdAt)}
