@@ -32,8 +32,8 @@ const Header = memo(function Header() {
           withCredentials: true,
         }
       );
-      queryClient.setQueryData(["userData"], null);
       navigate("/");
+      queryClient.setQueryData(["userData"], null);
     } catch (err) {
       setOpen(true);
     }
