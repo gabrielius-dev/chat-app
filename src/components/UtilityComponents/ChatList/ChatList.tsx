@@ -84,7 +84,7 @@ const MemoizedListItem = memo(function MemoizedListItem({
             </StyledBadge>
           </ListItemAvatar>
           <ListItemText
-            sx={{ wordBreak: "break-word" }}
+            sx={{ wordBreak: "break-word", maxWidth: "60%" }}
             primary={chatListItem.username}
             secondary={
               chatListItem.latestMessage
@@ -105,7 +105,7 @@ const MemoizedListItem = memo(function MemoizedListItem({
               key={chatListItem.latestMessage?.createdAt}
               date={chatListItem.latestMessage?.createdAt}
               minPeriod={10}
-              style={{ color: "rgba(0, 0, 0, 0.6)" }}
+              style={{ color: "rgba(0, 0, 0, 0.6)", marginLeft: "auto" }}
               title={formatDateString(chatListItem.latestMessage?.createdAt)}
             />
           )}
@@ -139,7 +139,7 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
             </Avatar>
           </ListItemAvatar>
           <ListItemText
-            sx={{ wordBreak: "break-word" }}
+            sx={{ wordBreak: "break-word", maxWidth: "60%" }}
             primary={chatListItem.name}
             secondary={
               chatListItem.latestMessage
@@ -160,7 +160,7 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
               key={chatListItem.latestMessage?.createdAt}
               date={chatListItem.latestMessage?.createdAt}
               minPeriod={10}
-              style={{ color: "rgba(0, 0, 0, 0.6)" }}
+              style={{ color: "rgba(0, 0, 0, 0.6)", marginLeft: "auto" }}
               title={formatDateString(chatListItem.latestMessage?.createdAt)}
             />
           )}
