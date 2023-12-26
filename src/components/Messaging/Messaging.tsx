@@ -280,10 +280,11 @@ function Messaging({
             sx={{
               display: "flex",
               alignItems: "center",
-
               p: 2,
               gap: 2,
               borderBottom: `1px solid ${theme.lightGray}`,
+              maxHeight: "40vh",
+              overflowY: "auto",
             }}
           >
             <Link to={`/user/${selectedUser._id}`}>
