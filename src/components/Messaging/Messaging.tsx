@@ -309,7 +309,7 @@ function Messaging({
                 sx={{
                   width: 50,
                   height: 50,
-                  bgcolor: theme.deepBlue,
+                  bgcolor: theme.midnightNavy,
                 }}
               >
                 {!selectedUser?.img

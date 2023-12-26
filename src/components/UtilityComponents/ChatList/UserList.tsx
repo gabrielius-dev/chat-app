@@ -97,7 +97,7 @@ const CustomLabel = ({
       sx={{
         width: 50,
         height: 50,
-        bgcolor: theme.deepBlue,
+        bgcolor: theme.midnightNavy,
       }}
     >
       {!img ? username[0].toUpperCase() : null}

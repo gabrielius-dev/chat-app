@@ -289,7 +289,7 @@ function GroupChat({
               sx={{
                 width: 50,
                 height: 50,
-                bgcolor: theme.deepBlue,
+                bgcolor: theme.midnightNavy,
               }}
             >
               {!groupChat?.image ? groupChat.name[0].toUpperCase() : null}

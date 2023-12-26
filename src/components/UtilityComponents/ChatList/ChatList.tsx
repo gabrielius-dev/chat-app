@@ -75,7 +75,7 @@ const MemoizedListItem = memo(function MemoizedListItem({
               <Avatar
                 alt="Profile picture"
                 src={chatListItem?.img}
-                sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
+                sx={{ width: 40, height: 40, bgcolor: theme.midnightNavy }}
               >
                 {!chatListItem?.img
                   ? chatListItem?.username[0].toUpperCase()
@@ -131,7 +131,7 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
             <Avatar
               alt="Profile picture"
               src={chatListItem?.image}
-              sx={{ width: 40, height: 40, bgcolor: theme.deepBlue }}
+              sx={{ width: 40, height: 40, bgcolor: theme.midnightNavy }}
             >
               {!chatListItem?.image
                 ? chatListItem?.name[0].toUpperCase()

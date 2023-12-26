@@ -114,7 +114,7 @@ const Header = memo(function Header() {
                 sx={{
                   width: 40,
                   height: 40,
-                  bgcolor: theme.deepBlue,
+                  bgcolor: theme.midnightNavy,
                   cursor: "pointer",
                 }}
                 {...bindTrigger(popupState)}
