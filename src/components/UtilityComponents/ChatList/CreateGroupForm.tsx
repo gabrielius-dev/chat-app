@@ -112,6 +112,12 @@ const CreateGroupForm = memo(function CreateGroupForm({
 
     if (selectedUserList.length === 0) {
       setErrorMessage("At least one user must be specified");
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 0);
+
       return;
     }
 
