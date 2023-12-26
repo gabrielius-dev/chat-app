@@ -296,7 +296,10 @@ function GroupChat({
             </Avatar>
             <Box>
               <Box sx={{ maxWidth: "max-content" }}>
-                <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: "bold", wordBreak: "break-all" }}
+                >
                   {groupChat.name}
                 </Typography>
               </Box>

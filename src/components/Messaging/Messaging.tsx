@@ -304,7 +304,10 @@ function Messaging({
             <Box>
               <Box sx={{ maxWidth: "max-content" }}>
                 <Link to={`/user/${selectedUser._id}`}>
-                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontWeight: "bold", wordBreak: "break-all" }}
+                  >
                     {selectedUser.username}
                   </Typography>
                 </Link>
