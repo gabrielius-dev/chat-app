@@ -97,7 +97,7 @@ const MemoizedListItem = memo(function MemoizedListItem({
                       ? chatListItem.latestMessage.content.slice(0, 15) + "..."
                       : chatListItem.latestMessage.content
                   }`
-                : `Say hi to ${chatListItem.username}!`
+                : "Start with a greeting!"
             }
           />
           {chatListItem.latestMessage?.createdAt && (
@@ -152,7 +152,7 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
                       ? chatListItem.latestMessage.content.slice(0, 15) + "..."
                       : chatListItem.latestMessage.content
                   }`
-                : `Say hi to ${chatListItem.name}!`
+                : "Say hello to the group!"
             }
           />
           {chatListItem.latestMessage?.createdAt && (
