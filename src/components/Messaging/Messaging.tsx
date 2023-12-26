@@ -57,11 +57,9 @@ function Messaging({
   const [messages, setMessages] = useState<MessageInterface[]>([]);
   const [newMessageAdded, setNewMessageAdded] = useState(false);
   const [isMessageValid, setIsMessageValid] = useState(true);
-  const [selectedUserExists, setSelectedUserExists] = useState(false);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const navigate = useNavigate();
-  const [selectedUserName, setSelectedUserName] = useState<string>("");
 
   const {
     data: selectedUser,
@@ -71,7 +69,7 @@ function Messaging({
     queryKey: ["databaseUserData", selectedUserId],
     queryFn: getDatabaseUser,
     retry: false,
-    refetchInterval: isWindowFocused && selectedUserExists ? 1000 * 60 : false,
+    refetchInterval: isWindowFocused ? 1000 * 60 : false,
   });
 
   async function getDatabaseUser() {
@@ -79,8 +77,6 @@ function Messaging({
       `http://localhost:8000/user/${selectedUserId}`,
       { withCredentials: true }
     );
-
-    setSelectedUserExists(!!response.data.user);
     setMessagingUserExists(!!response.data.user);
 
     return response.data.user;
@@ -133,12 +129,7 @@ function Messaging({
   }, [addNewMessage, refetch]);
 
   useEffect(() => {
-    if (
-      !isLoadingSelectedUser &&
-      selectedUser &&
-      selectedUserExists &&
-      (selectedUserName === "" || selectedUserName !== selectedUser.username)
-    ) {
+    if (!isLoadingSelectedUser && selectedUser) {
       const fetchMessages = async () => {
         const res: AxiosResponse<MessageInterface[]> = await axios.get(
           "http://localhost:8000/messages",
@@ -164,20 +155,13 @@ function Messaging({
         .catch((err) => console.error(err))
         .finally(() => {
           setInitialMessageFetching(false);
-          setSelectedUserName(selectedUser.username);
         });
 
       return () => {
         setInitialMessageFetching(false);
       };
     }
-  }, [
-    isLoadingSelectedUser,
-    selectedUser,
-    selectedUserExists,
-    selectedUserName,
-    user._id,
-  ]);
+  }, [isLoadingSelectedUser, selectedUser, user._id]);
 
   // For the first load scroll to the bottom after messages are loaded
   useEffect(() => {
