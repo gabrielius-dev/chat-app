@@ -16,7 +16,7 @@ const Messages = memo(function Messages({
   const memoizedMessages = useMemo(
     () =>
       messages.map((message) => (
-        <Message message={message} key={message._id} />
+        <Message message={message} key={message._id} messages={messages} />
       )),
     [messages]
   );
