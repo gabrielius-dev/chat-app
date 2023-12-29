@@ -18,6 +18,7 @@ import {
   useRef,
   useState,
   useLayoutEffect,
+  memo,
 } from "react";
 import { DatabaseUserResponse, User } from "../types/User";
 import TimeAgo from "react-timeago";
@@ -26,11 +27,12 @@ import Messages from "./Messages";
 import socket from "../../socket/socket";
 import LoadingScreen from "../UtilityComponents/LoadingScreen";
 import { formatDateString } from "../utils/formatDate";
+import { useChatContext } from "../../context/useChatContext";
 
 type setOpenType = (open: boolean) => void;
 type setMessagingUserExistsType = (open: boolean) => void;
 
-function Messaging({
+const Messaging = memo(function Messaging({
   isSocketConnected,
   open,
   setOpen,
@@ -46,6 +48,7 @@ function Messaging({
   const user: User = queryClient.getQueryData(["userData"])!;
   const { selectedUserId } = useParams();
   const isWindowFocused = useContext(WindowFocusContext);
+  const { setChatList } = useChatContext();
   const [message, setMessage] = useState("");
   const roomId = [user._id, selectedUserId].sort().join("-");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -58,6 +61,9 @@ function Messaging({
   const [newMessageAdded, setNewMessageAdded] = useState(false);
   const [isMessageValid, setIsMessageValid] = useState(true);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const [moreMessagesShowed, setMoreMessagesShowed] = useState(true);
+  const [previousSelectedUserUsername, setPreviousSelectedUserUsername] =
+    useState("");
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const navigate = useNavigate();
 
@@ -87,6 +93,21 @@ function Messaging({
   }, [isSmallScreen, setOpen]);
 
   useEffect(() => {
+    if (selectedUser)
+      setChatList((prevChatList) =>
+        prevChatList.map((chat) => {
+          if (chat._id === selectedUser._id) {
+            return {
+              ...selectedUser,
+              latestMessage: chat.latestMessage,
+            };
+          }
+          return chat;
+        })
+      );
+  }, [selectedUser, setChatList]);
+
+  useEffect(() => {
     setTimeout(() => {
       setShowLoadingScreen(true);
     }, 1000);
@@ -114,6 +135,9 @@ function Messaging({
 
   useEffect(() => {
     socket.emit("join-room", roomId);
+    return () => {
+      socket.emit("leave-room", roomId);
+    };
   }, [roomId]);
 
   useEffect(() => {
@@ -129,7 +153,11 @@ function Messaging({
   }, [addNewMessage, refetch]);
 
   useEffect(() => {
-    if (!isLoadingSelectedUser && selectedUser) {
+    if (
+      !isLoadingSelectedUser &&
+      selectedUser &&
+      selectedUser.username !== previousSelectedUserUsername
+    ) {
       const fetchMessages = async () => {
         const res: AxiosResponse<MessageInterface[]> = await axios.get(
           "http://localhost:8000/messages",
@@ -155,13 +183,19 @@ function Messaging({
         .catch((err) => console.error(err))
         .finally(() => {
           setInitialMessageFetching(false);
+          setPreviousSelectedUserUsername(selectedUser.username);
         });
 
       return () => {
         setInitialMessageFetching(false);
       };
     }
-  }, [isLoadingSelectedUser, selectedUser, user._id]);
+  }, [
+    isLoadingSelectedUser,
+    previousSelectedUserUsername,
+    selectedUser,
+    user._id,
+  ]);
 
   // For the first load scroll to the bottom after messages are loaded
   useEffect(() => {
@@ -191,7 +225,8 @@ function Messaging({
       messagesContainer &&
       messages.length &&
       selectedUser &&
-      moreMessagesExist
+      moreMessagesExist &&
+      !newMessageAdded
     ) {
       const hasVerticalScrollbar =
         messagesContainer.scrollHeight > messagesContainer.clientHeight;
@@ -200,13 +235,20 @@ function Messaging({
           .then((messages) => {
             setMessages((prevMessages) => [...messages, ...prevMessages]);
             setMoreMessagesExist(messages.length === 30);
+            setMoreMessagesShowed(false);
           })
           .catch((err) => {
             console.error(err);
           });
       }
     }
-  }, [fetchMoreMessages, messages.length, moreMessagesExist, selectedUser]);
+  }, [
+    fetchMoreMessages,
+    messages.length,
+    moreMessagesExist,
+    newMessageAdded,
+    selectedUser,
+  ]);
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
@@ -217,6 +259,7 @@ function Messaging({
           .then((messages) => {
             setMessages((prevMessages) => [...messages, ...prevMessages]);
             setMoreMessagesExist(messages.length === 30);
+            setMoreMessagesShowed(false);
           })
           .catch((err) => {
             console.error(err);
@@ -235,12 +278,14 @@ function Messaging({
       messagesContainer &&
       prevScrollHeight &&
       messages.length > 30 &&
-      !newMessageAdded
+      !newMessageAdded &&
+      !moreMessagesShowed
     ) {
       messagesContainer.scrollTop =
         messagesContainer.scrollHeight - prevScrollHeight;
+      setMoreMessagesShowed(true);
     }
-  }, [messages.length, newMessageAdded, prevScrollHeight]);
+  }, [messages.length, moreMessagesShowed, newMessageAdded, prevScrollHeight]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -337,6 +382,7 @@ function Messaging({
             messagesEndRef={messagesEndRef}
             handleScroll={handleScroll}
             messagesContainerRef={messagesContainerRef}
+            setMessages={setMessages}
           />
           <Box
             sx={{
@@ -415,6 +461,6 @@ function Messaging({
         showLoadingScreen && <LoadingScreen />}
     </>
   );
-}
+});
 
 export default Messaging;
