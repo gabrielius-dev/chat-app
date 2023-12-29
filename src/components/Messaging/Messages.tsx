@@ -1,24 +1,33 @@
-import { useMemo } from "react";
+import { Dispatch, SetStateAction, useMemo, memo } from "react";
 import { MessageInterface } from "../types/Message";
 import Message from "./Message";
 
-function Messages({
+type setMessagesType = Dispatch<SetStateAction<MessageInterface[]>>;
+
+const Messages = memo(function Messages({
   messages,
   messagesEndRef,
   messagesContainerRef,
   handleScroll,
+  setMessages,
 }: {
   messages: MessageInterface[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
   messagesContainerRef: React.RefObject<HTMLDivElement>;
   handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+  setMessages: setMessagesType;
 }) {
   const memoizedMessages = useMemo(
     () =>
       messages.map((message) => (
-        <Message message={message} key={message._id} />
+        <Message
+          message={message}
+          key={message._id}
+          setMessages={setMessages}
+          messages={messages}
+        />
       )),
-    [messages]
+    [messages, setMessages]
   );
 
   return (
@@ -37,6 +46,6 @@ function Messages({
       <div ref={messagesEndRef} />
     </div>
   );
-}
+});
 
 export default Messages;
