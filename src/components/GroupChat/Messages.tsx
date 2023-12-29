@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { GroupMessageInterface } from "../types/Message";
 import Message from "./Message";
 
-function Messages({
+const Messages = memo(function Messages({
   messages,
   messagesEndRef,
   messagesContainerRef,
@@ -16,7 +16,7 @@ function Messages({
   const memoizedMessages = useMemo(
     () =>
       messages.map((message) => (
-        <Message message={message} key={message._id} />
+        <Message message={message} key={message._id} messages={messages} />
       )),
     [messages]
   );
@@ -37,6 +37,6 @@ function Messages({
       <div ref={messagesEndRef} />
     </div>
   );
-}
+});
 
 export default Messages;

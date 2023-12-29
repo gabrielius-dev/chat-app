@@ -60,6 +60,7 @@ const GroupChat = memo(function GroupChat({
   const [isMessageValid, setIsMessageValid] = useState(true);
   const [isLoadingGroupChat, setIsLoadingGroupChat] = useState(true);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
+  const [moreMessagesShowed, setMoreMessagesShowed] = useState(true);
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const navigate = useNavigate();
   const [groupChat, setGroupChat] =
@@ -120,6 +121,23 @@ const GroupChat = memo(function GroupChat({
       socket.emit("leave-room", roomId);
     };
   }, [roomId]);
+
+  useEffect(() => {
+    if (!groupChat && messages.length === 0) return;
+
+    function messageDeletedHandler(message: GroupMessageInterface) {
+      setMessages((previousMessages) =>
+        previousMessages.filter(
+          (prevMessage) => prevMessage._id !== message._id
+        )
+      );
+    }
+
+    socket.on("group-message-deleted", messageDeletedHandler);
+    return () => {
+      socket.off("group-message-deleted", messageDeletedHandler);
+    };
+  }, [messages, groupChat]);
 
   useEffect(() => {
     const receiveMessageHandler = (message: GroupMessageInterface) => {
@@ -193,7 +211,8 @@ const GroupChat = memo(function GroupChat({
       messagesContainer &&
       messages.length &&
       groupChat &&
-      moreMessagesExist
+      moreMessagesExist &&
+      !newMessageAdded
     ) {
       const hasVerticalScrollbar =
         messagesContainer.scrollHeight > messagesContainer.clientHeight;
@@ -202,13 +221,20 @@ const GroupChat = memo(function GroupChat({
           .then((messages) => {
             setMessages((prevMessages) => [...messages, ...prevMessages]);
             setMoreMessagesExist(messages.length === 30);
+            setMoreMessagesShowed(false);
           })
           .catch((err) => {
             console.error(err);
           });
       }
     }
-  }, [fetchMoreMessages, messages.length, moreMessagesExist, groupChat]);
+  }, [
+    fetchMoreMessages,
+    messages.length,
+    moreMessagesExist,
+    groupChat,
+    newMessageAdded,
+  ]);
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
@@ -219,6 +245,7 @@ const GroupChat = memo(function GroupChat({
           .then((messages) => {
             setMessages((prevMessages) => [...messages, ...prevMessages]);
             setMoreMessagesExist(messages.length === 30);
+            setMoreMessagesShowed(false);
           })
           .catch((err) => {
             console.error(err);
@@ -237,12 +264,14 @@ const GroupChat = memo(function GroupChat({
       messagesContainer &&
       prevScrollHeight &&
       messages.length > 30 &&
-      !newMessageAdded
+      !newMessageAdded &&
+      !moreMessagesShowed
     ) {
       messagesContainer.scrollTop =
         messagesContainer.scrollHeight - prevScrollHeight;
+      setMoreMessagesShowed(true);
     }
-  }, [messages.length, newMessageAdded, prevScrollHeight]);
+  }, [messages.length, moreMessagesShowed, newMessageAdded, prevScrollHeight]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

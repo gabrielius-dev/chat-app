@@ -15,8 +15,15 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
+import socket from "../../socket/socket";
 
-function Message({ message }: { message: GroupMessageInterface }) {
+function Message({
+  message,
+  messages,
+}: {
+  message: GroupMessageInterface;
+  messages: GroupMessageInterface[];
+}) {
   const queryClient = useQueryClient();
   const theme = useTheme();
   const user: User = queryClient.getQueryData(["userData"])!;
@@ -29,6 +36,17 @@ function Message({ message }: { message: GroupMessageInterface }) {
         `http://localhost:8000/message/${message._id}`,
         { withCredentials: true }
       );
+      if (res.status === 204) {
+        let latestMessage;
+
+        if (messages.indexOf(message) === messages.length - 1) {
+          latestMessage = messages[messages.length - 2];
+        } else {
+          latestMessage = messages[messages.length - 1];
+        }
+
+        socket.emit("delete-group-message", message, latestMessage);
+      }
       if (res.status !== 204) {
         setOpen(true);
       }
