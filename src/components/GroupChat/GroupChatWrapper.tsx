@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import GroupChat from "./GroupChat";
 
-type setOpenType = (open: boolean) => void;
-type setGroupChatExistsType = (open: boolean) => void;
+type setOpenType = Dispatch<SetStateAction<boolean>>;
+type setGroupChatExistsType = Dispatch<SetStateAction<boolean>>;
 
 function GroupChatWrapper({
   isSocketConnected,
