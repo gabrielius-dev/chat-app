@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState, memo } from "react";
 import { useParams } from "react-router-dom";
 import Messaging from "./Messaging";
 
-type setOpenType = (open: boolean) => void;
-type setMessagingUserExistsType = (open: boolean) => void;
+type setOpenType = Dispatch<SetStateAction<boolean>>;
+type setMessagingUserExistsType = Dispatch<SetStateAction<boolean>>;
 
-function MessagingWrapper({
+const MessagingWrapper = memo(function MessagingWrapper({
   isSocketConnected,
   open,
   setOpen,
@@ -32,6 +32,6 @@ function MessagingWrapper({
       setMessagingUserExists={setMessagingUserExists}
     />
   );
-}
+});
 
 export default MessagingWrapper;
