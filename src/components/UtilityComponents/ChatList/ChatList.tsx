@@ -25,6 +25,8 @@ import WindowFocusContext from "../../../context/WindowsFocusContext";
 import CreateGroupForm from "./CreateGroupForm";
 import { formatDateString } from "../../utils/formatDate";
 import { useChatContext } from "../../../context/useChatContext";
+import { isEqual } from "lodash";
+import { MessageInterface } from "../../types/Message";
 
 const MemoizedListItem = memo(function MemoizedListItem({
   chatListItem,
@@ -90,7 +92,7 @@ const MemoizedListItem = memo(function MemoizedListItem({
             secondary={
               chatListItem.latestMessage
                 ? `${
-                    chatListItem.latestMessage?.sender === user._id
+                    chatListItem.latestMessage?.sender._id === user._id
                       ? "You: "
                       : ""
                   }${
@@ -277,8 +279,50 @@ const ChatList = memo(function ChatList() {
   }, [chatListFetching, groupChatListFetching, isWindowFocused, setChatList, setGroupChatList]);
 
   useEffect(() => {
-    socket.emit("join-room", user._id);
+    function handleDeletedMessage(
+      message: MessageInterface,
+      latestMessage: MessageInterface
+    ) {
+      setChatList((prevChatList: Chat[]) =>
+        prevChatList
+          .map((chat: Chat) => {
+            if (
+              chat._id === message.sender._id &&
+              isEqual(chat.latestMessage, message)
+            ) {
+              return {
+                ...message.sender,
+                latestMessage,
+              };
+            } else if (
+              chat._id === message.receiver._id &&
+              isEqual(chat.latestMessage, message)
+            ) {
+              return {
+                ...message.receiver,
+                latestMessage,
+              };
+            }
+            return chat;
+          })
+          .sort((a, b) => {
+            const aCreatedAt =
+              a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            const bCreatedAt =
+              b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            return bCreatedAt.localeCompare(aCreatedAt);
+          })
+      );
+    }
 
+    socket.on("message-deleted-chat-list", handleDeletedMessage);
+  }, [setChatList]);
+
+  useEffect(() => {
+    socket.emit("join-room", user._id);
+  }, [user._id]);
+
+  useEffect(() => {
     function getNewChatHandler(returnedChat: Chat) {
       setChatList((prevChatList) =>
         prevChatList
@@ -303,7 +347,7 @@ const ChatList = memo(function ChatList() {
     return () => {
       socket.off("get-new-chat", getNewChatHandler);
     };
-  }, [setChatList, user._id]);
+  }, [setChatList]);
 
   useEffect(() => {
     if (!groupChatList.length) return;
