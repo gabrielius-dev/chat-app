@@ -25,8 +25,7 @@ import WindowFocusContext from "../../../context/WindowsFocusContext";
 import CreateGroupForm from "./CreateGroupForm";
 import { formatDateString } from "../../utils/formatDate";
 import { useChatContext } from "../../../context/useChatContext";
-import { isEqual } from "lodash";
-import { MessageInterface } from "../../types/Message";
+import { GroupMessageInterface, MessageInterface } from "../../types/Message";
 
 const MemoizedListItem = memo(function MemoizedListItem({
   chatListItem,
@@ -200,6 +199,7 @@ const ChatList = memo(function ChatList() {
       }
     );
     if (response.data.length < 10 * loadOffset) setMoreChatsExist(false);
+
     return response.data;
   }, [loadOffset]);
 
@@ -214,6 +214,7 @@ const ChatList = memo(function ChatList() {
     );
     if (response.data.length < 5 * groupLoadOffset)
       setMoreGroupChatsExist(false);
+
     return response.data;
   }, [groupLoadOffset]);
 
@@ -288,7 +289,7 @@ const ChatList = memo(function ChatList() {
           .map((chat: Chat) => {
             if (
               chat._id === message.sender._id &&
-              isEqual(chat.latestMessage, message)
+              chat.latestMessage._id === message._id
             ) {
               return {
                 ...message.sender,
@@ -296,7 +297,7 @@ const ChatList = memo(function ChatList() {
               };
             } else if (
               chat._id === message.receiver._id &&
-              isEqual(chat.latestMessage, message)
+              chat.latestMessage._id === message._id
             ) {
               return {
                 ...message.receiver,
@@ -316,7 +317,47 @@ const ChatList = memo(function ChatList() {
     }
 
     socket.on("message-deleted-chat-list", handleDeletedMessage);
+
+    return () => {
+      socket.off("message-deleted-chat-list", handleDeletedMessage);
+    };
   }, [setChatList]);
+
+  useEffect(() => {
+    function handleDeletedMessage(
+      message: GroupMessageInterface,
+      latestMessage: GroupMessageInterface
+    ) {
+      setGroupChatList((prevChatList: GroupChat[]) =>
+        prevChatList
+          .map((chat: GroupChat) => {
+            if (
+              chat._id === message.receiver &&
+              chat.latestMessage._id === message._id
+            ) {
+              return {
+                ...chat,
+                latestMessage,
+              };
+            }
+            return chat;
+          })
+          .sort((a, b) => {
+            const aCreatedAt =
+              a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            const bCreatedAt =
+              b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            return bCreatedAt.localeCompare(aCreatedAt);
+          })
+      );
+    }
+
+    socket.on("group-message-deleted-group-chat-list", handleDeletedMessage);
+
+    return () => {
+      socket.off("group-message-deleted-group-chat-list", handleDeletedMessage);
+    };
+  }, [setGroupChatList]);
 
   useEffect(() => {
     socket.emit("join-room", user._id);
@@ -354,7 +395,8 @@ const ChatList = memo(function ChatList() {
 
     function handleJoinRoom(groupChatId: string) {
       if (!joinedRooms.has(groupChatId)) {
-        socket.emit("join-room", groupChatId);
+        console.log(`group-chat-list-${groupChatId}`);
+        socket.emit("join-room", `group-chat-list-${groupChatId}`);
         setJoinedRooms((prevRooms) => new Set(prevRooms).add(groupChatId));
       }
     }
