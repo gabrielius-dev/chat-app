@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import { GroupMessageInterface, MessageInterface } from "./Message";
 import { User } from "./User";
 
@@ -26,4 +27,11 @@ export interface GroupChatResponse {
   success: string;
   groupChat: GroupChatWithoutLatestMessage;
   message: string;
+}
+
+export interface ChatContextProps {
+  chatList: Chat[];
+  setChatList: Dispatch<SetStateAction<Chat[]>>;
+  groupChatList: GroupChat[];
+  setGroupChatList: Dispatch<SetStateAction<GroupChat[]>>;
 }
