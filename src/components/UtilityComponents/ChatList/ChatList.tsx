@@ -24,6 +24,7 @@ import { Chat, GroupChat } from "../../types/Chat";
 import WindowFocusContext from "../../../context/WindowsFocusContext";
 import CreateGroupForm from "./CreateGroupForm";
 import { formatDateString } from "../../utils/formatDate";
+import { useChatContext } from "../../../context/useChatContext";
 
 const MemoizedListItem = memo(function MemoizedListItem({
   chatListItem,
@@ -172,8 +173,8 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
 
 const ChatList = memo(function ChatList() {
   const theme = useTheme();
-  const [chatList, setChatList] = useState<Chat[] | []>([]);
-  const [groupChatList, setGroupChatList] = useState<GroupChat[] | []>([]);
+  const { chatList, setChatList, groupChatList, setGroupChatList } =
+    useChatContext();
   const [loadOffset, setLoadOffset] = useState(1);
   const [groupLoadOffset, setGroupLoadOffset] = useState(1);
   const [moreChatsExist, setMoreChatsExist] = useState(true);
@@ -223,7 +224,7 @@ const ChatList = memo(function ChatList() {
         setIsLoadingGroupChats(false);
       })
       .catch((err) => console.error(err));
-  }, [groupChatListFetching]);
+  }, [groupChatListFetching, setGroupChatList]);
 
   useEffect(() => {
     if (!newGroupChatAdded) return;
@@ -236,7 +237,7 @@ const ChatList = memo(function ChatList() {
       })
       .catch((err) => console.error(err))
       .finally(() => setNewGroupChatAdded(false));
-  }, [newGroupChatAdded, groupChatListFetching]);
+  }, [newGroupChatAdded, groupChatListFetching, setGroupChatList]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -247,7 +248,7 @@ const ChatList = memo(function ChatList() {
         setIsLoading(false);
       })
       .catch((err) => console.error(err));
-  }, [chatListFetching]);
+  }, [chatListFetching, setChatList]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -273,7 +274,7 @@ const ChatList = memo(function ChatList() {
     return () => {
       clearInterval(intervalId);
     };
-  }, [chatListFetching, groupChatListFetching, isWindowFocused]);
+  }, [chatListFetching, groupChatListFetching, isWindowFocused, setChatList, setGroupChatList]);
 
   useEffect(() => {
     socket.emit("join-room", user._id);
@@ -302,7 +303,7 @@ const ChatList = memo(function ChatList() {
     return () => {
       socket.off("get-new-chat", getNewChatHandler);
     };
-  }, [user._id]);
+  }, [setChatList, user._id]);
 
   useEffect(() => {
     if (!groupChatList.length) return;
@@ -340,7 +341,7 @@ const ChatList = memo(function ChatList() {
     return () => {
       socket.off("get-new-group-chat", getNewGroupChatHandler);
     };
-  }, [groupChatList, joinedRooms]);
+  }, [groupChatList, joinedRooms, setGroupChatList]);
 
   const loadMoreUsers = () =>
     setLoadOffset((currentLoadOffset) => currentLoadOffset + 1);
