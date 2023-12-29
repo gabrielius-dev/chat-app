@@ -28,6 +28,8 @@ import socket from "../../socket/socket";
 import LoadingScreen from "../UtilityComponents/LoadingScreen";
 import { formatDateString } from "../utils/formatDate";
 import { useChatContext } from "../../context/useChatContext";
+import { Chat } from "../types/Chat";
+import { isEqual } from "lodash";
 
 type setOpenType = (open: boolean) => void;
 type setMessagingUserExistsType = (open: boolean) => void;
@@ -139,6 +141,46 @@ const Messaging = memo(function Messaging({
       socket.emit("leave-room", roomId);
     };
   }, [roomId]);
+
+  useEffect(() => {
+    if (!selectedUser && messages.length === 0) return;
+
+    function messageDeletedHandler(message: MessageInterface) {
+      setChatList((prevChatList: Chat[]) =>
+        prevChatList
+          .map((chat: Chat) => {
+            if (
+              chat._id === selectedUser?._id &&
+              isEqual(chat.latestMessage, message)
+            ) {
+              return {
+                ...selectedUser,
+                latestMessage: messages[messages.length - 2],
+              };
+            }
+            return chat;
+          })
+          .sort((a, b) => {
+            const aCreatedAt =
+              a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            const bCreatedAt =
+              b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+            return bCreatedAt.localeCompare(aCreatedAt);
+          })
+      );
+
+      setMessages((previousMessages) =>
+        previousMessages.filter(
+          (prevMessage) => prevMessage._id !== message._id
+        )
+      );
+    }
+
+    socket.on("message-deleted", messageDeletedHandler);
+    return () => {
+      socket.off("message-deleted", messageDeletedHandler);
+    };
+  }, [messages, selectedUser, setChatList]);
 
   useEffect(() => {
     const receiveMessageHandler = (message: MessageInterface) => {
@@ -382,7 +424,6 @@ const Messaging = memo(function Messaging({
             messagesEndRef={messagesEndRef}
             handleScroll={handleScroll}
             messagesContainerRef={messagesContainerRef}
-            setMessages={setMessages}
           />
           <Box
             sx={{

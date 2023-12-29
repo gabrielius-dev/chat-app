@@ -1,33 +1,24 @@
-import { Dispatch, SetStateAction, useMemo, memo } from "react";
+import { useMemo, memo } from "react";
 import { MessageInterface } from "../types/Message";
 import Message from "./Message";
-
-type setMessagesType = Dispatch<SetStateAction<MessageInterface[]>>;
 
 const Messages = memo(function Messages({
   messages,
   messagesEndRef,
   messagesContainerRef,
   handleScroll,
-  setMessages,
 }: {
   messages: MessageInterface[];
   messagesEndRef: React.RefObject<HTMLDivElement>;
   messagesContainerRef: React.RefObject<HTMLDivElement>;
   handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
-  setMessages: setMessagesType;
 }) {
   const memoizedMessages = useMemo(
     () =>
       messages.map((message) => (
-        <Message
-          message={message}
-          key={message._id}
-          setMessages={setMessages}
-          messages={messages}
-        />
+        <Message message={message} key={message._id} />
       )),
-    [messages, setMessages]
+    [messages]
   );
 
   return (
