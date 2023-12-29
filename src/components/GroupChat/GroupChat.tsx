@@ -16,6 +16,9 @@ import {
   useRef,
   useState,
   useLayoutEffect,
+  SetStateAction,
+  Dispatch,
+  memo,
 } from "react";
 import { User } from "../types/User";
 import socket from "../../socket/socket";
@@ -26,10 +29,10 @@ import {
 } from "../types/Chat";
 import Messages from "./Messages";
 
-type setOpenType = (open: boolean) => void;
-type setGroupChatExistsType = (open: boolean) => void;
+type setOpenType = Dispatch<SetStateAction<boolean>>;
+type setGroupChatExistsType = Dispatch<SetStateAction<boolean>>;
 
-function GroupChat({
+const GroupChat = memo(function GroupChat({
   isSocketConnected,
   open,
   setOpen,
@@ -113,6 +116,9 @@ function GroupChat({
 
   useEffect(() => {
     socket.emit("join-room", roomId);
+    return () => {
+      socket.emit("leave-room", roomId);
+    };
   }, [roomId]);
 
   useEffect(() => {
@@ -397,6 +403,6 @@ function GroupChat({
       )}
     </>
   );
-}
+});
 
 export default GroupChat;
