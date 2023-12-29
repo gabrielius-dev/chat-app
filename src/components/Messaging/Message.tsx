@@ -15,7 +15,13 @@ import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import axios, { AxiosResponse } from "axios";
 import socket from "../../socket/socket";
 
-function Message({ message }: { message: MessageInterface }) {
+function Message({
+  message,
+  messages,
+}: {
+  message: MessageInterface;
+  messages: MessageInterface[];
+}) {
   const queryClient = useQueryClient();
   const theme = useTheme();
   const user: User = queryClient.getQueryData(["userData"])!;
@@ -29,7 +35,15 @@ function Message({ message }: { message: MessageInterface }) {
         { withCredentials: true }
       );
       if (res.status === 204) {
-        socket.emit("delete-message", message);
+        let latestMessage;
+
+        if (messages.indexOf(message) === messages.length - 1) {
+          latestMessage = messages[messages.length - 2];
+        } else {
+          latestMessage = messages[messages.length - 1];
+        }
+
+        socket.emit("delete-message", message, latestMessage);
       }
 
       if (res.status !== 204) setOpen(true);
@@ -54,8 +68,8 @@ function Message({ message }: { message: MessageInterface }) {
         onMouseLeave={() => setIsHovered(false)}
         sx={{
           maxWidth: "70%",
-          ml: `${message.sender === user._id ? "auto" : "0"}`,
-          mr: `${message.sender !== user._id ? "auto" : "0"}`,
+          ml: `${message.sender._id === user._id ? "auto" : "0"}`,
+          mr: `${message.sender._id !== user._id ? "auto" : "0"}`,
           mb: 2,
         }}
       >
@@ -64,11 +78,11 @@ function Message({ message }: { message: MessageInterface }) {
             sx={{
               display: "flex",
               alignItems: "center",
-              ml: `${message.sender === user._id ? "auto" : "0"}`,
-              mr: `${message.sender !== user._id ? "auto" : "0"}`,
+              ml: `${message.sender._id === user._id ? "auto" : "0"}`,
+              mr: `${message.sender._id !== user._id ? "auto" : "0"}`,
             }}
           >
-            {message.sender === user._id && (
+            {message.sender._id === user._id && (
               <IconButton
                 sx={{
                   visibility: isHovered ? "visible" : "hidden",
@@ -85,9 +99,9 @@ function Message({ message }: { message: MessageInterface }) {
               sx={{
                 borderRadius: 7,
                 backgroundColor: `${
-                  message.sender === user._id ? theme.deepBlue : "white"
+                  message.sender._id === user._id ? theme.deepBlue : "white"
                 }`,
-                color: `${message.sender === user._id ? "white" : "black"}`,
+                color: `${message.sender._id === user._id ? "white" : "black"}`,
                 py: 2,
                 px: 3,
                 boxShadow: 5,
@@ -109,8 +123,8 @@ function Message({ message }: { message: MessageInterface }) {
           <Typography
             sx={{
               color: "rgba(0, 0, 0, 0.6)",
-              ml: `${message.sender === user._id ? "auto" : "0"}`,
-              mr: `${message.sender !== user._id ? "auto" : "0"}`,
+              ml: `${message.sender._id === user._id ? "auto" : "0"}`,
+              mr: `${message.sender._id !== user._id ? "auto" : "0"}`,
             }}
           >
             {formatCustomDate(message.createdAt)}
