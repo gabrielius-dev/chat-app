@@ -7,6 +7,9 @@ import {
   useTheme,
   InputBase,
   useMediaQuery,
+  IconButton,
+  MenuItem,
+  Menu,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,6 +22,7 @@ import {
   SetStateAction,
   Dispatch,
   memo,
+  Fragment,
 } from "react";
 import { User } from "../types/User";
 import socket from "../../socket/socket";
@@ -28,6 +32,10 @@ import {
   GroupChatWithoutLatestMessage,
 } from "../types/Chat";
 import Messages from "./Messages";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
+import EditGroupForm from "./EditGroupForm";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -62,6 +70,7 @@ const GroupChat = memo(function GroupChat({
   const navigate = useNavigate();
   const [groupChat, setGroupChat] =
     useState<GroupChatWithoutLatestMessage | null>();
+  const [showEditGroupChat, setShowEditGroupChat] = useState(false);
 
   useEffect(() => {
     setIsLoadingGroupChat(true);
@@ -116,6 +125,21 @@ const GroupChat = memo(function GroupChat({
       socket.emit("leave-room", roomId);
     };
   }, [roomId]);
+
+  useEffect(() => {
+    function handleEditGroupChat(groupChat: GroupChatWithoutLatestMessage) {
+      if (groupChat.users.includes(user._id)) setGroupChat(groupChat);
+      else {
+        navigate("/");
+      }
+    }
+
+    socket.on("receive-edit-group-chat", handleEditGroupChat);
+
+    return () => {
+      socket.off("receive-edit-group-chat", handleEditGroupChat);
+    };
+  }, [navigate, user._id]);
 
   useEffect(() => {
     if (!groupChat && messages.length === 0) return;
@@ -291,6 +315,15 @@ const GroupChat = memo(function GroupChat({
     }
   }, [groupChat, isLoadingGroupChat, navigate]);
 
+  function handleEdit(popupState: PopupStateType) {
+    setShowEditGroupChat(true);
+    popupState.close();
+  }
+
+  function deleteGroupChat(popupState: PopupStateType) {
+    popupState.close();
+  }
+
   return (
     <>
       {!isInitialMessageFetching && isSocketConnected && groupChat && (
@@ -303,6 +336,12 @@ const GroupChat = memo(function GroupChat({
             overflow: "auto",
           }}
         >
+          {showEditGroupChat && (
+            <EditGroupForm
+              setShowGroupForm={setShowEditGroupChat}
+              groupChat={groupChat}
+            />
+          )}
           <Box
             sx={{
               display: "flex",
@@ -316,7 +355,7 @@ const GroupChat = memo(function GroupChat({
           >
             <Avatar
               alt="Profile picture"
-              src={groupChat?.image}
+              src={groupChat.image ?? undefined}
               sx={{
                 width: 50,
                 height: 50,
@@ -343,6 +382,38 @@ const GroupChat = memo(function GroupChat({
                 </Typography>
               </Box>
             </Box>
+            <div style={{ marginLeft: "auto" }}>
+              <PopupState
+                variant="popover"
+                popupId="popup-menu"
+                disableAutoFocus={true}
+              >
+                {(popupState) => (
+                  <Fragment>
+                    <IconButton
+                      aria-label="edit"
+                      {...bindTrigger(popupState)}
+                      data-testid="popup-open"
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+
+                    <Menu {...bindMenu(popupState)}>
+                      <MenuItem onClick={() => void handleEdit(popupState)}>
+                        Edit
+                      </MenuItem>
+                      {groupChat.creator === user._id && (
+                        <MenuItem
+                          onClick={() => void deleteGroupChat(popupState)}
+                        >
+                          Delete
+                        </MenuItem>
+                      )}
+                    </Menu>
+                  </Fragment>
+                )}
+              </PopupState>
+            </div>
           </Box>
           <Messages
             messages={messages}
