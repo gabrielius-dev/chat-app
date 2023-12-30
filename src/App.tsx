@@ -23,9 +23,6 @@ function App() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const [open, setOpen] = useState(isSmallScreen);
-  const [messagingUserExists, setMessagingUserExists] = useState(false);
-  const [groupChatExists, setGroupChatExists] = useState(false);
-  const [userProfileExists, setUserProfileExists] = useState(false);
 
   const toggleSidebar = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);
@@ -83,19 +80,13 @@ function App() {
                 overflow: "hidden",
               }}
             >
-              {user &&
-                ((location.pathname.startsWith("/messages/") &&
-                  messagingUserExists) ||
-                  (location.pathname.startsWith("/user/") &&
-                    userProfileExists) ||
-                  (location.pathname.startsWith("/group-chat/") &&
-                    groupChatExists)) && (
-                  <Sidebar
-                    toggleSidebar={toggleSidebar}
-                    open={open}
-                    isSmallScreen={isSmallScreen}
-                  />
-                )}
+              {user && location.pathname !== "/" && (
+                <Sidebar
+                  toggleSidebar={toggleSidebar}
+                  open={open}
+                  isSmallScreen={isSmallScreen}
+                />
+              )}
               <Routes>
                 <Route
                   path="/"
@@ -110,7 +101,6 @@ function App() {
                           isSocketConnected={isSocketConnected}
                           open={open}
                           setOpen={setOpen}
-                          setMessagingUserExists={setMessagingUserExists}
                         />
                       }
                     />
@@ -121,32 +111,44 @@ function App() {
                           isSocketConnected={isSocketConnected}
                           open={open}
                           setOpen={setOpen}
-                          setGroupChatExists={setGroupChatExists}
                         />
                       }
                     />
                     <Route
                       path="/user/:id"
-                      element={
-                        <User
-                          setUserProfileExists={setUserProfileExists}
-                          setOpen={setOpen}
-                        />
-                      }
+                      element={<User setOpen={setOpen} />}
                     />
                   </>
                 )}
                 <Route
                   path="/user-not-found"
-                  element={<Error errorMessage="User not found" />}
+                  element={
+                    <Error
+                      errorMessage="User not found"
+                      open={open}
+                      setOpen={setOpen}
+                    />
+                  }
                 />
                 <Route
                   path="/group-chat-not-found"
-                  element={<Error errorMessage="Group chat not found" />}
+                  element={
+                    <Error
+                      errorMessage="Group chat not found"
+                      open={open}
+                      setOpen={setOpen}
+                    />
+                  }
                 />
                 <Route
                   path="*"
-                  element={<Error errorMessage="Page not found" />}
+                  element={
+                    <Error
+                      errorMessage="Page not found"
+                      open={open}
+                      setOpen={setOpen}
+                    />
+                  }
                 />
               </Routes>
             </Box>

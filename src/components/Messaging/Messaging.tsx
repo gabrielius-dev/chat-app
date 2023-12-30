@@ -19,6 +19,8 @@ import {
   useState,
   useLayoutEffect,
   memo,
+  Dispatch,
+  SetStateAction,
 } from "react";
 import { DatabaseUserResponse, User } from "../types/User";
 import TimeAgo from "react-timeago";
@@ -29,19 +31,16 @@ import LoadingScreen from "../UtilityComponents/LoadingScreen";
 import { formatDateString } from "../utils/formatDate";
 import { useChatContext } from "../../context/useChatContext";
 
-type setOpenType = (open: boolean) => void;
-type setMessagingUserExistsType = (open: boolean) => void;
+type setOpenType = Dispatch<SetStateAction<boolean>>;
 
 const Messaging = memo(function Messaging({
   isSocketConnected,
   open,
   setOpen,
-  setMessagingUserExists,
 }: {
   isSocketConnected: boolean;
   open: boolean;
   setOpen: setOpenType;
-  setMessagingUserExists: setMessagingUserExistsType;
 }) {
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -83,7 +82,6 @@ const Messaging = memo(function Messaging({
       `http://localhost:8000/user/${selectedUserId}`,
       { withCredentials: true }
     );
-    setMessagingUserExists(!!response.data.user);
 
     return response.data.user;
   }

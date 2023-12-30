@@ -30,18 +30,15 @@ import {
 import Messages from "./Messages";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
-type setGroupChatExistsType = Dispatch<SetStateAction<boolean>>;
 
 const GroupChat = memo(function GroupChat({
   isSocketConnected,
   open,
   setOpen,
-  setGroupChatExists,
 }: {
   isSocketConnected: boolean;
   open: boolean;
   setOpen: setOpenType;
-  setGroupChatExists: setGroupChatExistsType;
 }) {
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -74,8 +71,6 @@ const GroupChat = memo(function GroupChat({
         { withCredentials: true }
       );
 
-      setGroupChatExists(!!response.data.groupChat);
-
       return response.data.groupChat;
     }
 
@@ -83,7 +78,7 @@ const GroupChat = memo(function GroupChat({
       .then((res) => setGroupChat(res))
       .catch((err) => console.error(err))
       .finally(() => setIsLoadingGroupChat(false));
-  }, [chatId, setGroupChatExists]);
+  }, [chatId]);
 
   useEffect(() => {
     setOpen(isSmallScreen);
