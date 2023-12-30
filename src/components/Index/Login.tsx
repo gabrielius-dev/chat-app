@@ -140,13 +140,13 @@ function Login() {
         rules={{
           required: "Username must be specified",
           maxLength: {
-            value: 100,
-            message: "Username can't exceed 100 characters",
+            value: 25,
+            message: "Username can't exceed 25 characters",
           },
         }}
         render={({ field }) => (
           <CustomTextField
-            inputProps={{ maxLength: 100 }}
+            inputProps={{ maxLength: 25 }}
             {...field}
             label="Username"
             variant="outlined"

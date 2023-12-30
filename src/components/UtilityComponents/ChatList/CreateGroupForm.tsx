@@ -177,8 +177,8 @@ const CreateGroupForm = memo(function CreateGroupForm({
             rules={{
               required: "Name must be specified",
               maxLength: {
-                value: 100,
-                message: "Name can't exceed 100 characters",
+                value: 25,
+                message: "Name can't exceed 25 characters",
               },
             }}
             render={({ field }) => (
@@ -198,7 +198,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
                     flex: 1,
                   }}
                   placeholder="Name"
-                  inputProps={{ "aria-label": "name", maxLength: 100 }}
+                  inputProps={{ "aria-label": "name", maxLength: 25 }}
                   {...field}
                   error={errors.name ? true : false}
                 />

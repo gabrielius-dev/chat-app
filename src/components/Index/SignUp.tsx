@@ -157,14 +157,14 @@ function SignUp() {
         rules={{
           required: "Username must be specified",
           maxLength: {
-            value: 100,
-            message: "Username can't exceed 100 characters",
+            value: 25,
+            message: "Username can't exceed 25 characters",
           },
         }}
         render={({ field }) => (
           <CustomTextField
             {...field}
-            inputProps={{ maxLength: 100 }}
+            inputProps={{ maxLength: 25 }}
             label="Username"
             variant="outlined"
             error={errors.username ? true : false}
