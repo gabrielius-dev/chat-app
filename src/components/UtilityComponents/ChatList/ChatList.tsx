@@ -395,14 +395,15 @@ const ChatList = memo(function ChatList() {
 
     function handleJoinRoom(groupChatId: string) {
       if (!joinedRooms.has(groupChatId)) {
-        console.log(`group-chat-list-${groupChatId}`);
         socket.emit("join-room", `group-chat-list-${groupChatId}`);
         setJoinedRooms((prevRooms) => new Set(prevRooms).add(groupChatId));
       }
     }
 
     groupChatList.forEach((groupChat) => handleJoinRoom(groupChat._id));
+  }, [groupChatList, joinedRooms]);
 
+  useEffect(() => {
     function getNewGroupChatHandler(returnedChat: GroupChat) {
       setGroupChatList((prevChatList) =>
         prevChatList
@@ -427,7 +428,7 @@ const ChatList = memo(function ChatList() {
     return () => {
       socket.off("get-new-group-chat", getNewGroupChatHandler);
     };
-  }, [groupChatList, joinedRooms, setGroupChatList]);
+  }, [setGroupChatList]);
 
   const loadMoreUsers = () =>
     setLoadOffset((currentLoadOffset) => currentLoadOffset + 1);
