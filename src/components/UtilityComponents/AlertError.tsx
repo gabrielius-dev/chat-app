@@ -16,7 +16,7 @@ const AlertError = memo(function AlertError({
     setOpen(false);
   };
   return (
-    <Snackbar open={open} autoHideDuration={4000} onClose={handleClose}>
+    <Snackbar open={open} autoHideDuration={7000} onClose={handleClose}>
       <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
         {message}
       </Alert>
