@@ -1,12 +1,28 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import PageNotFound from "../../assets/illustrations/page-not-found.svg";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function Error({ errorMessage }: { errorMessage: string }) {
+type setOpenType = Dispatch<SetStateAction<boolean>>;
+
+function Error({
+  errorMessage,
+  open,
+  setOpen,
+}: {
+  errorMessage: string;
+  open: boolean;
+  setOpen: setOpenType;
+}) {
   const [timeLeft, setTimeLeft] = useState(5);
   const timerIntervalRef = useRef<NodeJS.Timeout | undefined>();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
+
+  useEffect(() => {
+    setOpen(isSmallScreen);
+  }, [isSmallScreen, setOpen]);
 
   useEffect(() => {
     timerIntervalRef.current = setInterval(() => {
@@ -28,7 +44,7 @@ function Error({ errorMessage }: { errorMessage: string }) {
   return (
     <Box
       sx={{
-        display: "flex",
+        display: open && !isSmallScreen ? "none" : "flex",
         flexDirection: "column",
         height: "100%",
         justifyContent: "center",
@@ -43,14 +59,15 @@ function Error({ errorMessage }: { errorMessage: string }) {
           justifyContent: "center",
           alignItems: "center",
           gap: 2,
-          mt: "-60px",
+          maxHeight: "100%",
         }}
       >
         <img
           src={PageNotFound}
           style={{
-            width: "90vw",
             maxWidth: "500px",
+            width: "100%",
+            overflow: "auto",
           }}
         />
         <Typography variant="h4">{errorMessage}</Typography>
