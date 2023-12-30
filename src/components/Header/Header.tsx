@@ -1,10 +1,8 @@
 import {
-  Alert,
   Avatar,
   Box,
   Menu,
   MenuItem,
-  Snackbar,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -15,6 +13,7 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import AlertError from "../UtilityComponents/AlertError";
 
 const Header = memo(function Header() {
   const theme = useTheme();
@@ -40,10 +39,6 @@ const Header = memo(function Header() {
 
     popupState.close();
   }
-
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   return (
     <Box
@@ -134,11 +129,11 @@ const Header = memo(function Header() {
           )}
         </PopupState>
       </div>
-      <Snackbar open={open} autoHideDuration={4000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          An error occurred during logout. Please try again later.
-        </Alert>
-      </Snackbar>
+      <AlertError
+        message="An error occurred during logout. Please try again later."
+        open={open}
+        setOpen={setOpen}
+      />
     </Box>
   );
 });

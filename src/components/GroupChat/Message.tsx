@@ -1,21 +1,14 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { GroupMessageInterface } from "../types/Message";
 import { User } from "../types/User";
-import {
-  Box,
-  useTheme,
-  Typography,
-  Avatar,
-  IconButton,
-  Snackbar,
-  Alert,
-} from "@mui/material";
+import { Box, useTheme, Typography, Avatar, IconButton } from "@mui/material";
 import formatCustomDate from "../utils/formatDate";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import socket from "../../socket/socket";
+import AlertError from "../UtilityComponents/AlertError";
 
 function Message({
   message,
@@ -54,18 +47,15 @@ function Message({
       setOpen(true);
     }
   }
-  const handleClose = () => {
-    setOpen(false);
-  };
 
   return (
     <>
-      <Snackbar open={open} autoHideDuration={4000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: "100%" }}>
-          An error occurred during while deleting message. Please try again
-          later.
-        </Alert>
-      </Snackbar>
+      <AlertError
+        message="An error occurred during while deleting message. Please try again
+          later."
+        open={open}
+        setOpen={setOpen}
+      />
       <Box
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
