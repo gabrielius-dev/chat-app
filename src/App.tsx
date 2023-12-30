@@ -15,6 +15,7 @@ import User from "./components/User/User";
 import GroupChatWrapper from "./components/GroupChat/GroupChatWrapper";
 import MessagingWrapper from "./components/Messaging/MessagingWrapper";
 import { ChatProvider } from "./context/ChatProvider";
+import AlertError from "./components/UtilityComponents/AlertError";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -23,6 +24,8 @@ function App() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const [open, setOpen] = useState(isSmallScreen);
+  const [openAlertError, setOpenAlertError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const toggleSidebar = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);
@@ -61,6 +64,19 @@ function App() {
     }
   }, [user]);
 
+  useEffect(() => {
+    function handleGroupChatRemoved({ message }: { message: string }) {
+      setOpenAlertError(true);
+      setErrorMessage(message);
+    }
+
+    socket.on("group-chat-removed", handleGroupChatRemoved);
+
+    return () => {
+      socket.off("group-chat-removed", handleGroupChatRemoved);
+    };
+  }, []);
+
   return (
     <Box
       sx={{
@@ -71,6 +87,13 @@ function App() {
     >
       {!isLoading && (
         <>
+          {openAlertError && (
+            <AlertError
+              message={errorMessage}
+              open={openAlertError}
+              setOpen={setOpenAlertError}
+            />
+          )}
           {user && <Header />}
           <ChatProvider>
             <Box
