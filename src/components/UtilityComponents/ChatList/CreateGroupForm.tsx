@@ -16,7 +16,7 @@ import { useForm, Controller, SubmitHandler } from "react-hook-form";
 import axios, { AxiosError } from "axios";
 import { ErrorInterface, ErrorResponse } from "../../types/Error";
 import { transformError } from "../../utils/transformError";
-import UserList from "./UserList";
+import UserList from "../UserList";
 import { useEffect, useState, memo, useRef } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import AvatarEditor from "react-avatar-editor";
