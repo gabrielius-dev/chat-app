@@ -50,12 +50,14 @@ function Message({
 
   return (
     <>
-      <AlertError
-        message="An error occurred during while deleting message. Please try again
+      {open && (
+        <AlertError
+          message="An error occurred during while deleting message. Please try again
           later."
-        open={open}
-        setOpen={setOpen}
-      />
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
       <Box
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}

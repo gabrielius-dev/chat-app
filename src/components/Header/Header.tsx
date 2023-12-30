@@ -129,11 +129,13 @@ const Header = memo(function Header() {
           )}
         </PopupState>
       </div>
-      <AlertError
-        message="An error occurred during logout. Please try again later."
-        open={open}
-        setOpen={setOpen}
-      />
+      {open && (
+        <AlertError
+          message="An error occurred during logout. Please try again later."
+          open={open}
+          setOpen={setOpen}
+        />
+      )}
     </Box>
   );
 });
