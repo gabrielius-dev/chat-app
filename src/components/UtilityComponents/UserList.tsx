@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { useEffect, useState, memo, ChangeEvent, useCallback } from "react";
-import { User } from "../../types/User";
+import { User } from "../types/User";
 import {
   Avatar,
   useTheme,
