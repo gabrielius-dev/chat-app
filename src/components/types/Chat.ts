@@ -6,21 +6,17 @@ export interface Chat extends User {
   latestMessage: MessageInterface;
 }
 
-export interface GroupChat {
-  _id: string;
-  name: string;
-  image?: string;
-  users: User[];
-  createdAt: string;
+export interface GroupChat extends GroupChatWithoutLatestMessage {
   latestMessage: GroupMessageInterface;
 }
 
 export interface GroupChatWithoutLatestMessage {
   _id: string;
   name: string;
-  image?: string;
-  users: User[];
+  image: string | null;
+  users: string[];
   createdAt: string;
+  creator: string;
 }
 
 export interface GroupChatResponse {
