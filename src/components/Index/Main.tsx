@@ -36,6 +36,7 @@ function Main() {
         sx={{
           visibility: isImageLoaded ? "visible" : "hidden",
           mb: `${!isMediumScreen ? "1rem" : undefined}`,
+          maxHeight: "100%",
         }}
       >
         <WelcomeBox handleImageLoad={handleImageLoad} />
