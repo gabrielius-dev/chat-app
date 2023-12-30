@@ -17,15 +17,21 @@ import {
   Typography,
 } from "@mui/material";
 import TimeAgo from "react-timeago";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import socket from "../../../socket/socket";
-import { Chat, GroupChat } from "../../types/Chat";
+import {
+  Chat,
+  GroupChat,
+  GroupChatWithoutLatestMessage,
+} from "../../types/Chat";
 import WindowFocusContext from "../../../context/WindowsFocusContext";
 import CreateGroupForm from "./CreateGroupForm";
 import { formatDateString } from "../../utils/formatDate";
 import { useChatContext } from "../../../context/useChatContext";
 import { GroupMessageInterface, MessageInterface } from "../../types/Message";
+import AlertError from "../AlertError";
+import AlertSuccess from "../AlertSuccess";
 
 const MemoizedListItem = memo(function MemoizedListItem({
   chatListItem,
@@ -132,7 +138,7 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
           <ListItemAvatar>
             <Avatar
               alt="Profile picture"
-              src={chatListItem?.image}
+              src={chatListItem.image ?? undefined}
               sx={{ width: 40, height: 40, bgcolor: theme.midnightNavy }}
             >
               {!chatListItem?.image
@@ -186,8 +192,12 @@ const ChatList = memo(function ChatList() {
   const user: User = queryClient.getQueryData(["userData"])!;
   const isWindowFocused = useContext(WindowFocusContext);
   const [showGroupForm, setShowGroupForm] = useState(false);
-  const [newGroupChatAdded, setNewGroupChatAdded] = useState(false);
   const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
+  const [openAlertError, setOpenAlertError] = useState(false);
+  const [openAlertSuccess, setOpenAlertSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   const chatListFetching = useCallback(async () => {
     const response: AxiosResponse<Chat[]> = await axios.get(
@@ -228,19 +238,6 @@ const ChatList = memo(function ChatList() {
       })
       .catch((err) => console.error(err));
   }, [groupChatListFetching, setGroupChatList]);
-
-  useEffect(() => {
-    if (!newGroupChatAdded) return;
-    setIsLoadingGroupChats(true);
-
-    groupChatListFetching()
-      .then((res) => {
-        setGroupChatList(res);
-        setIsLoadingGroupChats(false);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setNewGroupChatAdded(false));
-  }, [newGroupChatAdded, groupChatListFetching, setGroupChatList]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -354,10 +351,84 @@ const ChatList = memo(function ChatList() {
 
     socket.on("group-message-deleted-group-chat-list", handleDeletedMessage);
 
+    function handleEditGroupChat(groupChat: GroupChatWithoutLatestMessage) {
+      setGroupChatList((prevGroupChatList) =>
+        prevGroupChatList.map((prevGroupChat) => {
+          if (prevGroupChat._id === groupChat._id) {
+            return { ...groupChat, latestMessage: prevGroupChat.latestMessage };
+          }
+          return prevGroupChat;
+        })
+      );
+    }
+    socket.on("receive-edit-group-chat-list", handleEditGroupChat);
+
+    async function handleGroupChatAdded({
+      message,
+      groupChat,
+    }: {
+      message: string;
+      groupChat: GroupChatWithoutLatestMessage;
+    }) {
+      if (groupChat.creator !== user._id) {
+        setOpenAlertSuccess(true);
+        setSuccessMessage(message);
+      }
+
+      try {
+        const response: AxiosResponse<GroupChat> = await axios.get(
+          `http://localhost:8000/group-chat-list-chat/${groupChat._id}`,
+          { withCredentials: true }
+        );
+
+        if (response.data)
+          setGroupChatList((prevGroupChatList) =>
+            [...prevGroupChatList, response.data].sort((a, b) => {
+              const aCreatedAt =
+                a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+              const bCreatedAt =
+                b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
+              return bCreatedAt.localeCompare(aCreatedAt);
+            })
+          );
+        if (groupChat.creator === user._id)
+          navigate(`/group-chat/${groupChat._id}`);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    socket.on("group-chat-added", handleGroupChatAdded);
+
+    function handleGroupChatRemoved({
+      message,
+      groupChat,
+    }: {
+      message: string;
+      groupChat: GroupChatWithoutLatestMessage;
+    }) {
+      setErrorMessage(message);
+      setOpenAlertError(true);
+
+      setGroupChatList((prevGroupChatList) =>
+        prevGroupChatList.filter(
+          (prevGroupChat) => prevGroupChat._id !== groupChat._id
+        )
+      );
+    }
+
+    socket.on("group-chat-removed", handleGroupChatRemoved);
+
     return () => {
       socket.off("group-message-deleted-group-chat-list", handleDeletedMessage);
+
+      socket.off("receive-edit-group-chat-list", handleEditGroupChat);
+
+      socket.off("group-chat-added", handleGroupChatAdded);
+
+      socket.off("group-chat-removed", handleGroupChatRemoved);
     };
-  }, [setGroupChatList]);
+  }, [navigate, setGroupChatList, user._id]);
 
   useEffect(() => {
     socket.emit("join-room", user._id);
@@ -445,10 +516,19 @@ const ChatList = memo(function ChatList() {
         alignItems: "center",
       }}
     >
+      <AlertError
+        message={errorMessage}
+        open={openAlertError}
+        setOpen={setOpenAlertError}
+      />
+      <AlertSuccess
+        message={successMessage}
+        open={openAlertSuccess}
+        setOpen={setOpenAlertSuccess}
+      />
       {showGroupForm && (
         <CreateGroupForm
           setShowGroupForm={setShowGroupForm}
-          setNewGroupChatAdded={setNewGroupChatAdded}
         />
       )}
       <Box
