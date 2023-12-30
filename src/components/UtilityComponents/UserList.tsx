@@ -112,10 +112,14 @@ const UserList = memo(function UserList({
   setSelectedUserList,
   errorMessage,
   selectedUserList,
+  prevSelectedUserList,
+  excludeUser,
 }: {
   setSelectedUserList: setSelectedUserListType;
   errorMessage: string;
   selectedUserList: string[];
+  prevSelectedUserList: string[] | null;
+  excludeUser: string;
 }) {
   const theme = useTheme();
   const [userList, setUserList] = useState<User[] | []>([]);
@@ -128,7 +132,12 @@ const UserList = memo(function UserList({
     const response: AxiosResponse<User[]> = await axios.get(
       "http://localhost:8000/user-list",
       {
-        params: { loadOffset, username: searchValue },
+        params: {
+          loadOffset,
+          username: searchValue,
+          userList: prevSelectedUserList,
+          excludeUser,
+        },
 
         withCredentials: true,
       }
@@ -137,7 +146,7 @@ const UserList = memo(function UserList({
     setMoreUsersExist(response.data.length === 10);
 
     return response.data;
-  }, [loadOffset, searchValue]);
+  }, [excludeUser, loadOffset, prevSelectedUserList, searchValue]);
 
   useEffect(() => {
     if (searchValue !== "") return;
