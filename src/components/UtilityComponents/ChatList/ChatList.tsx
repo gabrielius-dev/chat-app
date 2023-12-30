@@ -30,7 +30,6 @@ import CreateGroupForm from "./CreateGroupForm";
 import { formatDateString } from "../../utils/formatDate";
 import { useChatContext } from "../../../context/useChatContext";
 import { GroupMessageInterface, MessageInterface } from "../../types/Message";
-import AlertError from "../AlertError";
 import AlertSuccess from "../AlertSuccess";
 
 const MemoizedListItem = memo(function MemoizedListItem({
@@ -193,9 +192,7 @@ const ChatList = memo(function ChatList() {
   const isWindowFocused = useContext(WindowFocusContext);
   const [showGroupForm, setShowGroupForm] = useState(false);
   const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
-  const [openAlertError, setOpenAlertError] = useState(false);
   const [openAlertSuccess, setOpenAlertSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
@@ -340,11 +337,20 @@ const ChatList = memo(function ChatList() {
             return chat;
           })
           .sort((a, b) => {
-            const aCreatedAt =
-              a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
-            const bCreatedAt =
-              b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
-            return bCreatedAt.localeCompare(aCreatedAt);
+            const aLatestCreatedAt = a.latestMessage?.createdAt;
+            const bLatestCreatedAt = b.latestMessage?.createdAt;
+
+            if (aLatestCreatedAt && bLatestCreatedAt) {
+              return bLatestCreatedAt.localeCompare(aLatestCreatedAt);
+            } else if (aLatestCreatedAt) {
+              return -1;
+            } else if (bLatestCreatedAt) {
+              return 1;
+            } else {
+              const aCreatedAt = a.createdAt ?? "0000-00-00T00:00:00.000Z";
+              const bCreatedAt = b.createdAt ?? "0000-00-00T00:00:00.000Z";
+              return bCreatedAt.localeCompare(aCreatedAt);
+            }
           })
       );
     }
@@ -384,11 +390,20 @@ const ChatList = memo(function ChatList() {
         if (response.data)
           setGroupChatList((prevGroupChatList) =>
             [...prevGroupChatList, response.data].sort((a, b) => {
-              const aCreatedAt =
-                a.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
-              const bCreatedAt =
-                b.latestMessage?.createdAt ?? "0000-00-00T00:00:00.000Z";
-              return bCreatedAt.localeCompare(aCreatedAt);
+              const aLatestCreatedAt = a.latestMessage?.createdAt;
+              const bLatestCreatedAt = b.latestMessage?.createdAt;
+
+              if (aLatestCreatedAt && bLatestCreatedAt) {
+                return bLatestCreatedAt.localeCompare(aLatestCreatedAt);
+              } else if (aLatestCreatedAt) {
+                return -1;
+              } else if (bLatestCreatedAt) {
+                return 1;
+              } else {
+                const aCreatedAt = a.createdAt ?? "0000-00-00T00:00:00.000Z";
+                const bCreatedAt = b.createdAt ?? "0000-00-00T00:00:00.000Z";
+                return bCreatedAt.localeCompare(aCreatedAt);
+              }
             })
           );
         if (groupChat.creator === user._id)
@@ -401,15 +416,10 @@ const ChatList = memo(function ChatList() {
     socket.on("group-chat-added", handleGroupChatAdded);
 
     function handleGroupChatRemoved({
-      message,
       groupChat,
     }: {
-      message: string;
       groupChat: GroupChatWithoutLatestMessage;
     }) {
-      setErrorMessage(message);
-      setOpenAlertError(true);
-
       setGroupChatList((prevGroupChatList) =>
         prevGroupChatList.filter(
           (prevGroupChat) => prevGroupChat._id !== groupChat._id
@@ -516,21 +526,14 @@ const ChatList = memo(function ChatList() {
         alignItems: "center",
       }}
     >
-      <AlertError
-        message={errorMessage}
-        open={openAlertError}
-        setOpen={setOpenAlertError}
-      />
-      <AlertSuccess
-        message={successMessage}
-        open={openAlertSuccess}
-        setOpen={setOpenAlertSuccess}
-      />
-      {showGroupForm && (
-        <CreateGroupForm
-          setShowGroupForm={setShowGroupForm}
+      {openAlertSuccess && (
+        <AlertSuccess
+          message={successMessage}
+          open={openAlertSuccess}
+          setOpen={setOpenAlertSuccess}
         />
       )}
+      {showGroupForm && <CreateGroupForm setShowGroupForm={setShowGroupForm} />}
       <Box
         sx={{
           display: "flex",
