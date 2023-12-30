@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import { useForm, Controller, SubmitHandler } from "react-hook-form";
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { ErrorInterface, ErrorResponse } from "../../types/Error";
 import { transformError } from "../../utils/transformError";
 import UserList from "../UserList";
@@ -23,20 +23,19 @@ import AvatarEditor from "react-avatar-editor";
 import { MuiFileInput } from "mui-file-input";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import LoadingScreen from "../LoadingScreen";
+import { GroupChatResponse } from "../../types/Chat";
+import socket from "../../../socket/socket";
 
 interface IFormInput {
   name: string;
 }
 
 type setShowGroupFormType = React.Dispatch<React.SetStateAction<boolean>>;
-type setNewGroupChatAddedType = React.Dispatch<React.SetStateAction<boolean>>;
 
 const CreateGroupForm = memo(function CreateGroupForm({
   setShowGroupForm,
-  setNewGroupChatAdded,
 }: {
   setShowGroupForm: setShowGroupFormType;
-  setNewGroupChatAdded: setNewGroupChatAddedType;
 }) {
   const theme = useTheme();
   const [selectedUserList, setSelectedUserList] = useState<string[]>([]);
@@ -68,11 +67,19 @@ const CreateGroupForm = memo(function CreateGroupForm({
         formData.append("image", image);
       }
 
-      await axios.post("http://localhost:8000/group-chat", formData, {
-        withCredentials: true,
-      });
-      setNewGroupChatAdded(true);
-      setShowGroupForm(false);
+      const response: AxiosResponse<GroupChatResponse> = await axios.post(
+        "http://localhost:8000/group-chat",
+        formData,
+        {
+          withCredentials: true,
+        }
+      );
+      const groupChat = response.data.groupChat;
+
+      if (groupChat) {
+        setShowGroupForm(false);
+        socket.emit("create-group-chat", groupChat);
+      }
     } catch (err) {
       console.clear();
       const error = err as AxiosError;
@@ -290,6 +297,8 @@ const CreateGroupForm = memo(function CreateGroupForm({
             setSelectedUserList={setSelectedUserList}
             errorMessage={errorMessage}
             selectedUserList={selectedUserList}
+            prevSelectedUserList={null}
+            excludeUser={""}
           />
         </form>
       </DialogContent>
