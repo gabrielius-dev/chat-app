@@ -31,6 +31,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/User";
 import socket from "../../socket/socket";
+import extractFileIdFromDriveUrl from "../utils/extractFileIdFromDriveUrl";
 
 interface IFormInput {
   name: string;
@@ -77,11 +78,6 @@ const EditGroupForm = memo(function EditGroupForm({
       name: memoizedGroupChat.name,
     },
   });
-
-  function extractFileIdFromDriveUrl(url: string) {
-    const match = url.match(/[?&]id=([^&]+)/);
-    return match ? match[1] : "";
-  }
 
   const editGroupChat = async (data: IFormInput, image: File | null) => {
     try {
