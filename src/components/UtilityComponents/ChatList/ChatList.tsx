@@ -451,6 +451,9 @@ const ChatList = memo(function ChatList() {
 
   useEffect(() => {
     socket.emit("join-room", user._id);
+    return () => {
+      socket.emit("leave-room", user._id);
+    };
   }, [user._id]);
 
   useEffect(() => {
@@ -492,6 +495,15 @@ const ChatList = memo(function ChatList() {
 
     groupChatList.forEach((groupChat) => handleJoinRoom(groupChat._id));
   }, [groupChatList, joinedRooms]);
+
+  useEffect(() => {
+    return () => {
+      joinedRooms.forEach((room) =>
+        socket.emit("leave-room", `group-chat-list-${room}`)
+      );
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     function getNewGroupChatHandler(returnedChat: GroupChat) {
