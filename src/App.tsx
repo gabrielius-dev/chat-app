@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./components/UtilityComponents/LoadingScreen";
 import { useContext, useEffect, useState, useCallback } from "react";
 import WindowFocusContext from "./context/WindowsFocusContext";
-import { Box, useTheme, useMediaQuery } from "@mui/material";
+import { Box, useTheme, useMediaQuery, AlertColor } from "@mui/material";
 import Error from "./components/Error/Error";
 import socket from "./socket/socket";
 import Index from "./components/Index/Index";
@@ -15,7 +15,8 @@ import User from "./components/User/User";
 import GroupChatWrapper from "./components/GroupChat/GroupChatWrapper";
 import MessagingWrapper from "./components/Messaging/MessagingWrapper";
 import { ChatProvider } from "./context/ChatProvider";
-import AlertError from "./components/UtilityComponents/AlertError";
+import AlertNotification from "./components/UtilityComponents/AlertNotification";
+import { GroupChatWithoutLatestMessage } from "./components/types/Chat";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -24,8 +25,10 @@ function App() {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const [open, setOpen] = useState(isSmallScreen);
-  const [openAlertError, setOpenAlertError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [openAlertNotification, setOpenAlertNotification] = useState(false);
+  const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
+  const [alertNotificationType, setAlertNotificationType] =
+    useState<AlertColor>("info");
 
   const toggleSidebar = useCallback(() => {
     setOpen((prevOpen) => !prevOpen);
@@ -66,16 +69,36 @@ function App() {
 
   useEffect(() => {
     function handleGroupChatRemoved({ message }: { message: string }) {
-      setOpenAlertError(true);
-      setErrorMessage(message);
+      setAlertNotificationType("error");
+      setAlertNotificationMessage(message);
+      setOpenAlertNotification(true);
     }
 
     socket.on("group-chat-removed", handleGroupChatRemoved);
 
+    function handleGroupChatDeleted({
+      message,
+      groupChat,
+    }: {
+      message: string;
+      groupChat: GroupChatWithoutLatestMessage;
+    }) {
+      if (groupChat.creator === user?._id)
+        setAlertNotificationMessage(
+          `The group chat '${groupChat.name}' has been deleted successfully.`
+        );
+      else setAlertNotificationMessage(message);
+      setAlertNotificationType("info");
+      setOpenAlertNotification(true);
+    }
+
+    socket.on("group-chat-deleted", handleGroupChatDeleted);
+
     return () => {
       socket.off("group-chat-removed", handleGroupChatRemoved);
+      socket.off("group-chat-deleted", handleGroupChatDeleted);
     };
-  }, []);
+  }, [user?._id]);
 
   return (
     <Box
@@ -87,11 +110,12 @@ function App() {
     >
       {!isLoading && (
         <>
-          {openAlertError && (
-            <AlertError
-              message={errorMessage}
-              open={openAlertError}
-              setOpen={setOpenAlertError}
+          {openAlertNotification && (
+            <AlertNotification
+              message={alertNotificationMessage}
+              type={alertNotificationType}
+              open={openAlertNotification}
+              setOpen={setOpenAlertNotification}
             />
           )}
           {user && <Header />}
