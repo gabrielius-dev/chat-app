@@ -7,7 +7,7 @@ import { useState } from "react";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import axios, { AxiosResponse } from "axios";
 import socket from "../../socket/socket";
-import AlertError from "../UtilityComponents/AlertError";
+import AlertNotification from "../UtilityComponents/AlertNotification";
 
 function Message({
   message,
@@ -49,9 +49,10 @@ function Message({
   return (
     <>
       {open && (
-        <AlertError
+        <AlertNotification
           message="An error occurred during while deleting message. Please try again
           later."
+          type="error"
           open={open}
           setOpen={setOpen}
         />

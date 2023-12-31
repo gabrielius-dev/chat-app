@@ -13,7 +13,7 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
-import AlertError from "../UtilityComponents/AlertError";
+import AlertNotification from "../UtilityComponents/AlertNotification";
 
 const Header = memo(function Header() {
   const theme = useTheme();
@@ -130,8 +130,9 @@ const Header = memo(function Header() {
         </PopupState>
       </div>
       {open && (
-        <AlertError
+        <AlertNotification
           message="An error occurred during logout. Please try again later."
+          type="error"
           open={open}
           setOpen={setOpen}
         />
