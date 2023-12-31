@@ -15,6 +15,7 @@ import {
   Badge,
   styled,
   Typography,
+  AlertColor,
 } from "@mui/material";
 import TimeAgo from "react-timeago";
 import { Link, useNavigate } from "react-router-dom";
@@ -30,7 +31,7 @@ import CreateGroupForm from "./CreateGroupForm";
 import { formatDateString } from "../../utils/formatDate";
 import { useChatContext } from "../../../context/useChatContext";
 import { GroupMessageInterface, MessageInterface } from "../../types/Message";
-import AlertSuccess from "../AlertSuccess";
+import AlertNotification from "../AlertNotification";
 
 const MemoizedListItem = memo(function MemoizedListItem({
   chatListItem,
@@ -192,8 +193,10 @@ const ChatList = memo(function ChatList() {
   const isWindowFocused = useContext(WindowFocusContext);
   const [showGroupForm, setShowGroupForm] = useState(false);
   const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
-  const [openAlertSuccess, setOpenAlertSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [openAlertNotification, setOpenAlertNotification] = useState(false);
+  const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
+  const [alertNotificationType, setAlertNotificationType] =
+    useState<AlertColor>("info");
   const navigate = useNavigate();
 
   const chatListFetching = useCallback(async () => {
@@ -377,8 +380,9 @@ const ChatList = memo(function ChatList() {
       groupChat: GroupChatWithoutLatestMessage;
     }) {
       if (groupChat.creator !== user._id) {
-        setOpenAlertSuccess(true);
-        setSuccessMessage(message);
+        setAlertNotificationMessage(message);
+        setAlertNotificationType("info");
+        setOpenAlertNotification(true);
       }
 
       try {
@@ -420,6 +424,7 @@ const ChatList = memo(function ChatList() {
     }: {
       groupChat: GroupChatWithoutLatestMessage;
     }) {
+      socket.emit("leave-room", `group-chat-list-${groupChat._id}`);
       setGroupChatList((prevGroupChatList) =>
         prevGroupChatList.filter(
           (prevGroupChat) => prevGroupChat._id !== groupChat._id
@@ -429,6 +434,8 @@ const ChatList = memo(function ChatList() {
 
     socket.on("group-chat-removed", handleGroupChatRemoved);
 
+    socket.on("group-chat-deleted", handleGroupChatRemoved);
+
     return () => {
       socket.off("group-message-deleted-group-chat-list", handleDeletedMessage);
 
@@ -437,6 +444,8 @@ const ChatList = memo(function ChatList() {
       socket.off("group-chat-added", handleGroupChatAdded);
 
       socket.off("group-chat-removed", handleGroupChatRemoved);
+
+      socket.off("group-chat-deleted", handleGroupChatRemoved);
     };
   }, [navigate, setGroupChatList, user._id]);
 
@@ -526,11 +535,12 @@ const ChatList = memo(function ChatList() {
         alignItems: "center",
       }}
     >
-      {openAlertSuccess && (
-        <AlertSuccess
-          message={successMessage}
-          open={openAlertSuccess}
-          setOpen={setOpenAlertSuccess}
+      {openAlertNotification && (
+        <AlertNotification
+          message={alertNotificationMessage}
+          type={alertNotificationType}
+          open={openAlertNotification}
+          setOpen={setOpenAlertNotification}
         />
       )}
       {showGroupForm && <CreateGroupForm setShowGroupForm={setShowGroupForm} />}
