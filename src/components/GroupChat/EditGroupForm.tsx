@@ -267,6 +267,17 @@ const EditGroupForm = memo(function EditGroupForm({
             sx={{
               width: "100%",
               display: !isEditingGroup ? "inline-flex" : "none",
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+              },
             }}
           />
           <Typography

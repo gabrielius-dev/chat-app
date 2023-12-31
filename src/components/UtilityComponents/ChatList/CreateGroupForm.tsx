@@ -243,6 +243,17 @@ const CreateGroupForm = memo(function CreateGroupForm({
             sx={{
               width: "100%",
               display: !isCreatingGroup ? "inline-flex" : "none",
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+              },
             }}
           />
           <Typography
