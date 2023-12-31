@@ -10,6 +10,11 @@ import {
   IconButton,
   MenuItem,
   Menu,
+  Dialog,
+  DialogContent,
+  DialogContentText,
+  Button,
+  DialogActions,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -71,6 +76,7 @@ const GroupChat = memo(function GroupChat({
   const [groupChat, setGroupChat] =
     useState<GroupChatWithoutLatestMessage | null>();
   const [showEditGroupChat, setShowEditGroupChat] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   useEffect(() => {
     setIsLoadingGroupChat(true);
@@ -136,8 +142,15 @@ const GroupChat = memo(function GroupChat({
 
     socket.on("receive-edit-group-chat", handleEditGroupChat);
 
+    function handleDeleteGroupChat(groupChat: GroupChatWithoutLatestMessage) {
+      if (groupChat.users.includes(user._id)) navigate("/");
+    }
+
+    socket.on("receive-delete-group-chat", handleDeleteGroupChat);
+
     return () => {
       socket.off("receive-edit-group-chat", handleEditGroupChat);
+      socket.off("receive-delete-group-chat", handleDeleteGroupChat);
     };
   }, [navigate, user._id]);
 
@@ -320,8 +333,26 @@ const GroupChat = memo(function GroupChat({
     popupState.close();
   }
 
-  function deleteGroupChat(popupState: PopupStateType) {
+  function handleOpenDeleteConfirmation(popupState: PopupStateType) {
     popupState.close();
+    setShowDeleteConfirmation(true);
+  }
+
+  function handleCloseDeleteConfirmation() {
+    setShowDeleteConfirmation(false);
+  }
+
+  async function deleteGroupChat() {
+    if (!groupChat) return;
+
+    const response: AxiosResponse = await axios.delete(
+      `http://localhost:8000/group-chat/${groupChat._id}`,
+      { withCredentials: true }
+    );
+
+    if (response.status === 204) {
+      socket.emit("delete-group-chat", groupChat);
+    }
   }
 
   return (
@@ -342,6 +373,27 @@ const GroupChat = memo(function GroupChat({
               groupChat={groupChat}
             />
           )}
+          <Dialog
+            open={showDeleteConfirmation}
+            onClose={() => void handleCloseDeleteConfirmation()}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Are you sure you want to delete this group chat? This action
+                cannot be undone.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handleCloseDeleteConfirmation()}>
+                Cancel
+              </Button>
+              <Button onClick={() => void deleteGroupChat()} autoFocus>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
           <Box
             sx={{
               display: "flex",
@@ -404,7 +456,9 @@ const GroupChat = memo(function GroupChat({
                       </MenuItem>
                       {groupChat.creator === user._id && (
                         <MenuItem
-                          onClick={() => void deleteGroupChat(popupState)}
+                          onClick={() =>
+                            void handleOpenDeleteConfirmation(popupState)
+                          }
                         >
                           Delete
                         </MenuItem>
