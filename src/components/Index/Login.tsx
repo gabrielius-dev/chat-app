@@ -5,11 +5,9 @@ import {
   InputAdornment,
   InputLabel,
   OutlinedInput,
-  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -20,37 +18,12 @@ import { ErrorInterface, ErrorResponse } from "../types/Error";
 import { User, UserResponse } from "../types/User";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { transformError } from "../utils/transformError";
+import CustomTextField from "../UtilityComponents/CustomTextField";
 
 interface IFormInput {
   username: string;
   password: string;
 }
-
-const CustomTextField = styled(TextField)(({ theme }) => ({
-  "& label.Mui-focused": {
-    color: theme.deepBlue,
-  },
-  "& .MuiInput-underline:after": {
-    borderBottomColor: theme.deepBlue,
-  },
-  "& .MuiInputLabel-root": {
-    color: theme.deepBlue,
-  },
-  "&:hover .MuiInputLabel-root": {
-    color: theme.deepBlue,
-  },
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: theme.deepBlue,
-    },
-    "&:hover fieldset": {
-      borderColor: theme.deepBlue,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: theme.deepBlue,
-    },
-  },
-}));
 
 function Login() {
   const theme = useTheme();
