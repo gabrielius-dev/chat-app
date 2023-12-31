@@ -170,7 +170,15 @@ const EditGroupForm = memo(function EditGroupForm({
   };
 
   const handleImageChange = (image: File | null) => {
-    setImage(image);
+    setImageErrorMessage("");
+    if (image) {
+      const fileSizeInBytes = image.size;
+      const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+      if (fileSizeInMB > 10) {
+        setImageErrorMessage("Image size must be under 10MB.");
+        setImage(null);
+      } else setImage(image);
+    } else setImage(null);
   };
 
   return (
