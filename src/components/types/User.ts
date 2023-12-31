@@ -10,6 +10,7 @@ export interface User {
   lastOnline: string;
   online: boolean;
   img?: string;
+  bio?: string;
 }
 
 export interface DatabaseUserResponse {
