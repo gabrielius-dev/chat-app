@@ -7,6 +7,8 @@ interface ErrorObject {
   name?: string[];
   users?: string[];
   image?: string[];
+  bio?: string[];
+  img?: string[];
 }
 
 export function transformError(errorArray: ErrorInterface[]): ErrorObject {
