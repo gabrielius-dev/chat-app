@@ -454,7 +454,7 @@ const ChatList = memo(function ChatList() {
     return () => {
       socket.emit("leave-room", user._id);
     };
-  }, [user._id]);
+  }, [user]);
 
   useEffect(() => {
     function getNewChatHandler(returnedChat: Chat) {
@@ -482,6 +482,11 @@ const ChatList = memo(function ChatList() {
       socket.off("get-new-chat", getNewChatHandler);
     };
   }, [setChatList]);
+
+  //If user profile is edited socket will reconnect, join rooms again
+  useEffect(() => {
+    setJoinedRooms(new Set());
+  }, [user]);
 
   useEffect(() => {
     if (!groupChatList.length) return;
