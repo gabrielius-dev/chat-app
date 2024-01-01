@@ -30,6 +30,7 @@ import socket from "../../socket/socket";
 import LoadingScreen from "../UtilityComponents/LoadingScreen";
 import { formatDateString } from "../utils/formatDate";
 import { useChatContext } from "../../context/useChatContext";
+import { isEqual } from "lodash";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -66,11 +67,10 @@ const Messaging = memo(function Messaging({
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const navigate = useNavigate();
 
-  const {
-    data: selectedUser,
-    isLoading: isLoadingSelectedUser,
-    refetch,
-  } = useQuery<User | undefined, Error>({
+  const { data: selectedUser, isLoading: isLoadingSelectedUser } = useQuery<
+    User | undefined,
+    Error
+  >({
     queryKey: ["databaseUserData", selectedUserId],
     queryFn: getDatabaseUser,
     retry: false,
@@ -153,19 +153,36 @@ const Messaging = memo(function Messaging({
     return () => {
       socket.off("message-deleted", messageDeletedHandler);
     };
-  }, [messages, selectedUser, setChatList]);
+  }, [messages, selectedUser]);
 
   useEffect(() => {
+    if (!selectedUser) return;
     const receiveMessageHandler = (message: MessageInterface) => {
       addNewMessage(message);
-      void refetch();
+      if (
+        message.sender._id === selectedUser?._id &&
+        !isEqual(message.sender, selectedUser)
+      ) {
+        queryClient.setQueryData(
+          ["databaseUserData", selectedUser._id],
+          message.sender
+        );
+      } else if (
+        message.sender._id !== selectedUser?._id &&
+        !isEqual(message.receiver, selectedUser)
+      ) {
+        queryClient.setQueryData(
+          ["databaseUserData", selectedUser._id],
+          message.receiver
+        );
+      }
     };
     socket.on("receive-message", receiveMessageHandler);
 
     return () => {
       socket.off("receive-message", receiveMessageHandler);
     };
-  }, [addNewMessage, refetch]);
+  }, [addNewMessage, queryClient, selectedUser]);
 
   useEffect(() => {
     if (
