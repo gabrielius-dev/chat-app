@@ -87,12 +87,6 @@ const CreateGroupForm = memo(function CreateGroupForm({
       const errors: ErrorInterface[] = result.errors ?? [];
       const formattedErrors = transformError(errors);
 
-      setTimeout(() => {
-        formRef.current?.scrollIntoView({
-          behavior: "smooth",
-        });
-      }, 0);
-
       if (formattedErrors.users) {
         setErrorMessage(formattedErrors.users[0]);
       }
@@ -156,6 +150,15 @@ const CreateGroupForm = memo(function CreateGroupForm({
       } else setImage(image);
     } else setImage(null);
   };
+
+  useEffect(() => {
+    if (errors)
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 0);
+  }, [errors]);
 
   return (
     <Dialog

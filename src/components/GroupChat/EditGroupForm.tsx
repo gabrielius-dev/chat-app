@@ -31,7 +31,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/User";
 import socket from "../../socket/socket";
-import extractFileIdFromDriveUrl from "../utils/extractFileIdFromDriveUrl";
+import getPublicIdFromUrl from "../utils/getPublicIdFromUrl";
 
 interface IFormInput {
   name: string;
@@ -88,7 +88,7 @@ const EditGroupForm = memo(function EditGroupForm({
       if (memoizedGroupChat.image !== null)
         formData.append(
           "prevImageId",
-          extractFileIdFromDriveUrl(memoizedGroupChat.image)
+          getPublicIdFromUrl(memoizedGroupChat.image)
         );
       if (image) {
         formData.append("image", image);
@@ -111,12 +111,6 @@ const EditGroupForm = memo(function EditGroupForm({
       const result = error.response?.data as ErrorResponse;
       const errors: ErrorInterface[] = result.errors ?? [];
       const formattedErrors = transformError(errors);
-
-      setTimeout(() => {
-        formRef.current?.scrollIntoView({
-          behavior: "smooth",
-        });
-      }, 0);
 
       if (formattedErrors.users) {
         setErrorMessage(formattedErrors.users[0]);
@@ -180,6 +174,15 @@ const EditGroupForm = memo(function EditGroupForm({
       } else setImage(image);
     } else setImage(null);
   };
+
+  useEffect(() => {
+    if (errors)
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({
+          behavior: "smooth",
+        });
+      }, 0);
+  }, [errors]);
 
   return (
     <Dialog
