@@ -15,6 +15,7 @@ import {
   DialogContentText,
   Button,
   DialogActions,
+  AlertColor,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -41,6 +42,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import EditGroupForm from "./EditGroupForm";
+import AlertNotification from "../UtilityComponents/AlertNotification";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -77,6 +79,10 @@ const GroupChat = memo(function GroupChat({
     useState<GroupChatWithoutLatestMessage | null>();
   const [showEditGroupChat, setShowEditGroupChat] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [openAlertNotification, setOpenAlertNotification] = useState(false);
+  const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
+  const [alertNotificationType, setAlertNotificationType] =
+    useState<AlertColor>("info");
 
   useEffect(() => {
     setIsLoadingGroupChat(true);
@@ -170,6 +176,19 @@ const GroupChat = memo(function GroupChat({
       socket.off("group-message-deleted", messageDeletedHandler);
     };
   }, [messages, groupChat]);
+
+  useEffect(() => {
+    function handleMessageError({ message }: { message: string }) {
+      setAlertNotificationMessage(message);
+      setAlertNotificationType("error");
+      setOpenAlertNotification(true);
+    }
+
+    socket.on("group-message-error", handleMessageError);
+    return () => {
+      socket.off("group-message-error", handleMessageError);
+    };
+  }, []);
 
   useEffect(() => {
     const receiveMessageHandler = (message: GroupMessageInterface) => {
@@ -367,6 +386,14 @@ const GroupChat = memo(function GroupChat({
             overflow: "auto",
           }}
         >
+          {openAlertNotification && (
+            <AlertNotification
+              message={alertNotificationMessage}
+              type={alertNotificationType}
+              open={openAlertNotification}
+              setOpen={setOpenAlertNotification}
+            />
+          )}
           {showEditGroupChat && (
             <EditGroupForm
               setShowGroupForm={setShowEditGroupChat}

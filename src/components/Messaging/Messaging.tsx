@@ -8,6 +8,7 @@ import {
   useTheme,
   InputBase,
   useMediaQuery,
+  AlertColor,
 } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,6 +32,7 @@ import LoadingScreen from "../UtilityComponents/LoadingScreen";
 import { formatDateString } from "../utils/formatDate";
 import { useChatContext } from "../../context/useChatContext";
 import { isEqual } from "lodash";
+import AlertNotification from "../UtilityComponents/AlertNotification";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -66,6 +68,10 @@ const Messaging = memo(function Messaging({
     useState("");
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const navigate = useNavigate();
+  const [openAlertNotification, setOpenAlertNotification] = useState(false);
+  const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
+  const [alertNotificationType, setAlertNotificationType] =
+    useState<AlertColor>("info");
 
   const { data: selectedUser, isLoading: isLoadingSelectedUser } = useQuery<
     User | undefined,
@@ -154,6 +160,19 @@ const Messaging = memo(function Messaging({
       socket.off("message-deleted", messageDeletedHandler);
     };
   }, [messages, selectedUser]);
+
+  useEffect(() => {
+    function handleMessageError({ message }: { message: string }) {
+      setAlertNotificationMessage(message)
+      setAlertNotificationType('error')
+      setOpenAlertNotification(true)
+    }
+
+    socket.on("message-error", handleMessageError);
+    return () => {
+      socket.off("message-error", handleMessageError);
+    };
+  }, []);
 
   useEffect(() => {
     if (!selectedUser) return;
@@ -353,6 +372,14 @@ const Messaging = memo(function Messaging({
             overflow: "auto",
           }}
         >
+          {openAlertNotification && (
+            <AlertNotification
+              message={alertNotificationMessage}
+              type={alertNotificationType}
+              open={openAlertNotification}
+              setOpen={setOpenAlertNotification}
+            />
+          )}
           <Box
             sx={{
               display: "flex",
