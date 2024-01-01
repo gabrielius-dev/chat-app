@@ -43,10 +43,21 @@ function Login() {
   const queryClient = useQueryClient();
 
   const loginUser = async (data: IFormInput) => {
+    const encodedData = Object.entries(data)
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
+      )
+      .join("&");
     const response: AxiosResponse<UserResponse> = await axios.post(
       "http://localhost:8000/login",
-      data,
-      { withCredentials: true }
+      encodedData,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
     );
     return response.data.user;
   };

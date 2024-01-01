@@ -49,10 +49,21 @@ function SignUp() {
   const queryClient = useQueryClient();
 
   const signUpUser = async (data: IFormInput) => {
+    const encodedData = Object.entries(data)
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
+      )
+      .join("&");
     const response: AxiosResponse<UserResponse> = await axios.post(
       "http://localhost:8000/sign-up",
-      data,
-      { withCredentials: true }
+      encodedData,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
     );
     return response.data.user;
   };
