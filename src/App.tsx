@@ -11,12 +11,12 @@ import Error from "./components/Error/Error";
 import socket from "./socket/socket";
 import Index from "./components/Index/Index";
 import Sidebar from "./components/Sidebar/Sidebar";
-import User from "./components/User/User";
 import GroupChatWrapper from "./components/GroupChat/GroupChatWrapper";
 import MessagingWrapper from "./components/Messaging/MessagingWrapper";
 import { ChatProvider } from "./context/ChatProvider";
 import AlertNotification from "./components/UtilityComponents/AlertNotification";
 import { GroupChatWithoutLatestMessage } from "./components/types/Chat";
+import UserWrapper from "./components/User/UserWrapper";
 
 function App() {
   const isWindowFocused = useContext(WindowFocusContext);
@@ -163,7 +163,7 @@ function App() {
                     />
                     <Route
                       path="/user/:id"
-                      element={<User setOpen={setOpen} />}
+                      element={<UserWrapper open={open} setOpen={setOpen} />}
                     />
                   </>
                 )}
