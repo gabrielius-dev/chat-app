@@ -8,17 +8,17 @@ import {
 } from "@mui/material";
 import { User } from "../types/User";
 import { Link, useNavigate } from "react-router-dom";
-import { Fragment, useState, memo } from "react";
+import { Fragment, useState } from "react";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import AlertNotification from "../UtilityComponents/AlertNotification";
 
-const Header = memo(function Header() {
+function Header() {
   const theme = useTheme();
-  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
   const user: User = queryClient.getQueryData(["userData"])!;
   const navigate = useNavigate();
 
@@ -139,6 +139,6 @@ const Header = memo(function Header() {
       )}
     </Box>
   );
-});
+}
 
 export default Header;
