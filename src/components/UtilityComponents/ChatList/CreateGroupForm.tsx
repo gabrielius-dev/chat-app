@@ -25,6 +25,7 @@ import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateR
 import LoadingScreen from "../LoadingScreen";
 import { GroupChatResponse } from "../../types/Chat";
 import socket from "../../../socket/socket";
+import convertCanvasToImageBlob from "../../utils/convertCanvasToImageBlob";
 
 interface IFormInput {
   name: string;
@@ -41,7 +42,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
   const [selectedUserList, setSelectedUserList] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [scale, setScale] = useState(1);
-  const imageEditor = useRef<AvatarEditor | null>(null);
+  const imageEditor = useRef<AvatarEditor>(null!);
   const [image, setImage] = useState<File | null>(null);
   const [imageErrorMessage, setImageErrorMessage] = useState("");
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
@@ -58,7 +59,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
     },
   });
 
-  const createGroupChat = async (data: IFormInput, image: File | null) => {
+  const createGroupChat = async (data: IFormInput, image: Blob | null) => {
     try {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -109,7 +110,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
   }, [selectedUserList]);
 
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    let image1: File | null = null;
+    let image1: Blob | null = null;
 
     if (selectedUserList.length === 0) {
       setErrorMessage("At least one user must be specified");
@@ -123,18 +124,8 @@ const CreateGroupForm = memo(function CreateGroupForm({
     }
 
     setIsCreatingGroup(true);
-    if (imageEditor.current) {
-      const canvas: HTMLCanvasElement = imageEditor.current.getImage();
-      const dataURL: string | null = canvas.toDataURL();
-
-      if (dataURL) {
-        const res = await fetch(dataURL);
-        const blob = await res.blob();
-        const originalFileName = image?.name ?? "image.png";
-
-        image1 = new File([blob], originalFileName, { type: blob.type });
-      }
-    }
+    if (imageEditor.current)
+      image1 = await convertCanvasToImageBlob(imageEditor);
 
     await createGroupChat(data, image1);
   };

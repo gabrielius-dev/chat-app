@@ -34,6 +34,7 @@ import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateR
 import LoadingScreen from "../UtilityComponents/LoadingScreen";
 import { useParams } from "react-router-dom";
 import getPublicIdFromUrl from "../utils/getPublicIdFromUrl";
+import convertCanvasToImageBlob from "../utils/convertCanvasToImageBlob";
 
 interface IFormInput {
   username: string;
@@ -49,7 +50,7 @@ const EditUserProfileForm = memo(function EditUserProfileForm({
 }) {
   const theme = useTheme();
   const [scale, setScale] = useState(1);
-  const imageEditor = useRef<AvatarEditor | null>(null);
+  const imageEditor = useRef<AvatarEditor>(null!);
   const queryClient = useQueryClient();
   const user: User = queryClient.getQueryData(["userData"])!;
   const [image, setImage] = useState<File | null>(null);
@@ -70,7 +71,7 @@ const EditUserProfileForm = memo(function EditUserProfileForm({
     },
   });
 
-  const editUserProfile = async (data: IFormInput, image: File | null) => {
+  const editUserProfile = async (data: IFormInput, image: Blob | null) => {
     try {
       const formData = new FormData();
       formData.append("username", data.username);
@@ -124,21 +125,11 @@ const EditUserProfileForm = memo(function EditUserProfileForm({
   };
 
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    let image1: File | null = null;
+    let image1: Blob | null = null;
 
     setIsEditingProfile(true);
-    if (imageEditor.current) {
-      const canvas: HTMLCanvasElement = imageEditor.current.getImage();
-      const dataURL: string | null = canvas.toDataURL();
-
-      if (dataURL) {
-        const res = await fetch(dataURL);
-        const blob = await res.blob();
-        const originalFileName = image?.name ?? "image.png";
-
-        image1 = new File([blob], originalFileName, { type: blob.type });
-      }
-    }
+    if (imageEditor.current)
+      image1 = await convertCanvasToImageBlob(imageEditor);
 
     await editUserProfile(data, image1);
   };
