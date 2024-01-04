@@ -4,8 +4,7 @@ import axios, { AxiosResponse } from "axios";
 import { User as UserType, UserResponse } from "./components/types/User";
 import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "./components/UtilityComponents/LoadingScreen";
-import { useContext, useEffect, useState, useCallback } from "react";
-import WindowFocusContext from "./context/WindowsFocusContext";
+import { useEffect, useState, useCallback } from "react";
 import { Box, useTheme, useMediaQuery, AlertColor } from "@mui/material";
 import Error from "./components/Error/Error";
 import socket from "./socket/socket";
@@ -19,7 +18,6 @@ import { GroupChatWithoutLatestMessage } from "./components/types/Chat";
 import UserWrapper from "./components/User/UserWrapper";
 
 function App() {
-  const isWindowFocused = useContext(WindowFocusContext);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
   const location = useLocation();
   const theme = useTheme();
@@ -48,7 +46,7 @@ function App() {
     queryKey: ["userData"],
     queryFn: getUser,
     retry: false,
-    refetchInterval: isWindowFocused ? 1000 * 120 : false,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -65,6 +63,9 @@ function App() {
         socket.disconnect();
       };
     }
+    return () => {
+      socket.disconnect();
+    };
   }, [user]);
 
   useEffect(() => {
