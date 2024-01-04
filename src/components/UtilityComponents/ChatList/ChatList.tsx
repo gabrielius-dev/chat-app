@@ -33,6 +33,33 @@ import { useChatContext } from "../../../context/useChatContext";
 import { GroupMessageInterface, MessageInterface } from "../../types/Message";
 import AlertNotification from "../AlertNotification";
 
+function formatLatestMessage(
+  chatListItem: Chat | GroupChat,
+  user: User,
+  defaultMessage: string
+) {
+  const formatImageCount = (count: number) =>
+    count === 1 ? "an" : count.toString();
+
+  return chatListItem.latestMessage
+    ? `${chatListItem.latestMessage.sender._id === user._id ? "You: " : ""}${
+        chatListItem.latestMessage.content
+          ? chatListItem.latestMessage.content.length > 15
+            ? chatListItem.latestMessage.content.slice(0, 15) + "..."
+            : chatListItem.latestMessage.content
+          : chatListItem.latestMessage.images?.length !== undefined
+          ? `${
+              chatListItem.latestMessage.sender._id === user._id ? "s" : "S"
+            }ent ${formatImageCount(
+              chatListItem.latestMessage.images.length
+            )} image${
+              chatListItem.latestMessage.images.length !== 1 ? "s" : ""
+            }`
+          : defaultMessage
+      }`
+    : defaultMessage;
+}
+
 const MemoizedListItem = memo(function MemoizedListItem({
   chatListItem,
   user,
@@ -94,19 +121,11 @@ const MemoizedListItem = memo(function MemoizedListItem({
           <ListItemText
             sx={{ wordBreak: "break-word", maxWidth: "60%" }}
             primary={chatListItem.username}
-            secondary={
-              chatListItem.latestMessage
-                ? `${
-                    chatListItem.latestMessage?.sender._id === user._id
-                      ? "You: "
-                      : ""
-                  }${
-                    chatListItem.latestMessage?.content?.length > 15
-                      ? chatListItem.latestMessage.content.slice(0, 15) + "..."
-                      : chatListItem.latestMessage.content
-                  }`
-                : "Start with a greeting!"
-            }
+            secondary={formatLatestMessage(
+              chatListItem,
+              user,
+              "Start with a greeting!"
+            )}
           />
           {chatListItem.latestMessage?.createdAt && (
             <TimeAgo
@@ -149,19 +168,11 @@ const MemoizedGroupListItem = memo(function MemoizedListItem({
           <ListItemText
             sx={{ wordBreak: "break-word", maxWidth: "60%" }}
             primary={chatListItem.name}
-            secondary={
-              chatListItem.latestMessage
-                ? `${
-                    chatListItem.latestMessage?.sender._id === user._id
-                      ? "You: "
-                      : `${chatListItem.latestMessage?.sender.username}: `
-                  }${
-                    chatListItem.latestMessage?.content?.length > 15
-                      ? chatListItem.latestMessage.content.slice(0, 15) + "..."
-                      : chatListItem.latestMessage.content
-                  }`
-                : "Say hello to the group!"
-            }
+            secondary={formatLatestMessage(
+              chatListItem,
+              user,
+              "Say hello to the group!"
+            )}
           />
           {chatListItem.latestMessage?.createdAt && (
             <TimeAgo
@@ -517,7 +528,7 @@ const ChatList = memo(function ChatList() {
     }
 
     groupChatList.forEach((groupChat) => handleJoinRoom(groupChat._id));
-  }, [groupChatList, joinedRooms]);
+  }, [groupChatList, joinedRooms, user]);
 
   useEffect(() => {
     return () => {
