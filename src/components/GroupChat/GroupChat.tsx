@@ -16,6 +16,8 @@ import {
   Button,
   DialogActions,
   AlertColor,
+  CircularProgress,
+  Skeleton,
 } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -29,6 +31,7 @@ import {
   Dispatch,
   memo,
   Fragment,
+  ChangeEvent,
 } from "react";
 import { User } from "../types/User";
 import socket from "../../socket/socket";
@@ -43,6 +46,9 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import EditGroupForm from "./EditGroupForm";
 import AlertNotification from "../UtilityComponents/AlertNotification";
+import compressImage from "../UtilityComponents/compressImage";
+import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
+import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -59,7 +65,6 @@ const GroupChat = memo(function GroupChat({
   const queryClient = useQueryClient();
   const user: User = queryClient.getQueryData(["userData"])!;
   const { chatId } = useParams();
-  const [message, setMessage] = useState("");
   const roomId = chatId;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isInitialMessageFetching, setInitialMessageFetching] = useState(true);
@@ -68,7 +73,6 @@ const GroupChat = memo(function GroupChat({
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<GroupMessageInterface[]>([]);
-  const [newMessageAdded, setNewMessageAdded] = useState(false);
   const [isMessageValid, setIsMessageValid] = useState(true);
   const [isLoadingGroupChat, setIsLoadingGroupChat] = useState(true);
   const [showLoadingScreen, setShowLoadingScreen] = useState(false);
@@ -83,6 +87,11 @@ const GroupChat = memo(function GroupChat({
   const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
   const [alertNotificationType, setAlertNotificationType] =
     useState<AlertColor>("info");
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const messageInputRef = useRef<HTMLInputElement>();
+  const [selectedImagesLength, setSelectedImagesLength] = useState(0);
+  const [textMessageIsSent, setTextMessageIsSent] = useState(true);
+  const [imagesMessageIsSent, setImagesMessageIsSent] = useState(true);
 
   useEffect(() => {
     setIsLoadingGroupChat(true);
@@ -109,7 +118,7 @@ const GroupChat = memo(function GroupChat({
     setTimeout(() => {
       setShowLoadingScreen(true);
     }, 1000);
-  }, [chatId]);
+  }, []);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -128,7 +137,6 @@ const GroupChat = memo(function GroupChat({
     });
     setSkipAmount((prevSkipAmount) => prevSkipAmount + 1);
     scrollToBottom();
-    setNewMessageAdded(true);
   }, []);
 
   useEffect(() => {
@@ -136,7 +144,7 @@ const GroupChat = memo(function GroupChat({
     return () => {
       socket.emit("leave-room", roomId);
     };
-  }, [roomId]);
+  }, [roomId, user]);
 
   useEffect(() => {
     function handleEditGroupChat(groupChat: GroupChatWithoutLatestMessage) {
@@ -193,6 +201,8 @@ const GroupChat = memo(function GroupChat({
   useEffect(() => {
     const receiveMessageHandler = (message: GroupMessageInterface) => {
       addNewMessage(message);
+      if (message.content) setTextMessageIsSent(true);
+      if (message.images) setImagesMessageIsSent(true);
     };
     socket.on("receive-group-message", receiveMessageHandler);
 
@@ -253,6 +263,8 @@ const GroupChat = memo(function GroupChat({
         withCredentials: true,
       }
     );
+    setSkipAmount((prevSkipAmount) => prevSkipAmount + 30);
+
     return res.data;
   }, [skipAmount, chatId]);
 
@@ -263,7 +275,7 @@ const GroupChat = memo(function GroupChat({
       messages.length &&
       groupChat &&
       moreMessagesExist &&
-      !newMessageAdded
+      moreMessagesShowed
     ) {
       const hasVerticalScrollbar =
         messagesContainer.scrollHeight > messagesContainer.clientHeight;
@@ -284,13 +296,19 @@ const GroupChat = memo(function GroupChat({
     messages.length,
     moreMessagesExist,
     groupChat,
-    newMessageAdded,
+    moreMessagesShowed,
   ]);
 
   const handleScroll = useCallback(
     (e: React.UIEvent<HTMLDivElement>) => {
+      const messagesContainer = messagesContainerRef.current;
+      if (!messagesContainer) return;
+      const hasVerticalScrollbar =
+        messagesContainer.scrollHeight > messagesContainer.clientHeight;
       if (e.currentTarget.scrollTop === 0 && moreMessagesExist) {
         setPrevScrollHeight(e.currentTarget.scrollHeight);
+
+        if (!hasVerticalScrollbar) return;
 
         fetchMoreMessages()
           .then((messages) => {
@@ -301,9 +319,6 @@ const GroupChat = memo(function GroupChat({
           .catch((err) => {
             console.error(err);
           });
-
-        setNewMessageAdded(false);
-        setSkipAmount((prevSkipAmount) => prevSkipAmount + 30);
       }
     },
     [fetchMoreMessages, moreMessagesExist]
@@ -311,33 +326,63 @@ const GroupChat = memo(function GroupChat({
 
   useLayoutEffect(() => {
     const messagesContainer = messagesContainerRef.current;
-    if (
-      messagesContainer &&
-      prevScrollHeight &&
-      messages.length > 30 &&
-      !newMessageAdded &&
-      !moreMessagesShowed
-    ) {
+    if (messagesContainer && prevScrollHeight && !moreMessagesShowed) {
       messagesContainer.scrollTop =
         messagesContainer.scrollHeight - prevScrollHeight;
       setMoreMessagesShowed(true);
     }
-  }, [messages.length, moreMessagesShowed, newMessageAdded, prevScrollHeight]);
+  }, [moreMessagesShowed, prevScrollHeight]);
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setMessage(e.target.value);
-      setIsMessageValid(true);
-    },
-    []
-  );
+  const handleInputChange = useCallback(() => {
+    setIsMessageValid(true);
+  }, []);
 
-  const handleMessageSubmit = () => {
-    if (message.trim() === "") {
+  const handleMessageSubmit = async () => {
+    if (!messageInputRef.current || !groupChat?._id) return;
+
+    const message = messageInputRef.current.value;
+
+    if (selectedImagesLength !== selectedImages?.length) {
+      setAlertNotificationMessage(
+        "Please wait a moment while the images are loading. This may take a few seconds."
+      );
+      setAlertNotificationType("info");
+      setOpenAlertNotification(true);
+      return;
+    }
+
+    if (message.trim() === "" && selectedImages.length === 0) {
       setIsMessageValid(false);
     } else {
-      socket.emit("send-group-message", message, user._id, chatId, roomId);
-      setMessage("");
+      if (message.trim()) setTextMessageIsSent(false);
+
+      if (selectedImages.length) setImagesMessageIsSent(false);
+
+      setIsMessageValid(true);
+      messageInputRef.current.value = "";
+      setSelectedImages([]);
+      setSelectedImagesLength(0);
+      const formData = new FormData();
+
+      if (message.trim()) formData.append("message", message);
+      else formData.append("message", "");
+
+      formData.append("sender", user._id);
+      formData.append("receiver", groupChat._id);
+      formData.append("roomId", groupChat._id);
+
+      if (selectedImages.length > 0) {
+        for (const image of selectedImages) {
+          formData.append("images", image);
+        }
+      }
+      try {
+        await axios.post(`http://localhost:8000/group-message`, formData, {
+          withCredentials: true,
+        });
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -372,6 +417,40 @@ const GroupChat = memo(function GroupChat({
     if (response.status === 204) {
       socket.emit("delete-group-chat", groupChat);
     }
+  }
+
+  const handleFileChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>) => {
+      const selectedImages = e.target.files;
+
+      if (selectedImages) {
+        setSelectedImagesLength(
+          (prevLength) => selectedImages.length + prevLength
+        );
+        for (const image of selectedImages) {
+          try {
+            const compressedImage = await compressImage(image);
+
+            setSelectedImages((prevSelectedImages) => [
+              ...prevSelectedImages,
+              compressedImage,
+            ]);
+          } catch (error) {
+            console.error("Error compressing image:", error);
+          }
+        }
+      }
+    },
+    []
+  );
+
+  function removeSelectedImage(image: File) {
+    setSelectedImages((prevSelectedImages) =>
+      prevSelectedImages.filter(
+        (prevSelectedImage) => prevSelectedImage !== image
+      )
+    );
+    setSelectedImagesLength((prevLength) => prevLength - 1);
   }
 
   return (
@@ -506,34 +585,122 @@ const GroupChat = memo(function GroupChat({
             sx={{
               p: 2,
               display: "flex",
-              alignItems: "center",
               gap: 2,
               borderTop: `1px solid ${theme.lightGray}`,
+              alignItems: "center",
             }}
           >
-            <InputBase
-              placeholder="Type a message here..."
-              value={message}
-              onInput={handleInputChange}
-              multiline
-              maxRows={3}
-              autoFocus
-              required
-              error={!isMessageValid}
-              inputProps={{ maxLength: 1000, spellCheck: false }}
+            <IconButton component="label" htmlFor="fileInput">
+              <AddPhotoAlternateRoundedIcon sx={{ color: theme.deepBlue }} />
+              <input
+                type="file"
+                id="fileInput"
+                accept="image/*"
+                multiple
+                style={{ display: "none" }}
+                onChange={(e) => void handleFileChange(e)}
+              />
+            </IconButton>
+            <Box
               sx={{
+                display: "flex",
                 flex: 1,
-                padding: 2,
+                flexDirection: "column",
                 borderRadius: 10,
                 boxShadow: 1,
-                border: "1px solid transparent",
-                "&.Mui-error": {
-                  border: isMessageValid ? undefined : "1px solid red",
-                },
+                border: isMessageValid
+                  ? "1px solid transparent"
+                  : "1px solid red",
+                width: "100%",
+                overflow: "hidden",
               }}
-            />
+            >
+              {selectedImagesLength > 0 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    p: 2,
+                    overflowX: "auto",
+                  }}
+                >
+                  {selectedImages.map((image, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        position: "relative",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <IconButton
+                        sx={{
+                          position: "absolute",
+                          right: -10,
+                          top: -10,
+                          backgroundColor: "white",
+                          borderRadius: 50,
+                          p: 0.5,
+                          "&:hover": {
+                            backgroundColor: "white",
+                          },
+                        }}
+                        onClick={() => removeSelectedImage(image)}
+                      >
+                        <ClearRoundedIcon
+                          sx={{ width: 16, height: 16, color: "black" }}
+                        />
+                      </IconButton>
+                      <img
+                        src={URL.createObjectURL(image)}
+                        style={{
+                          objectFit: "cover",
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: 7,
+                        }}
+                      />
+                    </Box>
+                  ))}
+                  {Array.from(
+                    { length: selectedImagesLength - selectedImages.length },
+                    (_, i) => (
+                      <Box
+                        key={i}
+                        sx={{
+                          position: "relative",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Skeleton
+                          variant="rectangular"
+                          width="48px"
+                          height="48px"
+                          animation="wave"
+                        />
+                      </Box>
+                    )
+                  )}
+                </Box>
+              )}
+              <InputBase
+                placeholder="Aa"
+                inputRef={messageInputRef}
+                onChange={handleInputChange}
+                multiline
+                maxRows={3}
+                autoFocus
+                required
+                error={!isMessageValid}
+                inputProps={{ maxLength: 1000, spellCheck: false }}
+                sx={{
+                  flex: 1,
+                  padding: 2,
+                }}
+              />
+            </Box>
             <button
-              onClick={handleMessageSubmit}
+              onClick={() => void handleMessageSubmit()}
               style={{
                 width: 50,
                 height: 50,
@@ -543,33 +710,39 @@ const GroupChat = memo(function GroupChat({
                 justifyContent: "center",
                 alignItems: "center",
               }}
+              disabled={!textMessageIsSent || !imagesMessageIsSent}
             >
-              <svg
-                fill="#fff"
-                height="30px"
-                width="30px"
-                version="1.1"
-                id="Capa_1"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 495.003 495.003"
-                xmlSpace="preserve"
-              >
-                <g id="XMLID_51_">
-                  <path
-                    id="XMLID_53_"
-                    d="M164.711,456.687c0,2.966,1.647,5.686,4.266,7.072c2.617,1.385,5.799,1.207,8.245-0.468l55.09-37.616
+              {(!textMessageIsSent || !imagesMessageIsSent) && (
+                <CircularProgress sx={{ color: "white" }} />
+              )}
+              {textMessageIsSent && imagesMessageIsSent && (
+                <svg
+                  fill="#fff"
+                  height="30px"
+                  width="30px"
+                  version="1.1"
+                  id="Capa_1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                  viewBox="0 0 495.003 495.003"
+                  xmlSpace="preserve"
+                >
+                  <g id="XMLID_51_">
+                    <path
+                      id="XMLID_53_"
+                      d="M164.711,456.687c0,2.966,1.647,5.686,4.266,7.072c2.617,1.385,5.799,1.207,8.245-0.468l55.09-37.616
 		l-67.6-32.22V456.687z"
-                  />
-                  <path
-                    id="XMLID_52_"
-                    d="M492.431,32.443c-1.513-1.395-3.466-2.125-5.44-2.125c-1.19,0-2.377,0.264-3.5,0.816L7.905,264.422
+                    />
+                    <path
+                      id="XMLID_52_"
+                      d="M492.431,32.443c-1.513-1.395-3.466-2.125-5.44-2.125c-1.19,0-2.377,0.264-3.5,0.816L7.905,264.422
 		c-4.861,2.389-7.937,7.353-7.904,12.783c0.033,5.423,3.161,10.353,8.057,12.689l125.342,59.724l250.62-205.99L164.455,364.414
 		l156.145,74.4c1.918,0.919,4.012,1.376,6.084,1.376c1.768,0,3.519-0.322,5.186-0.977c3.637-1.438,6.527-4.318,7.97-7.956
 		L494.436,41.257C495.66,38.188,494.862,34.679,492.431,32.443z"
-                  />
-                </g>
-              </svg>
+                    />
+                  </g>
+                </svg>
+              )}
             </button>
           </Box>
         </Box>
