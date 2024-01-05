@@ -180,6 +180,7 @@ function Message({
                   display: "flex",
                   flexWrap: "wrap",
                   gap: "16px",
+                  justifyContent: "space-between",
                 }}
               >
                 {message.images.map((image, index) => (
@@ -187,7 +188,7 @@ function Message({
                     key={index}
                     sx={{
                       flex: "1 1 calc(25% - 16px)",
-                      minWidth: "80px",
+                      minWidth: "100px",
                       maxWidth: "150px",
                       maxHeight: "150px",
                       position: "relative",
@@ -203,9 +204,13 @@ function Message({
                     {loadingImages.includes(index) && (
                       <Skeleton
                         variant="rectangular"
-                        width="100%"
-                        height="100%"
                         animation="wave"
+                        style={{
+                          width: "clamp(80px,150px,36vw)",
+                          height: "clamp(80px,150px,36vw)",
+                          maxWidth: "100%",
+                          maxHeight: "100%",
+                        }}
                       />
                     )}
                     <img
@@ -233,7 +238,10 @@ function Message({
                   backgroundColor: "rgba(0, 0, 0, 0.9)",
                 },
               }}
-              controller={{ closeOnPullDown: true, closeOnBackdropClick: true }}
+              controller={{
+                closeOnPullDown: true,
+                closeOnBackdropClick: true,
+              }}
             />
           </>
         )}
