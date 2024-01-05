@@ -42,7 +42,13 @@ function formatLatestMessage(
     count === 1 ? "an" : count.toString();
 
   return chatListItem.latestMessage
-    ? `${chatListItem.latestMessage.sender._id === user._id ? "You: " : ""}${
+    ? `${
+        chatListItem.latestMessage.sender._id === user._id
+          ? "You: "
+          : chatListItem.latestMessage.sender._id !== chatListItem._id
+          ? `${chatListItem.latestMessage.sender.username}: `
+          : ""
+      }${
         chatListItem.latestMessage.content
           ? chatListItem.latestMessage.content.length > 15
             ? chatListItem.latestMessage.content.slice(0, 15) + "..."
