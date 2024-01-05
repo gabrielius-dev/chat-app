@@ -82,6 +82,7 @@ const Messaging = memo(function Messaging({
   const [selectedImagesLength, setSelectedImagesLength] = useState(0);
   const [textMessageIsSent, setTextMessageIsSent] = useState(true);
   const [imagesMessageIsSent, setImagesMessageIsSent] = useState(true);
+  const [messagesDeleted, setMessagesDeleted] = useState(0);
 
   const { data: selectedUser, isLoading: isLoadingSelectedUser } = useQuery<
     User | undefined,
@@ -135,7 +136,7 @@ const Messaging = memo(function Messaging({
         block: "end",
         inline: "nearest",
       });
-    }, 0);
+    }, 300);
   };
 
   const addNewMessage = useCallback((newMessage: MessageInterface) => {
@@ -158,6 +159,7 @@ const Messaging = memo(function Messaging({
     if (!selectedUser && messages.length === 0) return;
 
     function messageDeletedHandler(message: MessageInterface) {
+      setMessagesDeleted((prevCount) => prevCount + 1);
       setMessages((previousMessages) =>
         previousMessages.filter(
           (prevMessage) => prevMessage._id !== message._id
@@ -274,7 +276,7 @@ const Messaging = memo(function Messaging({
         params: {
           user: user._id,
           selectedUser: selectedUserId,
-          skipAmount: skipAmount + 30,
+          skipAmount: skipAmount + 30 - messagesDeleted,
         },
         withCredentials: true,
       }
@@ -282,7 +284,7 @@ const Messaging = memo(function Messaging({
     setSkipAmount((prevSkipAmount) => prevSkipAmount + 30);
 
     return res.data;
-  }, [selectedUserId, skipAmount, user._id]);
+  }, [messagesDeleted, selectedUserId, skipAmount, user._id]);
 
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current;

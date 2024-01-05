@@ -92,6 +92,7 @@ const GroupChat = memo(function GroupChat({
   const [selectedImagesLength, setSelectedImagesLength] = useState(0);
   const [textMessageIsSent, setTextMessageIsSent] = useState(true);
   const [imagesMessageIsSent, setImagesMessageIsSent] = useState(true);
+  const [messagesDeleted, setMessagesDeleted] = useState(0);
 
   useEffect(() => {
     setIsLoadingGroupChat(true);
@@ -127,7 +128,7 @@ const GroupChat = memo(function GroupChat({
         block: "end",
         inline: "nearest",
       });
-    }, 0);
+    }, 300);
   };
 
   const addNewMessage = useCallback((newMessage: GroupMessageInterface) => {
@@ -172,6 +173,7 @@ const GroupChat = memo(function GroupChat({
     if (!groupChat && messages.length === 0) return;
 
     function messageDeletedHandler(message: GroupMessageInterface) {
+      setMessagesDeleted((prevCount) => prevCount + 1);
       setMessages((previousMessages) =>
         previousMessages.filter(
           (prevMessage) => prevMessage._id !== message._id
@@ -258,7 +260,7 @@ const GroupChat = memo(function GroupChat({
       {
         params: {
           groupChat: chatId,
-          skipAmount: skipAmount + 30,
+          skipAmount: skipAmount + 30 - messagesDeleted,
         },
         withCredentials: true,
       }
@@ -266,7 +268,7 @@ const GroupChat = memo(function GroupChat({
     setSkipAmount((prevSkipAmount) => prevSkipAmount + 30);
 
     return res.data;
-  }, [skipAmount, chatId]);
+  }, [chatId, skipAmount, messagesDeleted]);
 
   useEffect(() => {
     const messagesContainer = messagesContainerRef.current;
