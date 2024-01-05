@@ -10,7 +10,6 @@ import {
   useMediaQuery,
   AlertColor,
   IconButton,
-  CircularProgress,
   Skeleton,
 } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -80,8 +79,6 @@ const Messaging = memo(function Messaging({
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const messageInputRef = useRef<HTMLInputElement>();
   const [selectedImagesLength, setSelectedImagesLength] = useState(0);
-  const [textMessageIsSent, setTextMessageIsSent] = useState(true);
-  const [imagesMessageIsSent, setImagesMessageIsSent] = useState(true);
   const [messagesDeleted, setMessagesDeleted] = useState(0);
 
   const { data: selectedUser, isLoading: isLoadingSelectedUser } = useQuery<
@@ -141,11 +138,24 @@ const Messaging = memo(function Messaging({
 
   const addNewMessage = useCallback((newMessage: MessageInterface) => {
     setMessages((previousMessages) => {
-      if (previousMessages.length === 0) return [newMessage];
-      return [...previousMessages, newMessage];
+      const updatedMessages = [...previousMessages, newMessage];
+
+      const previousMessagesCopy = [...updatedMessages];
+
+      updatedMessages.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+
+      const orderChanged = !isEqual(previousMessagesCopy, updatedMessages);
+
+      if (!orderChanged) {
+        scrollToBottom();
+      }
+
+      return updatedMessages;
     });
     setSkipAmount((prevSkipAmount) => prevSkipAmount + 1);
-    scrollToBottom();
   }, []);
 
   useEffect(() => {
@@ -190,8 +200,6 @@ const Messaging = memo(function Messaging({
     if (!selectedUser) return;
     const receiveMessageHandler = (message: MessageInterface) => {
       addNewMessage(message);
-      if (message.content) setTextMessageIsSent(true);
-      if (message.images) setImagesMessageIsSent(true);
       if (
         message.sender._id === selectedUser?._id &&
         !isEqual(message.sender, selectedUser)
@@ -215,7 +223,7 @@ const Messaging = memo(function Messaging({
     return () => {
       socket.off("receive-message", receiveMessageHandler);
     };
-  }, [addNewMessage, queryClient, selectedUser]);
+  }, [addNewMessage, queryClient, selectedUser, user._id]);
 
   useEffect(() => {
     if (
@@ -245,7 +253,9 @@ const Messaging = memo(function Messaging({
           setMessages(res);
           setMoreMessagesExist(res.length === 30);
         })
-        .catch((err) => console.error(err))
+        .catch(() => {
+          /* empty */
+        })
         .finally(() => {
           setInitialMessageFetching(false);
           setPreviousSelectedUserUsername(selectedUser.username);
@@ -304,8 +314,8 @@ const Messaging = memo(function Messaging({
             setMoreMessagesExist(messages.length === 30);
             setMoreMessagesShowed(false);
           })
-          .catch((err) => {
-            console.error(err);
+          .catch(() => {
+            /* empty */
           });
       }
     }
@@ -334,8 +344,8 @@ const Messaging = memo(function Messaging({
             setMoreMessagesExist(messages.length === 30);
             setMoreMessagesShowed(false);
           })
-          .catch((err) => {
-            console.error(err);
+          .catch(() => {
+            /* empty */
           });
       }
     },
@@ -372,10 +382,6 @@ const Messaging = memo(function Messaging({
     if (message.trim() === "" && selectedImages.length === 0) {
       setIsMessageValid(false);
     } else {
-      if (message.trim()) setTextMessageIsSent(false);
-
-      if (selectedImages.length) setImagesMessageIsSent(false);
-
       setIsMessageValid(true);
       messageInputRef.current.value = "";
       setSelectedImages([]);
@@ -398,8 +404,8 @@ const Messaging = memo(function Messaging({
         await axios.post(`http://localhost:8000/message`, formData, {
           withCredentials: true,
         });
-      } catch (err) {
-        console.error(err);
+      } catch {
+        /* empty */
       }
     }
   };
@@ -426,8 +432,8 @@ const Messaging = memo(function Messaging({
               ...prevSelectedImages,
               compressedImage,
             ]);
-          } catch (error) {
-            console.error("Error compressing image:", error);
+          } catch {
+            /* empty */
           }
         }
       }
@@ -655,39 +661,33 @@ const Messaging = memo(function Messaging({
                 justifyContent: "center",
                 alignItems: "center",
               }}
-              disabled={!textMessageIsSent || !imagesMessageIsSent}
             >
-              {(!textMessageIsSent || !imagesMessageIsSent) && (
-                <CircularProgress sx={{ color: "white" }} />
-              )}
-              {textMessageIsSent && imagesMessageIsSent && (
-                <svg
-                  fill="#fff"
-                  height="30px"
-                  width="30px"
-                  version="1.1"
-                  id="Capa_1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
-                  viewBox="0 0 495.003 495.003"
-                  xmlSpace="preserve"
-                >
-                  <g id="XMLID_51_">
-                    <path
-                      id="XMLID_53_"
-                      d="M164.711,456.687c0,2.966,1.647,5.686,4.266,7.072c2.617,1.385,5.799,1.207,8.245-0.468l55.09-37.616
+              <svg
+                fill="#fff"
+                height="30px"
+                width="30px"
+                version="1.1"
+                id="Capa_1"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlnsXlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 495.003 495.003"
+                xmlSpace="preserve"
+              >
+                <g id="XMLID_51_">
+                  <path
+                    id="XMLID_53_"
+                    d="M164.711,456.687c0,2.966,1.647,5.686,4.266,7.072c2.617,1.385,5.799,1.207,8.245-0.468l55.09-37.616
 		l-67.6-32.22V456.687z"
-                    />
-                    <path
-                      id="XMLID_52_"
-                      d="M492.431,32.443c-1.513-1.395-3.466-2.125-5.44-2.125c-1.19,0-2.377,0.264-3.5,0.816L7.905,264.422
+                  />
+                  <path
+                    id="XMLID_52_"
+                    d="M492.431,32.443c-1.513-1.395-3.466-2.125-5.44-2.125c-1.19,0-2.377,0.264-3.5,0.816L7.905,264.422
 		c-4.861,2.389-7.937,7.353-7.904,12.783c0.033,5.423,3.161,10.353,8.057,12.689l125.342,59.724l250.62-205.99L164.455,364.414
 		l156.145,74.4c1.918,0.919,4.012,1.376,6.084,1.376c1.768,0,3.519-0.322,5.186-0.977c3.637-1.438,6.527-4.318,7.97-7.956
 		L494.436,41.257C495.66,38.188,494.862,34.679,492.431,32.443z"
-                    />
-                  </g>
-                </svg>
-              )}
+                  />
+                </g>
+              </svg>
             </button>
           </Box>
         </Box>
