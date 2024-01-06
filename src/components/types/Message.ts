@@ -7,6 +7,7 @@ export interface MessageInterface {
   sender: User;
   receiver: User;
   images?: Image[];
+  sendingIndicatorId?: string;
 }
 
 interface Image {
@@ -28,4 +29,5 @@ export interface GroupMessageInterface {
   sender: SenderInterface;
   receiver: string;
   images?: Image[];
+  sendingIndicatorId?: string;
 }
