@@ -98,7 +98,6 @@ function Message({
           ml: `${message.sender._id === user._id ? "auto" : "0"}`,
           mr: `${message.sender._id !== user._id ? "auto" : "0"}`,
           flexDirection: "column",
-          gap: 2,
         }}
       >
         {message.content && (
