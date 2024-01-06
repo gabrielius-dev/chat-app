@@ -39,6 +39,7 @@ import AlertNotification from "../UtilityComponents/AlertNotification";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import compressImage from "../UtilityComponents/compressImage";
+import { v4 as uuidv4 } from "uuid";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -138,7 +139,14 @@ const Messaging = memo(function Messaging({
 
   const addNewMessage = useCallback((newMessage: MessageInterface) => {
     setMessages((previousMessages) => {
-      const updatedMessages = [...previousMessages, newMessage];
+      // To remove loading message when the real message arrives if loading message even existed
+      const filteredMessages = previousMessages.filter(
+        (message) =>
+          !newMessage.sendingIndicatorId ||
+          message.sendingIndicatorId !== newMessage.sendingIndicatorId
+      );
+
+      const updatedMessages = [...filteredMessages, newMessage];
 
       const previousMessagesCopy = [...updatedMessages];
 
@@ -387,6 +395,31 @@ const Messaging = memo(function Messaging({
       setSelectedImages([]);
       setSelectedImagesLength(0);
       const formData = new FormData();
+
+      //Show loading message if message contains image(s)
+      if (selectedImages.length > 0) {
+        const uniqueId: string = uuidv4();
+
+        const loadingMessage: MessageInterface = {
+          _id: uniqueId,
+          createdAt: new Date().toISOString(),
+          sender: {
+            username: "NOT IMPORTANT",
+            _id: "NOT IMPORTANT",
+            lastOnline: "NOT IMPORTANT",
+            online: false,
+          },
+          receiver: {
+            username: "NOT IMPORTANT",
+            _id: "NOT IMPORTANT",
+            lastOnline: "NOT IMPORTANT",
+            online: false,
+          },
+          sendingIndicatorId: uniqueId,
+        };
+        setMessages((prevMessages) => [...prevMessages, loadingMessage]);
+        formData.append("sendingIndicatorId", uniqueId);
+      }
 
       if (message.trim()) formData.append("message", message);
       else formData.append("message", "");

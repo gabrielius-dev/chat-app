@@ -1,6 +1,7 @@
-import { useMemo, memo } from "react";
+import { useMemo, memo, Fragment } from "react";
 import { GroupMessageInterface } from "../types/Message";
 import Message from "./Message";
+import LoadingMessage from "../UtilityComponents/LoadingMessage";
 
 const Messages = memo(function Messages({
   messages,
@@ -16,7 +17,14 @@ const Messages = memo(function Messages({
   const memoizedMessages = useMemo(
     () =>
       messages.map((message) => (
-        <Message message={message} key={message._id} messages={messages} />
+        <Fragment key={message._id}>
+          {message.sendingIndicatorId !== message._id && (
+            <Message message={message} messages={messages} />
+          )}{" "}
+          {message.sendingIndicatorId === message._id && (
+            <LoadingMessage createdAt={message.createdAt} />
+          )}
+        </Fragment>
       )),
     [messages]
   );

@@ -49,6 +49,7 @@ import compressImage from "../UtilityComponents/compressImage";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { isEqual } from "lodash";
+import { v4 as uuidv4 } from "uuid";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -133,7 +134,14 @@ const GroupChat = memo(function GroupChat({
 
   const addNewMessage = useCallback((newMessage: GroupMessageInterface) => {
     setMessages((previousMessages) => {
-      const updatedMessages = [...previousMessages, newMessage];
+      // To remove loading message when the real message arrives if loading message even existed
+      const filteredMessages = previousMessages.filter(
+        (message) =>
+          !newMessage.sendingIndicatorId ||
+          message.sendingIndicatorId !== newMessage.sendingIndicatorId
+      );
+
+      const updatedMessages = [...filteredMessages, newMessage];
 
       const previousMessagesCopy = [...updatedMessages];
 
@@ -375,6 +383,24 @@ const GroupChat = memo(function GroupChat({
       setSelectedImages([]);
       setSelectedImagesLength(0);
       const formData = new FormData();
+
+      //Show loading message if message contains image(s)
+      if (selectedImages.length > 0) {
+        const uniqueId: string = uuidv4();
+
+        const loadingMessage: GroupMessageInterface = {
+          _id: uniqueId,
+          createdAt: new Date().toISOString(),
+          sender: {
+            username: "NOT IMPORTANT",
+            _id: "NOT IMPORTANT",
+          },
+          receiver: "NOT IMPORTANT",
+          sendingIndicatorId: uniqueId,
+        };
+        setMessages((prevMessages) => [...prevMessages, loadingMessage]);
+        formData.append("sendingIndicatorId", uniqueId);
+      }
 
       if (message.trim()) formData.append("message", message);
       else formData.append("message", "");
