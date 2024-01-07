@@ -14,7 +14,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
-import socket from "../../socket/socket";
 import AlertNotification from "../UtilityComponents/AlertNotification";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -54,22 +53,13 @@ function Message({
   async function deleteMessage() {
     try {
       setIsDeletingMessage(true);
+      const isLatestMessageDeleted =
+        messages.indexOf(message) === messages.length - 1;
 
       const res: AxiosResponse = await axios.delete(
-        `http://localhost:8000/message/${message._id}`,
+        `http://localhost:8000/group-message/${message._id}?isLatestMessageDeleted=${isLatestMessageDeleted}`,
         { withCredentials: true }
       );
-      if (res.status === 204) {
-        let latestMessage;
-
-        if (messages.indexOf(message) === messages.length - 1) {
-          latestMessage = messages[messages.length - 2];
-        } else {
-          latestMessage = messages[messages.length - 1];
-        }
-
-        socket.emit("delete-group-message", message, latestMessage);
-      }
       if (res.status !== 204) setOpen(true);
     } catch (err) {
       setOpen(true);
