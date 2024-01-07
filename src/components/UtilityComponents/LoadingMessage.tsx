@@ -2,7 +2,13 @@ import { Box, Typography } from "@mui/material";
 import { ClockLoader } from "react-spinners";
 import formatCustomDate from "../utils/formatDate";
 
-function LoadingMessage({ createdAt }: { createdAt: string }) {
+function LoadingMessage({
+  createdAt,
+  imagesCount,
+}: {
+  createdAt: string;
+  imagesCount: number;
+}) {
   return (
     <Box
       sx={{
@@ -27,7 +33,7 @@ function LoadingMessage({ createdAt }: { createdAt: string }) {
         }}
       >
         <Typography variant="subtitle1" color="white">
-          Message is being sent
+          {imagesCount > 1 ? "Images are" : "Image is"} being sent
         </Typography>
         <ClockLoader size={15} color="white" />
       </Box>
