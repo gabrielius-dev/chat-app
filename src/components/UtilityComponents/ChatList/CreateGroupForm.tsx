@@ -24,8 +24,8 @@ import { MuiFileInput } from "mui-file-input";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import LoadingScreen from "../LoadingScreen";
 import { GroupChatResponse } from "../../types/Chat";
-import socket from "../../../socket/socket";
 import convertCanvasToImageBlob from "../../utils/convertCanvasToImageBlob";
+import { useNavigate } from "react-router-dom";
 
 interface IFormInput {
   name: string;
@@ -47,6 +47,8 @@ const CreateGroupForm = memo(function CreateGroupForm({
   const [imageErrorMessage, setImageErrorMessage] = useState("");
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const userListRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const {
     setError,
@@ -79,7 +81,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
 
       if (groupChat) {
         setShowGroupForm(false);
-        socket.emit("create-group-chat", groupChat);
+        navigate(`/group-chat/${groupChat._id}`);
       }
     } catch (err) {
       console.clear();
@@ -115,7 +117,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
     if (selectedUserList.length === 0) {
       setErrorMessage("At least one user must be specified");
       setTimeout(() => {
-        formRef.current?.scrollIntoView({
+        userListRef.current?.scrollIntoView({
           behavior: "smooth",
         });
       }, 0);
@@ -305,14 +307,15 @@ const CreateGroupForm = memo(function CreateGroupForm({
               />
             </Box>
           )}
-
-          <UserList
-            setSelectedUserList={setSelectedUserList}
-            errorMessage={errorMessage}
-            selectedUserList={selectedUserList}
-            prevSelectedUserList={null}
-            excludeUser={""}
-          />
+          <div ref={userListRef} style={{ width: "100%", height: "100%" }}>
+            <UserList
+              setSelectedUserList={setSelectedUserList}
+              errorMessage={errorMessage}
+              selectedUserList={selectedUserList}
+              prevSelectedUserList={null}
+              excludeUser={""}
+            />
+          </div>
         </form>
       </DialogContent>
       <DialogActions>
