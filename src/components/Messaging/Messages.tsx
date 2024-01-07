@@ -20,9 +20,12 @@ const Messages = memo(function Messages({
         <Fragment key={message._id}>
           {message.sendingIndicatorId !== message._id && (
             <Message message={message} messages={messages} />
-          )}{" "}
+          )}
           {message.sendingIndicatorId === message._id && (
-            <LoadingMessage createdAt={message.createdAt} />
+            <LoadingMessage
+              createdAt={message.createdAt}
+              imagesCount={message.images?.[0].width ?? 1}
+            />
           )}
         </Fragment>
       )),
