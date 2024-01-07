@@ -384,21 +384,38 @@ const GroupChat = memo(function GroupChat({
       setSelectedImagesLength(0);
       const formData = new FormData();
 
+      const createdAt = Date.now();
+
       //Show loading message if message contains image(s)
       if (selectedImages.length > 0) {
         const uniqueId: string = uuidv4();
 
+        // Minus one millisecond to show loading message before text message if it exists
+        const currentDate = new Date(createdAt);
+        const datePlusOneMillisecond = new Date(currentDate.getTime() - 1);
+
+        const datePlusOneMillisecondString =
+          datePlusOneMillisecond.toISOString();
+
         const loadingMessage: GroupMessageInterface = {
           _id: uniqueId,
-          createdAt: new Date().toISOString(),
+          createdAt: datePlusOneMillisecondString,
           sender: {
             username: "NOT IMPORTANT",
             _id: "NOT IMPORTANT",
           },
           receiver: "NOT IMPORTANT",
           sendingIndicatorId: uniqueId,
+          images: [
+            {
+              width: selectedImages.length,
+              height: selectedImages.length,
+              url: "NOT IMPORTANT",
+            },
+          ],
         };
         setMessages((prevMessages) => [...prevMessages, loadingMessage]);
+        scrollToBottom();
         formData.append("sendingIndicatorId", uniqueId);
       }
 
@@ -407,6 +424,7 @@ const GroupChat = memo(function GroupChat({
 
       formData.append("sender", user._id);
       formData.append("receiver", groupChat._id);
+      formData.append("createdAt", createdAt.toString());
       formData.append("roomId", groupChat._id);
 
       if (selectedImages.length > 0) {

@@ -396,13 +396,22 @@ const Messaging = memo(function Messaging({
       setSelectedImagesLength(0);
       const formData = new FormData();
 
+      const createdAt = Date.now();
+
       //Show loading message if message contains image(s)
       if (selectedImages.length > 0) {
         const uniqueId: string = uuidv4();
 
+        // Minus one millisecond to show loading message before text message if it exists
+        const currentDate = new Date(createdAt);
+        const datePlusOneMillisecond = new Date(currentDate.getTime() - 1);
+
+        const datePlusOneMillisecondString =
+          datePlusOneMillisecond.toISOString();
+
         const loadingMessage: MessageInterface = {
           _id: uniqueId,
-          createdAt: new Date().toISOString(),
+          createdAt: datePlusOneMillisecondString,
           sender: {
             username: "NOT IMPORTANT",
             _id: "NOT IMPORTANT",
@@ -416,8 +425,16 @@ const Messaging = memo(function Messaging({
             online: false,
           },
           sendingIndicatorId: uniqueId,
+          images: [
+            {
+              width: selectedImages.length,
+              height: selectedImages.length,
+              url: "NOT IMPORTANT",
+            },
+          ],
         };
         setMessages((prevMessages) => [...prevMessages, loadingMessage]);
+        scrollToBottom();
         formData.append("sendingIndicatorId", uniqueId);
       }
 
@@ -426,6 +443,7 @@ const Messaging = memo(function Messaging({
 
       formData.append("sender", user._id);
       formData.append("receiver", selectedUserId);
+      formData.append("createdAt", createdAt.toString());
       formData.append("roomId", roomId);
 
       if (selectedImages.length > 0) {
