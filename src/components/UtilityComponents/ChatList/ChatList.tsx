@@ -18,7 +18,7 @@ import {
   AlertColor,
 } from "@mui/material";
 import TimeAgo from "react-timeago";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import socket from "../../../socket/socket";
 import {
@@ -214,7 +214,6 @@ const ChatList = memo(function ChatList() {
   const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
   const [alertNotificationType, setAlertNotificationType] =
     useState<AlertColor>("info");
-  const navigate = useNavigate();
 
   const chatListFetching = useCallback(async () => {
     const response: AxiosResponse<Chat[]> = await axios.get(
@@ -253,7 +252,9 @@ const ChatList = memo(function ChatList() {
         setGroupChatList(res);
         setIsLoadingGroupChats(false);
       })
-      .catch((err) => console.error(err));
+      .catch(() => {
+        /*Empty*/
+      });
   }, [groupChatListFetching, setGroupChatList]);
 
   useEffect(() => {
@@ -264,7 +265,9 @@ const ChatList = memo(function ChatList() {
         setChatList(res);
         setIsLoading(false);
       })
-      .catch((err) => console.error(err));
+      .catch(() => {
+        /*Empty*/
+      });
   }, [chatListFetching, setChatList]);
 
   useEffect(() => {
@@ -277,13 +280,17 @@ const ChatList = memo(function ChatList() {
             setChatList(res);
             setIsLoading(false);
           })
-          .catch((err) => console.error(err));
+          .catch(() => {
+            /*Empty*/
+          });
         groupChatListFetching()
           .then((res) => {
             setGroupChatList(res);
             setIsLoading(false);
           })
-          .catch((err) => console.error(err));
+          .catch(() => {
+            /*Empty*/
+          });
       }, 60000);
     } else {
       clearInterval(intervalId!);
@@ -294,29 +301,29 @@ const ChatList = memo(function ChatList() {
   }, [chatListFetching, groupChatListFetching, isWindowFocused, setChatList, setGroupChatList]);
 
   useEffect(() => {
-    function handleDeletedMessage(
-      message: MessageInterface,
-      latestMessage: MessageInterface
-    ) {
+    async function handleDeletedMessage(message: MessageInterface) {
+      let chatListItem: Chat;
+      if (message.sender._id !== user._id) {
+        const response: AxiosResponse<Chat> = await axios.get(
+          `http://localhost:8000/chat-list-chat/${message.sender._id}`,
+          { withCredentials: true }
+        );
+        chatListItem = response.data;
+      }
+      if (message.receiver._id !== user._id) {
+        const response: AxiosResponse<Chat> = await axios.get(
+          `http://localhost:8000/chat-list-chat/${message.receiver._id}`,
+          { withCredentials: true }
+        );
+        chatListItem = response.data;
+      }
       setChatList((prevChatList: Chat[]) =>
         prevChatList
           .map((chat: Chat) => {
-            if (
-              chat._id === message.sender._id &&
-              chat.latestMessage._id === message._id
-            ) {
-              return {
-                ...message.sender,
-                latestMessage,
-              };
-            } else if (
-              chat._id === message.receiver._id &&
-              chat.latestMessage._id === message._id
-            ) {
-              return {
-                ...message.receiver,
-                latestMessage,
-              };
+            if (chat._id === message.sender._id) {
+              if (chatListItem) return chatListItem;
+            } else if (chat._id === message.receiver._id) {
+              if (chatListItem) return chatListItem;
             }
             return chat;
           })
@@ -344,24 +351,22 @@ const ChatList = memo(function ChatList() {
     return () => {
       socket.off("message-deleted-chat-list", handleDeletedMessage);
     };
-  }, [setChatList]);
+  }, [setChatList, user._id]);
 
   useEffect(() => {
-    function handleDeletedMessage(
-      message: GroupMessageInterface,
-      latestMessage: GroupMessageInterface
-    ) {
+    async function handleDeletedMessage(message: GroupMessageInterface) {
+      const response: AxiosResponse<GroupChat> = await axios.get(
+        `http://localhost:8000/group-chat-list-chat/${message.receiver}`,
+        { withCredentials: true }
+      );
+
+      const chatListItem = response.data;
+
       setGroupChatList((prevGroupChatList: GroupChat[]) =>
         prevGroupChatList
           .map((chat: GroupChat) => {
-            if (
-              chat._id === message.receiver &&
-              chat.latestMessage._id === message._id
-            ) {
-              return {
-                ...chat,
-                latestMessage,
-              };
+            if (chat._id === message.receiver) {
+              return chatListItem;
             }
             return chat;
           })
@@ -436,10 +441,8 @@ const ChatList = memo(function ChatList() {
               }
             })
           );
-        if (groupChat.creator === user._id)
-          navigate(`/group-chat/${groupChat._id}`);
-      } catch (err) {
-        console.error(err);
+      } catch {
+        /*Empty*/
       }
     }
 
@@ -473,7 +476,7 @@ const ChatList = memo(function ChatList() {
 
       socket.off("group-chat-deleted", handleGroupChatRemoved);
     };
-  }, [navigate, setGroupChatList, user._id]);
+  }, [setGroupChatList, user._id]);
 
   useEffect(() => {
     socket.emit("join-room", user._id);
@@ -488,7 +491,10 @@ const ChatList = memo(function ChatList() {
         prevChatList
           .map((chat) => {
             if (chat._id === returnedChat._id) {
-              return returnedChat;
+              const isLatestMessage =
+                new Date(returnedChat.latestMessage.createdAt) >
+                new Date(chat.latestMessage.createdAt);
+              if (isLatestMessage) return returnedChat;
             }
             return chat;
           })
@@ -551,7 +557,10 @@ const ChatList = memo(function ChatList() {
         prevGroupChatList
           .map((chat) => {
             if (chat._id === returnedChat._id) {
-              return returnedChat;
+              const isLatestMessage =
+                new Date(returnedChat.latestMessage.createdAt) >
+                new Date(chat.latestMessage.createdAt);
+              if (isLatestMessage) return returnedChat;
             }
             return chat;
           })
