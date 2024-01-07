@@ -30,7 +30,6 @@ import {
 } from "../types/Chat";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/User";
-import socket from "../../socket/socket";
 import getPublicIdFromUrl from "../utils/getPublicIdFromUrl";
 import convertCanvasToImageBlob from "../utils/convertCanvasToImageBlob";
 
@@ -104,7 +103,6 @@ const EditGroupForm = memo(function EditGroupForm({
       );
       const groupChat = response.data.groupChat;
       if (groupChat) {
-        socket.emit("edit-group-chat", groupChat, memoizedGroupChat);
         setShowGroupForm(false);
       }
     } catch (err) {
