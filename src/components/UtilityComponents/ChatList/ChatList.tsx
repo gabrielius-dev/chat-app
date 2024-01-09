@@ -209,7 +209,6 @@ const ChatList = memo(function ChatList() {
   const user: User = queryClient.getQueryData(["userData"])!;
   const isWindowFocused = useContext(WindowFocusContext);
   const [showGroupForm, setShowGroupForm] = useState(false);
-  const [joinedRooms, setJoinedRooms] = useState<Set<string>>(new Set());
   const [openAlertNotification, setOpenAlertNotification] = useState(false);
   const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
   const [alertNotificationType, setAlertNotificationType] =
@@ -317,14 +316,16 @@ const ChatList = memo(function ChatList() {
         );
         chatListItem = response.data;
       }
+
       setChatList((prevChatList: Chat[]) =>
         prevChatList
           .map((chat: Chat) => {
-            if (chat._id === message.sender._id) {
+            if (
+              chat._id === message.sender._id ||
+              chat._id === message.receiver._id
+            )
               if (chatListItem) return chatListItem;
-            } else if (chat._id === message.receiver._id) {
-              if (chatListItem) return chatListItem;
-            }
+
             return chat;
           })
           .sort((a, b) => {
@@ -487,34 +488,41 @@ const ChatList = memo(function ChatList() {
 
   useEffect(() => {
     function getNewChatHandler(returnedChat: Chat) {
-      setChatList((prevChatList) =>
-        prevChatList
-          .map((chat) => {
-            if (chat._id === returnedChat._id) {
-              const isLatestMessage =
-                new Date(returnedChat.latestMessage.createdAt) >
-                new Date(chat.latestMessage.createdAt);
-              if (isLatestMessage) return returnedChat;
-            }
-            return chat;
-          })
-          .sort((a, b) => {
-            const aLatestCreatedAt = a.latestMessage?.createdAt;
-            const bLatestCreatedAt = b.latestMessage?.createdAt;
+      setChatList((prevChatList) => {
+        const isChatInList = prevChatList.some(
+          (chat) => chat._id === returnedChat._id
+        );
 
-            if (aLatestCreatedAt && bLatestCreatedAt) {
-              return bLatestCreatedAt.localeCompare(aLatestCreatedAt);
-            } else if (aLatestCreatedAt) {
-              return -1;
-            } else if (bLatestCreatedAt) {
-              return 1;
-            } else {
-              const aCreatedAt = a.lastOnline ?? "0000-00-00T00:00:00.000Z";
-              const bCreatedAt = b.lastOnline ?? "0000-00-00T00:00:00.000Z";
-              return bCreatedAt.localeCompare(aCreatedAt);
-            }
-          })
-      );
+        if (isChatInList)
+          return prevChatList
+            .map((chat) => {
+              if (chat._id === returnedChat._id) {
+                const isLatestMessage = chat.latestMessage
+                  ? new Date(returnedChat.latestMessage.createdAt) >
+                    new Date(chat.latestMessage.createdAt)
+                  : true;
+                if (isLatestMessage) return returnedChat;
+              }
+              return chat;
+            })
+            .sort((a, b) => {
+              const aLatestCreatedAt = a.latestMessage?.createdAt;
+              const bLatestCreatedAt = b.latestMessage?.createdAt;
+
+              if (aLatestCreatedAt && bLatestCreatedAt) {
+                return bLatestCreatedAt.localeCompare(aLatestCreatedAt);
+              } else if (aLatestCreatedAt) {
+                return -1;
+              } else if (bLatestCreatedAt) {
+                return 1;
+              } else {
+                const aCreatedAt = a.lastOnline ?? "0000-00-00T00:00:00.000Z";
+                const bCreatedAt = b.lastOnline ?? "0000-00-00T00:00:00.000Z";
+                return bCreatedAt.localeCompare(aCreatedAt);
+              }
+            });
+        else return [returnedChat, ...prevChatList];
+      });
     }
 
     socket.on("get-new-chat", getNewChatHandler);
@@ -524,63 +532,43 @@ const ChatList = memo(function ChatList() {
     };
   }, [setChatList]);
 
-  //If user profile is edited socket will reconnect, join rooms again
-  useEffect(() => {
-    setJoinedRooms(new Set());
-  }, [user]);
-
-  useEffect(() => {
-    if (!groupChatList.length) return;
-
-    function handleJoinRoom(groupChatId: string) {
-      if (!joinedRooms.has(groupChatId)) {
-        socket.emit("join-room", `group-chat-list-${groupChatId}`);
-        setJoinedRooms((prevRooms) => new Set(prevRooms).add(groupChatId));
-      }
-    }
-
-    groupChatList.forEach((groupChat) => handleJoinRoom(groupChat._id));
-  }, [groupChatList, joinedRooms, user]);
-
-  useEffect(() => {
-    return () => {
-      joinedRooms.forEach((room) =>
-        socket.emit("leave-room", `group-chat-list-${room}`)
-      );
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   useEffect(() => {
     function getNewGroupChatHandler(returnedChat: GroupChat) {
-      setGroupChatList((prevGroupChatList) =>
-        prevGroupChatList
-          .map((chat) => {
-            if (chat._id === returnedChat._id) {
-              const isLatestMessage =
-                new Date(returnedChat.latestMessage.createdAt) >
-                new Date(chat.latestMessage.createdAt);
-              if (isLatestMessage) return returnedChat;
-            }
-            return chat;
-          })
-          .sort((a, b) => {
-            const aLatestCreatedAt = a.latestMessage?.createdAt;
-            const bLatestCreatedAt = b.latestMessage?.createdAt;
+      setGroupChatList((prevGroupChatList) => {
+        const isChatInList = prevGroupChatList.some(
+          (chat) => chat._id === returnedChat._id
+        );
 
-            if (aLatestCreatedAt && bLatestCreatedAt) {
-              return bLatestCreatedAt.localeCompare(aLatestCreatedAt);
-            } else if (aLatestCreatedAt) {
-              return -1;
-            } else if (bLatestCreatedAt) {
-              return 1;
-            } else {
-              const aCreatedAt = a.createdAt ?? "0000-00-00T00:00:00.000Z";
-              const bCreatedAt = b.createdAt ?? "0000-00-00T00:00:00.000Z";
-              return bCreatedAt.localeCompare(aCreatedAt);
-            }
-          })
-      );
+        if (isChatInList)
+          return prevGroupChatList
+            .map((chat) => {
+              if (chat._id === returnedChat._id) {
+                const isLatestMessage = chat.latestMessage
+                  ? new Date(returnedChat.latestMessage.createdAt) >
+                    new Date(chat.latestMessage.createdAt)
+                  : true;
+                if (isLatestMessage) return returnedChat;
+              }
+              return chat;
+            })
+            .sort((a, b) => {
+              const aLatestCreatedAt = a.latestMessage?.createdAt;
+              const bLatestCreatedAt = b.latestMessage?.createdAt;
+
+              if (aLatestCreatedAt && bLatestCreatedAt) {
+                return bLatestCreatedAt.localeCompare(aLatestCreatedAt);
+              } else if (aLatestCreatedAt) {
+                return -1;
+              } else if (bLatestCreatedAt) {
+                return 1;
+              } else {
+                const aCreatedAt = a.createdAt ?? "0000-00-00T00:00:00.000Z";
+                const bCreatedAt = b.createdAt ?? "0000-00-00T00:00:00.000Z";
+                return bCreatedAt.localeCompare(aCreatedAt);
+              }
+            });
+        else return [returnedChat, ...prevGroupChatList];
+      });
     }
 
     socket.on("get-new-group-chat", getNewGroupChatHandler);
