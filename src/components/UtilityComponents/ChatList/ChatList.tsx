@@ -1,5 +1,12 @@
 import axios, { AxiosResponse } from "axios";
-import { useEffect, useState, memo, useContext, useCallback } from "react";
+import {
+  useEffect,
+  useState,
+  memo,
+  useContext,
+  useCallback,
+  ChangeEvent,
+} from "react";
 import { User } from "../../types/User";
 import {
   Avatar,
@@ -16,6 +23,7 @@ import {
   styled,
   Typography,
   AlertColor,
+  InputBase,
 } from "@mui/material";
 import TimeAgo from "react-timeago";
 import { Link } from "react-router-dom";
@@ -213,37 +221,41 @@ const ChatList = memo(function ChatList() {
   const [alertNotificationMessage, setAlertNotificationMessage] = useState("");
   const [alertNotificationType, setAlertNotificationType] =
     useState<AlertColor>("info");
+  const [groupSearchValue, setGroupSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState("");
 
   const chatListFetching = useCallback(async () => {
     const response: AxiosResponse<Chat[]> = await axios.get(
       "http://localhost:8000/chat-list",
       {
-        params: { loadOffset },
+        params: { loadOffset, searchValue },
 
         withCredentials: true,
       }
     );
-    if (response.data.length < 10 * loadOffset) setMoreChatsExist(false);
+
+    setMoreChatsExist(response.data.length === 10 * loadOffset);
 
     return response.data;
-  }, [loadOffset]);
+  }, [loadOffset, searchValue]);
 
   const groupChatListFetching = useCallback(async () => {
     const response: AxiosResponse<GroupChat[]> = await axios.get(
       "http://localhost:8000/group-chat-list",
       {
-        params: { loadOffset: groupLoadOffset },
+        params: { loadOffset: groupLoadOffset, searchValue: groupSearchValue },
 
         withCredentials: true,
       }
     );
-    if (response.data.length < 5 * groupLoadOffset)
-      setMoreGroupChatsExist(false);
+
+    setMoreGroupChatsExist(response.data.length === 5 * groupLoadOffset);
 
     return response.data;
-  }, [groupLoadOffset]);
+  }, [groupLoadOffset, groupSearchValue]);
 
   useEffect(() => {
+    if (groupSearchValue !== "") return;
     setIsLoadingGroupChats(true);
 
     groupChatListFetching()
@@ -254,9 +266,10 @@ const ChatList = memo(function ChatList() {
       .catch(() => {
         /*Empty*/
       });
-  }, [groupChatListFetching, setGroupChatList]);
+  }, [groupChatListFetching, groupSearchValue, setGroupChatList]);
 
   useEffect(() => {
+    if (searchValue !== "") return;
     setIsLoading(true);
 
     chatListFetching()
@@ -267,7 +280,7 @@ const ChatList = memo(function ChatList() {
       .catch(() => {
         /*Empty*/
       });
-  }, [chatListFetching, setChatList]);
+  }, [chatListFetching, searchValue, setChatList]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -277,14 +290,6 @@ const ChatList = memo(function ChatList() {
         chatListFetching()
           .then((res) => {
             setChatList(res);
-            setIsLoading(false);
-          })
-          .catch(() => {
-            /*Empty*/
-          });
-        groupChatListFetching()
-          .then((res) => {
-            setGroupChatList(res);
             setIsLoading(false);
           })
           .catch(() => {
@@ -578,6 +583,50 @@ const ChatList = memo(function ChatList() {
     };
   }, [setGroupChatList]);
 
+  useEffect(() => {
+    setGroupLoadOffset(1);
+  }, [groupSearchValue]);
+
+  useEffect(() => {
+    if (groupSearchValue === "") return;
+
+    setIsLoadingGroupChats(true);
+    const getData = setTimeout(() => {
+      groupChatListFetching()
+        .then((res) => {
+          setGroupChatList(res);
+          setIsLoadingGroupChats(false);
+        })
+        .catch(() => {
+          /*EMPTY*/
+        });
+    }, 500);
+
+    return () => clearTimeout(getData);
+  }, [groupChatListFetching, groupSearchValue, setGroupChatList]);
+
+  useEffect(() => {
+    setLoadOffset(1);
+  }, [searchValue]);
+
+  useEffect(() => {
+    if (searchValue === "") return;
+
+    setIsLoading(true);
+    const getData = setTimeout(() => {
+      chatListFetching()
+        .then((res) => {
+          setChatList(res);
+          setIsLoading(false);
+        })
+        .catch(() => {
+          /*EMPTY*/
+        });
+    }, 500);
+
+    return () => clearTimeout(getData);
+  }, [chatListFetching, searchValue, setChatList]);
+
   const loadMoreUsers = () =>
     setLoadOffset((currentLoadOffset) => currentLoadOffset + 1);
 
@@ -642,7 +691,7 @@ const ChatList = memo(function ChatList() {
               "&:hover": {
                 border: 2,
               },
-              borderRadius: 1,
+              borderRadius: 10,
               border: 2,
               margin: 1,
             }}
@@ -650,6 +699,34 @@ const ChatList = memo(function ChatList() {
           >
             Create group chat
           </Button>
+          <Box sx={{ width: "100%", p: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                width: "100%",
+                border: `1px solid rgba(0, 0, 0, 0.23)`,
+                borderRadius: 10,
+                p: 1,
+              }}
+            >
+              <InputBase
+                sx={{ ml: 1, flex: 1, color: "rgba(0, 0, 0, 0.87)" }}
+                placeholder="Search for group chats"
+                inputProps={{ "aria-label": "search group chats" }}
+                value={groupSearchValue}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  setGroupSearchValue(e.target.value)
+                }
+              />
+            </Box>
+          </Box>
+          {groupChatList.length === 0 &&
+            !isLoadingGroupChats &&
+            groupSearchValue && (
+              <Typography sx={{ textAlign: "center" }} variant="h5">
+                No matching group chats found
+              </Typography>
+            )}
           <List sx={{ width: "100%", bgcolor: "background.paper", pt: 0 }}>
             {groupChatList.map((chatListItem) => (
               <MemoizedGroupListItem
@@ -682,7 +759,7 @@ const ChatList = memo(function ChatList() {
                 "&:hover": {
                   border: 2,
                 },
-                borderRadius: 1,
+                borderRadius: 10,
                 border: 2,
                 marginX: 1,
               }}
@@ -706,6 +783,32 @@ const ChatList = memo(function ChatList() {
         >
           User list
         </Typography>
+        <Box sx={{ width: "100%", p: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              width: "100%",
+              border: `1px solid rgba(0, 0, 0, 0.23)`,
+              borderRadius: 10,
+              p: 1,
+            }}
+          >
+            <InputBase
+              sx={{ ml: 1, flex: 1, color: "rgba(0, 0, 0, 0.87)" }}
+              placeholder="Search for users"
+              inputProps={{ "aria-label": "search users" }}
+              value={searchValue}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setSearchValue(e.target.value)
+              }
+            />
+          </Box>
+        </Box>
+        {chatList.length === 0 && !isLoading && (
+          <Typography sx={{ textAlign: "center" }} variant="h5">
+            No matching users found
+          </Typography>
+        )}
         <List sx={{ width: "100%", bgcolor: "background.paper", pt: 0 }}>
           {chatList.map((chatListItem) => (
             <MemoizedListItem
@@ -746,7 +849,7 @@ const ChatList = memo(function ChatList() {
               "&:hover": {
                 border: 2,
               },
-              borderRadius: 1,
+              borderRadius: 10,
               border: 2,
               mx: 1,
               flex: 1,
