@@ -8,12 +8,22 @@ function LoadingScreen() {
     <Box
       sx={{
         position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-      <ClipLoader size={"20vw"} color={theme.deepBlue} />
+      <ClipLoader
+        color={theme.deepBlue}
+        cssOverride={{
+          aspectRatio: "1/1",
+          width: "40%",
+          height: "auto",
+          maxWidth: "300px",
+        }}
+      />
     </Box>
   );
 }
