@@ -294,7 +294,7 @@ const UserList = memo(function UserList({
         </FormGroup>
         {userList.length === 0 && !isLoading && (
           <Typography sx={{ textAlign: "center" }} variant="h5">
-            No matching users found.
+            No matching users found
           </Typography>
         )}
         {isLoading && <CircularProgress sx={{ color: theme.deepBlue }} />}
