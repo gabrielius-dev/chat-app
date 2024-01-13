@@ -20,10 +20,8 @@ import "yet-another-react-lightbox/styles.css";
 
 function Message({
   message,
-  messages,
 }: {
   message: GroupMessageInterface;
-  messages: GroupMessageInterface[];
 }) {
   const queryClient = useQueryClient();
   const theme = useTheme();
@@ -53,11 +51,9 @@ function Message({
   async function deleteMessage() {
     try {
       setIsDeletingMessage(true);
-      const isLatestMessageDeleted =
-        messages.indexOf(message) === messages.length - 1;
 
       const res: AxiosResponse = await axios.delete(
-        `http://localhost:8000/group-message/${message._id}?isLatestMessageDeleted=${isLatestMessageDeleted}`,
+        `http://localhost:8000/group-message/${message._id}`,
         { withCredentials: true }
       );
       if (res.status !== 204) setOpen(true);
