@@ -71,7 +71,7 @@ const CreateGroupForm = memo(function CreateGroupForm({
       }
 
       const response: AxiosResponse<GroupChatResponse> = await axios.post(
-        "http://localhost:8000/group-chat",
+        `${import.meta.env.VITE_BACK_END_URL}/group-chat`,
         formData,
         {
           withCredentials: true,

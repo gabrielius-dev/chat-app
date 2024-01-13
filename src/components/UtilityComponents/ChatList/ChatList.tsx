@@ -226,7 +226,7 @@ const ChatList = memo(function ChatList() {
 
   const chatListFetching = useCallback(async () => {
     const response: AxiosResponse<Chat[]> = await axios.get(
-      "http://localhost:8000/chat-list",
+      `${import.meta.env.VITE_BACK_END_URL}/chat-list`,
       {
         params: { loadOffset, searchValue },
 
@@ -241,7 +241,7 @@ const ChatList = memo(function ChatList() {
 
   const groupChatListFetching = useCallback(async () => {
     const response: AxiosResponse<GroupChat[]> = await axios.get(
-      "http://localhost:8000/group-chat-list",
+      `${import.meta.env.VITE_BACK_END_URL}/group-chat-list`,
       {
         params: { loadOffset: groupLoadOffset, searchValue: groupSearchValue },
 
@@ -309,14 +309,18 @@ const ChatList = memo(function ChatList() {
       let chatListItem: Chat;
       if (message.sender._id !== user._id) {
         const response: AxiosResponse<Chat> = await axios.get(
-          `http://localhost:8000/chat-list-chat/${message.sender._id}`,
+          `${import.meta.env.VITE_BACK_END_URL}/chat-list-chat/${
+            message.sender._id
+          }`,
           { withCredentials: true }
         );
         chatListItem = response.data;
       }
       if (message.receiver._id !== user._id) {
         const response: AxiosResponse<Chat> = await axios.get(
-          `http://localhost:8000/chat-list-chat/${message.receiver._id}`,
+          `${import.meta.env.VITE_BACK_END_URL}/chat-list-chat/${
+            message.receiver._id
+          }`,
           { withCredentials: true }
         );
         chatListItem = response.data;
@@ -362,7 +366,9 @@ const ChatList = memo(function ChatList() {
   useEffect(() => {
     async function handleDeletedMessage(message: GroupMessageInterface) {
       const response: AxiosResponse<GroupChat> = await axios.get(
-        `http://localhost:8000/group-chat-list-chat/${message.receiver}`,
+        `${import.meta.env.VITE_BACK_END_URL}/group-chat-list-chat/${
+          message.receiver
+        }`,
         { withCredentials: true }
       );
 
@@ -424,7 +430,9 @@ const ChatList = memo(function ChatList() {
 
       try {
         const response: AxiosResponse<GroupChat> = await axios.get(
-          `http://localhost:8000/group-chat-list-chat/${groupChat._id}`,
+          `${import.meta.env.VITE_BACK_END_URL}/group-chat-list-chat/${
+            groupChat._id
+          }`,
           { withCredentials: true }
         );
 

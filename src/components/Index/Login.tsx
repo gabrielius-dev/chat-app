@@ -50,7 +50,7 @@ function Login() {
       )
       .join("&");
     const response: AxiosResponse<UserResponse> = await axios.post(
-      "http://localhost:8000/login",
+      `${import.meta.env.VITE_BACK_END_URL}/login`,
       encodedData,
       {
         withCredentials: true,
@@ -110,7 +110,7 @@ function Login() {
       )
       .join("&");
     const response: AxiosResponse<UserResponse> = await axios.post(
-      "http://localhost:8000/login",
+      `${import.meta.env.VITE_BACK_END_URL}/login`,
       encodedData,
       {
         withCredentials: true,

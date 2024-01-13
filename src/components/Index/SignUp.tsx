@@ -56,7 +56,7 @@ function SignUp() {
       )
       .join("&");
     const response: AxiosResponse<UserResponse> = await axios.post(
-      "http://localhost:8000/sign-up",
+      `${import.meta.env.VITE_BACK_END_URL}/sign-up`,
       encodedData,
       {
         withCredentials: true,

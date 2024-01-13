@@ -18,11 +18,7 @@ import AlertNotification from "../UtilityComponents/AlertNotification";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
-function Message({
-  message,
-}: {
-  message: GroupMessageInterface;
-}) {
+function Message({ message }: { message: GroupMessageInterface }) {
   const queryClient = useQueryClient();
   const theme = useTheme();
   const user: User = queryClient.getQueryData(["userData"])!;
@@ -53,7 +49,7 @@ function Message({
       setIsDeletingMessage(true);
 
       const res: AxiosResponse = await axios.delete(
-        `http://localhost:8000/group-message/${message._id}`,
+        `${import.meta.env.VITE_BACK_END_URL}/group-message/${message._id}`,
         { withCredentials: true }
       );
       if (res.status !== 204) setOpen(true);

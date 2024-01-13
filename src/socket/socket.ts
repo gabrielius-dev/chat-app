@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:8000", {
+const socket = io(`${import.meta.env.VITE_BACK_END_URL}`, {
   withCredentials: true,
   autoConnect: false,
 });

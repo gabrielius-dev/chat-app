@@ -25,7 +25,7 @@ function Header() {
   async function handleLogout(popupState: PopupStateType) {
     try {
       await axios.post(
-        "http://localhost:8000/logout",
+        `${import.meta.env.VITE_BACK_END_URL}/logout`,
         {},
         {
           withCredentials: true,

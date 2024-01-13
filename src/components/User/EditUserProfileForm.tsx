@@ -84,7 +84,7 @@ const EditUserProfileForm = memo(function EditUserProfileForm({
       }
 
       const response: AxiosResponse<UserResponse> = await axios.put(
-        `http://localhost:8000/user/${user._id}`,
+        `${import.meta.env.VITE_BACK_END_URL}/user/${user._id}`,
         formData,
         {
           withCredentials: true,

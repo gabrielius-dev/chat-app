@@ -97,7 +97,7 @@ const GroupChat = memo(function GroupChat({
     setIsLoadingGroupChat(true);
     async function fetchGroupChat() {
       const response: AxiosResponse<GroupChatResponse> = await axios.get(
-        `http://localhost:8000/group-chat/${chatId}`,
+        `${import.meta.env.VITE_BACK_END_URL}/group-chat/${chatId}`,
         { withCredentials: true }
       );
 
@@ -236,7 +236,7 @@ const GroupChat = memo(function GroupChat({
     if (!isLoadingGroupChat && groupChat) {
       const fetchMessages = async () => {
         const res: AxiosResponse<GroupMessageInterface[]> = await axios.get(
-          "http://localhost:8000/group-messages",
+          `${import.meta.env.VITE_BACK_END_URL}/group-messages`,
           {
             params: {
               groupChat: groupChat._id,
@@ -278,7 +278,7 @@ const GroupChat = memo(function GroupChat({
 
   const fetchMoreMessages = useCallback(async () => {
     const res: AxiosResponse<GroupMessageInterface[]> = await axios.get(
-      "http://localhost:8000/group-messages",
+      `${import.meta.env.VITE_BACK_END_URL}/group-messages`,
       {
         params: {
           groupChat: chatId,
@@ -433,9 +433,13 @@ const GroupChat = memo(function GroupChat({
         }
       }
       try {
-        await axios.post(`http://localhost:8000/group-message`, formData, {
-          withCredentials: true,
-        });
+        await axios.post(
+          `${import.meta.env.VITE_BACK_END_URL}/group-message`,
+          formData,
+          {
+            withCredentials: true,
+          }
+        );
       } catch {
         /* empty */
       }
@@ -465,9 +469,12 @@ const GroupChat = memo(function GroupChat({
   async function deleteGroupChat() {
     if (!groupChat) return;
 
-    await axios.delete(`http://localhost:8000/group-chat/${groupChat._id}`, {
-      withCredentials: true,
-    });
+    await axios.delete(
+      `${import.meta.env.VITE_BACK_END_URL}/group-chat/${groupChat._id}`,
+      {
+        withCredentials: true,
+      }
+    );
   }
 
   const handleFileChange = useCallback(

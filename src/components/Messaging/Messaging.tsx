@@ -95,7 +95,7 @@ const Messaging = memo(function Messaging({
 
   async function getDatabaseUser() {
     const response: AxiosResponse<DatabaseUserResponse> = await axios.get(
-      `http://localhost:8000/user/${selectedUserId}`,
+      `${import.meta.env.VITE_BACK_END_URL}/user/${selectedUserId}`,
       { withCredentials: true }
     );
 
@@ -241,7 +241,7 @@ const Messaging = memo(function Messaging({
     ) {
       const fetchMessages = async () => {
         const res: AxiosResponse<MessageInterface[]> = await axios.get(
-          "http://localhost:8000/messages",
+          `${import.meta.env.VITE_BACK_END_URL}/messages`,
           {
             params: {
               user: user._id,
@@ -289,7 +289,7 @@ const Messaging = memo(function Messaging({
 
   const fetchMoreMessages = useCallback(async () => {
     const res: AxiosResponse<MessageInterface[]> = await axios.get(
-      "http://localhost:8000/messages",
+      `${import.meta.env.VITE_BACK_END_URL}/messages`,
       {
         params: {
           user: user._id,
@@ -452,7 +452,7 @@ const Messaging = memo(function Messaging({
         }
       }
       try {
-        await axios.post(`http://localhost:8000/message`, formData, {
+        await axios.post(`${import.meta.env.VITE_BACK_END_URL}/message`, formData, {
           withCredentials: true,
         });
       } catch {

@@ -130,7 +130,7 @@ const UserList = memo(function UserList({
 
   const fetchUserList = useCallback(async () => {
     const response: AxiosResponse<User[]> = await axios.get(
-      "http://localhost:8000/user-list",
+      `${import.meta.env.VITE_BACK_END_URL}/user-list`,
       {
         params: {
           loadOffset,

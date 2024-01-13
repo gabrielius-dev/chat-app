@@ -41,7 +41,7 @@ function Message({ message }: { message: MessageInterface }) {
       setIsDeletingMessage(true);
 
       const res: AxiosResponse = await axios.delete(
-        `http://localhost:8000/message/${message._id}`,
+        `${import.meta.env.VITE_BACK_END_URL}/message/${message._id}`,
         { withCredentials: true }
       );
 

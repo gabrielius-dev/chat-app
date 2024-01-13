@@ -40,7 +40,7 @@ export default function User({
 
   async function getUserProfile() {
     const response: AxiosResponse<DatabaseUserResponse> = await axios.get(
-      `http://localhost:8000/user/${id}`,
+      `${import.meta.env.VITE_BACK_END_URL}/user/${id}`,
       { withCredentials: true }
     );
 

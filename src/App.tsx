@@ -34,7 +34,7 @@ function App() {
 
   const getUser = useCallback(async () => {
     const response: AxiosResponse<UserResponse> = await axios.get(
-      "http://localhost:8000/user",
+      `${import.meta.env.VITE_BACK_END_URL}/user`,
       {
         withCredentials: true,
       }
