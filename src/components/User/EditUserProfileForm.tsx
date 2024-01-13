@@ -214,6 +214,12 @@ const EditUserProfileForm = memo(function EditUserProfileForm({
                   inputProps={{ "aria-label": "username", maxLength: 25 }}
                   {...field}
                   error={errors.username ? true : false}
+                  title={
+                    user.username === "Guest User"
+                      ? "Guest User username cannot be changed."
+                      : undefined
+                  }
+                  disabled={user.username === "Guest User"}
                 />
               </Box>
             )}
