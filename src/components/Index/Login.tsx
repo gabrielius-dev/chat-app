@@ -101,6 +101,27 @@ function Login() {
     event.preventDefault();
   };
 
+  async function handleGuestLogin() {
+    const data = { username: "Guest User", password: "guest" };
+    const encodedData = Object.entries(data)
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
+      )
+      .join("&");
+    const response: AxiosResponse<UserResponse> = await axios.post(
+      "http://localhost:8000/login",
+      encodedData,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+    queryClient.setQueryData(["userData"], response.data.user);
+  }
+
   return (
     <form
       className="flex flex-col items-center mb-8"
@@ -248,6 +269,22 @@ function Login() {
         }}
       >
         Login
+      </Button>
+      <Button
+        variant="outlined"
+        sx={{
+          bgcolor: theme.deepBlue,
+          color: theme.creamy,
+          fontWeight: "500",
+          "&:hover": {
+            bgcolor: "#155e75",
+          },
+          borderRadius: 1,
+          mt: 2,
+        }}
+        onClick={() => void handleGuestLogin()}
+      >
+        Guest Login
       </Button>
     </form>
   );
