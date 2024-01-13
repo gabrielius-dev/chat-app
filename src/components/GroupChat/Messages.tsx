@@ -19,7 +19,7 @@ const Messages = memo(function Messages({
       messages.map((message) => (
         <Fragment key={message._id}>
           {message.sendingIndicatorId !== message._id && (
-            <Message message={message} messages={messages} />
+            <Message message={message} />
           )}
           {message.sendingIndicatorId === message._id && (
             <LoadingMessage
