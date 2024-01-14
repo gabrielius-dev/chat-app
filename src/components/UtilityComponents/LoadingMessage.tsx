@@ -35,7 +35,7 @@ function LoadingMessage({
         <Typography variant="subtitle1" color="white">
           {imagesCount > 1 ? "Images are" : "Image is"} being sent
         </Typography>
-        <ClockLoader size={15} color="white" />
+        <ClockLoader size={15} color="white" cssOverride={{ flexShrink: 0 }} />
       </Box>
       <Typography
         sx={{
