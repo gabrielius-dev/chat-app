@@ -270,12 +270,15 @@ const EditGroupForm = memo(function EditGroupForm({
               "& .MuiOutlinedInput-root": {
                 "& fieldset": {
                   borderColor: "rgba(0, 0, 0, 0.23)",
+                  borderRadius: 10,
                 },
                 "&:hover fieldset": {
                   borderColor: "rgba(0, 0, 0, 0.23)",
+                  borderRadius: 10,
                 },
                 "&.Mui-focused fieldset": {
                   borderColor: "rgba(0, 0, 0, 0.23)",
+                  borderRadius: 10,
                 },
               },
             }}
@@ -366,7 +369,7 @@ const EditGroupForm = memo(function EditGroupForm({
             "&:hover": {
               bgcolor: "#155e75",
             },
-            borderRadius: 1,
+            borderRadius: 10,
             width: "100%",
           }}
           disabled={isEditingGroup}
