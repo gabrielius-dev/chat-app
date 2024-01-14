@@ -58,8 +58,8 @@ function formatLatestMessage(
           : ""
       }${
         chatListItem.latestMessage.content
-          ? chatListItem.latestMessage.content.length > 15
-            ? chatListItem.latestMessage.content.slice(0, 15) + "..."
+          ? chatListItem.latestMessage.content.length > 16
+            ? chatListItem.latestMessage.content.slice(0, 16) + "..."
             : chatListItem.latestMessage.content
           : chatListItem.latestMessage.images?.length !== undefined
           ? `${
