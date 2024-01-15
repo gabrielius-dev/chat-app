@@ -50,6 +50,10 @@ import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateR
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
+import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
+import "./styles/picker.css";
 
 type setOpenType = Dispatch<SetStateAction<boolean>>;
 
@@ -92,6 +96,8 @@ const GroupChat = memo(function GroupChat({
   const messageInputRef = useRef<HTMLInputElement>();
   const [selectedImagesLength, setSelectedImagesLength] = useState(0);
   const [messagesDeleted, setMessagesDeleted] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsLoadingGroupChat(true);
@@ -360,6 +366,25 @@ const GroupChat = memo(function GroupChat({
   const handleInputChange = useCallback(() => {
     setIsMessageValid(true);
   }, []);
+
+  useEffect(() => {
+    const handleOutsideClick: EventListener = (event) => {
+      if (
+        event.target instanceof Element &&
+        emojiPickerRef.current &&
+        !event.target.closest(".emoji-picker-button") &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [showEmojiPicker]);
 
   const handleMessageSubmit = async () => {
     if (!messageInputRef.current || !groupChat?._id) return;
@@ -646,8 +671,35 @@ const GroupChat = memo(function GroupChat({
               gap: 2,
               borderTop: `1px solid ${theme.lightGray}`,
               alignItems: "center",
+              position: "relative",
+              justifyContent: "center",
             }}
           >
+            {showEmojiPicker && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: selectedImagesLength > 0 ? 150 : 100,
+                  zIndex: 1,
+                  width: "95%",
+                  height: "clamp(250px, 60vh, 450px)",
+                  maxWidth: "350px",
+                }}
+                ref={emojiPickerRef}
+              >
+                <Picker
+                  data={data}
+                  onEmojiSelect={(emoji: { native: string }) => {
+                    const inputRef = messageInputRef.current;
+                    if (inputRef) {
+                      inputRef.value += emoji.native;
+                      inputRef.focus();
+                    }
+                  }}
+                  previewPosition="none"
+                />
+              </Box>
+            )}
             <IconButton component="label" htmlFor="fileInput">
               <AddPhotoAlternateRoundedIcon sx={{ color: theme.deepBlue }} />
               <input
@@ -741,21 +793,37 @@ const GroupChat = memo(function GroupChat({
                   )}
                 </Box>
               )}
-              <InputBase
-                placeholder="Aa"
-                inputRef={messageInputRef}
-                onChange={handleInputChange}
-                multiline
-                maxRows={3}
-                autoFocus
-                required
-                error={!isMessageValid}
-                inputProps={{ maxLength: 1000, spellCheck: false }}
+              <Box
                 sx={{
-                  flex: 1,
-                  padding: 2,
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "center",
                 }}
-              />
+              >
+                <InputBase
+                  placeholder="Aa"
+                  inputRef={messageInputRef}
+                  onChange={handleInputChange}
+                  multiline
+                  maxRows={3}
+                  autoFocus
+                  required
+                  error={!isMessageValid}
+                  inputProps={{ maxLength: 1000, spellCheck: false }}
+                  sx={{
+                    flex: 1,
+                    padding: 2,
+                  }}
+                />
+                <IconButton
+                  className="emoji-picker-button"
+                  onClick={() => {
+                    setShowEmojiPicker((prevValue) => !prevValue);
+                  }}
+                >
+                  <InsertEmoticonIcon sx={{ color: theme.deepBlue }} />
+                </IconButton>
+              </Box>
             </Box>
             <button
               onClick={() => void handleMessageSubmit()}
