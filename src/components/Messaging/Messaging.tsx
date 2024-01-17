@@ -644,6 +644,7 @@ const Messaging = memo(function Messaging({
                       inputRef.focus();
                     }
                   }}
+                  dynamicWidth={true}
                   previewPosition="none"
                 />
               </Box>

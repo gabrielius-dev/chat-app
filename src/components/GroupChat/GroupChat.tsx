@@ -696,6 +696,7 @@ const GroupChat = memo(function GroupChat({
                       inputRef.focus();
                     }
                   }}
+                  dynamicWidth={true}
                   previewPosition="none"
                 />
               </Box>
