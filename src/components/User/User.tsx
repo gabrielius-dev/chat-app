@@ -108,6 +108,7 @@ export default function User({
               flexDirection: "column",
               alignItems: "center",
               gap: 1,
+              p: 2,
             }}
           >
             <Avatar
@@ -123,11 +124,14 @@ export default function User({
               {!user?.img ? user?.username[0].toUpperCase() : null}
             </Avatar>
 
-            <Typography variant="h5" sx={{ wordBreak: "break-all" }}>
+            <Typography variant="h5" sx={{ wordBreak: "break-word" }}>
               {user.username}
             </Typography>
             {user.bio && (
-              <Typography variant="subtitle1" sx={{ wordBreak: "break-all" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ wordBreak: "break-word", textAlign: "center" }}
+              >
                 {user.bio}
               </Typography>
             )}
