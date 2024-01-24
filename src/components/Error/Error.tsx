@@ -70,8 +70,12 @@ function Error({
             overflow: "auto",
           }}
         />
-        <Typography variant="h4">{errorMessage}</Typography>
-        <Typography variant="h6">Redirecting in {timeLeft}...</Typography>
+        <Typography variant="h4" sx={{ textAlign: "center" }}>
+          {errorMessage}
+        </Typography>
+        <Typography variant="h6" sx={{ textAlign: "center" }}>
+          Redirecting in {timeLeft}...
+        </Typography>
       </Box>
     </Box>
   );
