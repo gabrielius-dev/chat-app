@@ -51,8 +51,8 @@ function WelcomeBox({
           fontWeight: "500",
         }}
       >
-        Welcome to our chat community! Join the conversation or sign up to
-        connect with friends and make new ones.
+        Welcome to the real-time messaging platform! Connect instantly with
+        friends and enjoy seamless communication. Let the conversations begin!
       </Typography>
     </Grid>
   );
