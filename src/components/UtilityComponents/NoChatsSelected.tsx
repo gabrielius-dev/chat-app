@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 
 export default function NoChatsSelected() {
   return (
-    <Box sx={{ width: "30vw", maxWidth: "500px", maxHeight: "60vh" }}>
+    <Box sx={{ width: "90%", maxWidth: "500px", maxHeight: "60vh" }}>
       <svg
         data-name="Layer 1"
         xmlns="http://www.w3.org/2000/svg"
