@@ -1,45 +1,32 @@
-import { useMediaQuery, Box, Typography } from "@mui/material";
-import ChatList from "../UtilityComponents/ChatList/ChatList";
+import { Box, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { User } from "../types/User";
-import { useTheme } from "@mui/material/styles";
 import Main from "./Main";
-import Sidebar from "../Sidebar/Sidebar";
-import { useState, useEffect, useCallback } from "react";
 import NoChatsSelected from "../UtilityComponents/NoChatsSelected";
 
-function Index({ isSocketConnected }: { isSocketConnected: boolean }) {
-  const theme = useTheme();
-  const isMediumScreen = useMediaQuery(theme.breakpoints.up("md"));
+function Index({
+  isSocketConnected,
+  open,
+  isSmallScreen,
+}: {
+  isSocketConnected: boolean;
+  open: boolean;
+  isSmallScreen: boolean;
+}) {
   const queryClient = useQueryClient();
   const user: User | undefined = queryClient.getQueryData(["userData"]);
-  const [open, setOpen] = useState(isMediumScreen);
-
-  const toggleSidebar = useCallback(() => {
-    setOpen((prevOpen) => !prevOpen);
-  }, []);
-
-  useEffect(() => {
-    setOpen(isMediumScreen);
-  }, [isMediumScreen]);
 
   return (
     <Box sx={{ width: "100vw", overflow: "auto" }}>
       {!user && <Main />}
-      {user && !isMediumScreen && isSocketConnected && <ChatList />}
-      {user && isMediumScreen && isSocketConnected && (
+      {user && isSocketConnected && (
         <Box
           sx={{
-            display: "flex",
+            display: open && !isSmallScreen ? "none" : "flex",
             height: "100%",
             overflow: "hidden",
           }}
         >
-          <Sidebar
-            open={open}
-            toggleSidebar={toggleSidebar}
-            isSmallScreen={true}
-          />
           <Box
             sx={{
               display: "flex",

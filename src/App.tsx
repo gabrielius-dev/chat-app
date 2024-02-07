@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Header from "./components/Header/Header";
 import axios, { AxiosResponse } from "axios";
 import { User as UserType, UserResponse } from "./components/types/User";
@@ -19,7 +19,6 @@ import UserWrapper from "./components/User/UserWrapper";
 
 function App() {
   const [isSocketConnected, setIsSocketConnected] = useState(false);
-  const location = useLocation();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.up("sm"));
   const [open, setOpen] = useState(isSmallScreen);
@@ -128,7 +127,7 @@ function App() {
                 overflow: "hidden",
               }}
             >
-              {user && location.pathname !== "/" && (
+              {user && (
                 <Sidebar
                   toggleSidebar={toggleSidebar}
                   open={open}
@@ -138,7 +137,13 @@ function App() {
               <Routes>
                 <Route
                   path="/"
-                  element={<Index isSocketConnected={isSocketConnected} />}
+                  element={
+                    <Index
+                      isSocketConnected={isSocketConnected}
+                      open={open}
+                      isSmallScreen={isSmallScreen}
+                    />
+                  }
                 />
                 {user && (
                   <>
