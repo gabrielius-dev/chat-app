@@ -99,7 +99,7 @@ export default function User({
               color: theme.midnightNavy,
             }}
           >
-            {currentUser._id === user._id ? "My Profile" : "User Profile"}
+            {currentUser._id === user._id ? "My profile" : "User profile"}
           </Typography>
           <Box
             sx={{
@@ -143,15 +143,16 @@ export default function User({
               sx={{
                 bgcolor: theme.deepBlue,
                 color: theme.creamy,
-                fontWeight: "bold",
+                fontWeight: 600,
                 "&:hover": {
                   bgcolor: "#155e75",
                 },
+                borderRadius: 10,
                 textTransform: "none",
-                borderRadius: 50,
+                fontSize: "1rem",
               }}
             >
-              Edit Profile
+              Edit profile
             </Button>
           )}
           <Box
