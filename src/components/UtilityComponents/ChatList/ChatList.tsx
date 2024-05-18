@@ -693,15 +693,17 @@ const ChatList = memo(function ChatList() {
           <Button
             variant="outlined"
             sx={{
-              color: theme.deepBlue,
-              fontWeight: "bold",
-              textTransform: "none",
+              bgcolor: theme.deepBlue,
+              color: theme.creamy,
+              fontWeight: 600,
               "&:hover": {
-                border: 2,
+                bgcolor: "#155e75",
               },
               borderRadius: 10,
-              border: 2,
-              margin: 1,
+              mx: 1,
+              mt: 1,
+              textTransform: "none",
+              fontSize: "1rem",
             }}
             onClick={() => setShowGroupForm(true)}
           >
@@ -761,15 +763,16 @@ const ChatList = memo(function ChatList() {
             <Button
               variant="outlined"
               sx={{
-                color: theme.deepBlue,
-                fontWeight: "bold",
-                textTransform: "none",
+                bgcolor: theme.deepBlue,
+                color: theme.creamy,
+                fontWeight: 600,
                 "&:hover": {
-                  border: 2,
+                  bgcolor: "#155e75",
                 },
                 borderRadius: 10,
-                border: 2,
-                marginX: 1,
+                mx: 1,
+                textTransform: "none",
+                fontSize: "1rem",
               }}
               onClick={loadMoreGroupChats}
             >
@@ -851,15 +854,16 @@ const ChatList = memo(function ChatList() {
           <Button
             variant="outlined"
             sx={{
-              color: theme.deepBlue,
-              fontWeight: "bold",
-              textTransform: "none",
+              bgcolor: theme.deepBlue,
+              color: theme.creamy,
+              fontWeight: 600,
               "&:hover": {
-                border: 2,
+                bgcolor: "#155e75",
               },
               borderRadius: 10,
-              border: 2,
               mx: 1,
+              textTransform: "none",
+              fontSize: "1rem",
               flex: 1,
             }}
             onClick={loadMoreUsers}
