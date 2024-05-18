@@ -121,7 +121,7 @@ function SignUp() {
 
   return (
     <form
-      className="flex flex-col items-center mb-8"
+      className="flex flex-col items-center mb-8 max-w-[275px]"
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       onSubmit={handleSubmit(onSubmit)}
     >
@@ -152,18 +152,20 @@ function SignUp() {
             label="Username"
             variant="outlined"
             error={errors.username ? true : false}
+            sx={{ m: 1 }}
           />
         )}
       />
       <Typography
         sx={{
           color: "#f44336",
-          visibility: `${errors.username ? "visible" : "hidden"}`,
+          display: `${errors.username ? "flex" : "none"}`,
           textAlign: "center",
+          alignItems: "center",
         }}
         data-testid="username-error-element"
       >
-        <WarningRoundedIcon />
+        <WarningRoundedIcon sx={{ width: "20px", height: "20px" }} />
         {errors.username?.message}
       </Typography>
 
@@ -181,7 +183,7 @@ function SignUp() {
           <FormControl
             sx={{
               m: 1,
-              width: "25ch",
+              width: "100%",
               "& label.Mui-focused": {
                 color: theme.deepBlue,
               },
@@ -202,6 +204,7 @@ function SignUp() {
                 color: theme.deepBlue,
               },
               "& .MuiOutlinedInput-root": {
+                borderRadius: "40px",
                 "& fieldset": {
                   borderColor: theme.deepBlue,
                 },
@@ -230,7 +233,7 @@ function SignUp() {
                     onMouseDown={handleMouseDownPassword}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               }
@@ -242,12 +245,13 @@ function SignUp() {
       <Typography
         sx={{
           color: "#f44336",
-          visibility: `${errors.password ? "visible" : "hidden"}`,
+          display: `${errors.password ? "flex" : "none"}`,
           textAlign: "center",
+          alignItems: "center",
         }}
         data-testid="password-error-element"
       >
-        <WarningRoundedIcon />
+        <WarningRoundedIcon sx={{ width: "20px", height: "20px" }} />
         {errors.password?.message}
       </Typography>
 
@@ -267,7 +271,7 @@ function SignUp() {
           <FormControl
             sx={{
               m: 1,
-              width: "25ch",
+              width: "100%",
               "& label.Mui-focused": {
                 color: theme.deepBlue,
               },
@@ -288,6 +292,7 @@ function SignUp() {
                 color: theme.deepBlue,
               },
               "& .MuiOutlinedInput-root": {
+                borderRadius: "40px",
                 "& fieldset": {
                   borderColor: theme.deepBlue,
                 },
@@ -319,9 +324,9 @@ function SignUp() {
                     edge="end"
                   >
                     {showPasswordConfirmation ? (
-                      <VisibilityOff />
-                    ) : (
                       <Visibility />
+                    ) : (
+                      <VisibilityOff />
                     )}
                   </IconButton>
                 </InputAdornment>
@@ -334,12 +339,13 @@ function SignUp() {
       <Typography
         sx={{
           color: "#f44336",
-          visibility: `${errors.passwordConfirmation ? "visible" : "hidden"}`,
+          display: `${errors.passwordConfirmation ? "flex" : "none"}`,
           textAlign: "center",
+          alignItems: "center",
         }}
         data-testid="passwordConfirmation-error-element"
       >
-        <WarningRoundedIcon />
+        <WarningRoundedIcon sx={{ width: "20px", height: "20px" }} />
         {errors.passwordConfirmation?.message}
       </Typography>
 
@@ -349,11 +355,15 @@ function SignUp() {
         sx={{
           bgcolor: theme.deepBlue,
           color: theme.creamy,
-          fontWeight: "500",
+          fontWeight: 600,
           "&:hover": {
             bgcolor: "#155e75",
           },
-          borderRadius: 1,
+          borderRadius: 10,
+          textTransform: "none",
+          fontSize: "1rem",
+          width: "100%",
+          mt: 1,
         }}
       >
         Sign up
