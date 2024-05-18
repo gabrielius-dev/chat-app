@@ -156,18 +156,20 @@ function Login() {
             label="Username"
             variant="outlined"
             error={errors.username ? true : false}
+            sx={{ m: 1 }}
           />
         )}
       />
       <Typography
         sx={{
           color: "#f44336",
-          visibility: `${errors.username ? "visible" : "hidden"}`,
+          display: `${errors.username ? "flex" : "none"}`,
           textAlign: "center",
+          alignItems: "center",
         }}
         data-testid="username-error-element"
       >
-        <WarningRoundedIcon />
+        <WarningRoundedIcon sx={{ width: "20px", height: "20px" }} />
         {errors.username?.message}
       </Typography>
 
@@ -185,7 +187,7 @@ function Login() {
           <FormControl
             sx={{
               m: 1,
-              width: "25ch",
+              width: "100%",
               "& label.Mui-focused": {
                 color: theme.deepBlue,
               },
@@ -206,6 +208,7 @@ function Login() {
                 color: theme.deepBlue,
               },
               "& .MuiOutlinedInput-root": {
+                borderRadius: "40px",
                 "& fieldset": {
                   borderColor: theme.deepBlue,
                 },
@@ -234,7 +237,7 @@ function Login() {
                     onMouseDown={handleMouseDownPassword}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
               }
@@ -246,12 +249,13 @@ function Login() {
       <Typography
         sx={{
           color: "#f44336",
-          visibility: `${errors.password ? "visible" : "hidden"}`,
+          display: `${errors.password ? "flex" : "none"}`,
           textAlign: "center",
+          alignItems: "center",
         }}
         data-testid="password-error-element"
       >
-        <WarningRoundedIcon />
+        <WarningRoundedIcon sx={{ width: "20px", height: "20px" }} />
         {errors.password?.message}
       </Typography>
 
@@ -261,11 +265,15 @@ function Login() {
         sx={{
           bgcolor: theme.deepBlue,
           color: theme.creamy,
-          fontWeight: "500",
+          fontWeight: 600,
           "&:hover": {
             bgcolor: "#155e75",
           },
-          borderRadius: 1,
+          borderRadius: 10,
+          textTransform: "none",
+          fontSize: "1rem",
+          width: "100%",
+          mt: 1,
         }}
       >
         Login
@@ -275,16 +283,19 @@ function Login() {
         sx={{
           bgcolor: theme.deepBlue,
           color: theme.creamy,
-          fontWeight: "500",
+          fontWeight: 600,
           "&:hover": {
             bgcolor: "#155e75",
           },
-          borderRadius: 1,
+          borderRadius: 10,
           mt: 2,
+          textTransform: "none",
+          fontSize: "1rem",
+          width: "100%",
         }}
         onClick={() => void handleGuestLogin()}
       >
-        Guest Login
+        Guest login
       </Button>
     </form>
   );
