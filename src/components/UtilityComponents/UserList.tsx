@@ -274,15 +274,17 @@ const UserList = memo(function UserList({
             <Button
               variant="outlined"
               sx={{
-                color: theme.deepBlue,
-                fontWeight: "bold",
-                textTransform: "none",
+                bgcolor: theme.deepBlue,
+                color: theme.creamy,
+                fontWeight: 600,
                 "&:hover": {
-                  border: 2,
+                  bgcolor: "#155e75",
                 },
-                borderRadius: 1,
-                border: 2,
-                marginX: "-8px",
+                borderRadius: 10,
+                textTransform: "none",
+                fontSize: "1rem",
+                width: "100%",
+                mb: 1,
               }}
               onClick={() =>
                 setLoadOffset((prevLoadOffset) => prevLoadOffset + 1)
