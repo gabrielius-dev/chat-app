@@ -48,7 +48,7 @@ function Main() {
           sx={{
             boxShadow: 1,
             p: 2,
-            borderRadius: 1,
+            borderRadius: "40px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -59,9 +59,14 @@ function Main() {
           {showLogin && <Login />}
           {!showLogin && <SignUp />}
           <Typography sx={{ textAlign: "center" }}>
-            {showLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+            {showLogin ? "Don't have an account?" : "Already have an account?"}
             <Link
-              sx={{ color: theme.deepBlue, fontWeight: "bold" }}
+              sx={{
+                color: theme.deepBlue,
+                fontWeight: "bold",
+                position: "relative",
+                ml: 0.5,
+              }}
               href="#"
               underline="none"
               onClick={(e) => {
@@ -70,7 +75,10 @@ function Main() {
               }}
               data-testid="sign-up-login-link"
             >
-              {showLogin ? "Sign up" : "Login"}
+              <span className="group">
+                {showLogin ? "Sign up" : "Login"}
+                <span className="absolute inset-x-0 -bottom-0.5 h-0.5 bg-[#1C768F] group-hover:opacity-100 opacity-0 transition-opacity"></span>
+              </span>
             </Link>
           </Typography>
         </Grid>
