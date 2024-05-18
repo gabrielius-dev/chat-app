@@ -1,6 +1,7 @@
 import { TextField, styled } from "@mui/material";
 
 const CustomTextField = styled(TextField)(({ theme }) => ({
+  width: "100%",
   "& label.Mui-focused": {
     color: theme.deepBlue,
   },
@@ -14,6 +15,7 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
     color: theme.deepBlue,
   },
   "& .MuiOutlinedInput-root": {
+    borderRadius: "40px",
     "& fieldset": {
       borderColor: theme.deepBlue,
     },
