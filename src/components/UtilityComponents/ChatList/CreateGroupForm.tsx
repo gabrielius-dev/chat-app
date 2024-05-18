@@ -323,18 +323,20 @@ const CreateGroupForm = memo(function CreateGroupForm({
       </DialogContent>
       <DialogActions>
         <Button
-          variant="outlined"
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           onClick={handleSubmit(onSubmit)}
+          variant="outlined"
           sx={{
             bgcolor: theme.deepBlue,
             color: theme.creamy,
-            fontWeight: "500",
+            fontWeight: 600,
             "&:hover": {
               bgcolor: "#155e75",
             },
             borderRadius: 10,
-            width: "100%",
+            textTransform: "none",
+            fontSize: "1rem",
+            flex: 1,
           }}
           disabled={isCreatingGroup}
         >
