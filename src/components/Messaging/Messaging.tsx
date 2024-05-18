@@ -38,7 +38,7 @@ import { isEqual } from "lodash";
 import AlertNotification from "../UtilityComponents/AlertNotification";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
-import compressImage from "../UtilityComponents/compressImage";
+import compressImage from "../utils/compressImage";
 import { v4 as uuidv4 } from "uuid";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 import data from "@emoji-mart/data";
@@ -767,6 +767,7 @@ const Messaging = memo(function Messaging({
                 <IconButton
                   className="emoji-picker-button"
                   onClick={() => setShowEmojiPicker((prevValue) => !prevValue)}
+                  sx={{ mr: 0.5 }}
                 >
                   <InsertEmoticonIcon sx={{ color: theme.deepBlue }} />
                 </IconButton>

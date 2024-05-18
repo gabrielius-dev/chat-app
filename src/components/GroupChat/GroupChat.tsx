@@ -45,7 +45,7 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { PopupState as PopupStateType } from "material-ui-popup-state/hooks";
 import EditGroupForm from "./EditGroupForm";
 import AlertNotification from "../UtilityComponents/AlertNotification";
-import compressImage from "../UtilityComponents/compressImage";
+import compressImage from "../utils/compressImage";
 import AddPhotoAlternateRoundedIcon from "@mui/icons-material/AddPhotoAlternateRounded";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { isEqual } from "lodash";
@@ -821,6 +821,7 @@ const GroupChat = memo(function GroupChat({
                   onClick={() => {
                     setShowEmojiPicker((prevValue) => !prevValue);
                   }}
+                  sx={{ mr: 0.5 }}
                 >
                   <InsertEmoticonIcon sx={{ color: theme.deepBlue }} />
                 </IconButton>
