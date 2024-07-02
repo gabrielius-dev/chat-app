@@ -21,9 +21,11 @@ function Header() {
   const queryClient = useQueryClient();
   const user: User = queryClient.getQueryData(["userData"])!;
   const navigate = useNavigate();
+  const [pending, setPending] = useState(false);
 
   async function handleLogout(popupState: PopupStateType) {
     try {
+      setPending(true);
       await axios.post(
         `${import.meta.env.VITE_BACK_END_URL}/logout`,
         {},
@@ -35,6 +37,8 @@ function Header() {
       queryClient.setQueryData(["userData"], null);
     } catch (err) {
       setOpen(true);
+    } finally {
+      setPending(false);
     }
 
     popupState.close();
@@ -121,8 +125,11 @@ function Header() {
                 <MenuItem onClick={popupState.close}>
                   <Link to={`/user/${user?._id}`}>My account</Link>
                 </MenuItem>
-                <MenuItem onClick={() => void handleLogout(popupState)}>
-                  Logout
+                <MenuItem
+                  onClick={() => void handleLogout(popupState)}
+                  disabled={pending}
+                >
+                  Sign out
                 </MenuItem>
               </Menu>
             </Fragment>
