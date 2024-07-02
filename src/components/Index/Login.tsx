@@ -19,6 +19,7 @@ import { User, UserResponse } from "../types/User";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { transformError } from "../utils/transformError";
 import CustomTextField from "../UtilityComponents/CustomTextField";
+import { PulseLoader } from "react-spinners";
 
 interface IFormInput {
   username: string;
@@ -42,7 +43,11 @@ function Login() {
 
   const queryClient = useQueryClient();
 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isLoggingInGuest, setIsLoggingInGuest] = useState(false);
+
   const loginUser = async (data: IFormInput) => {
+    setIsLoggingIn(true);
     const encodedData = Object.entries(data)
       .map(
         ([key, value]) =>
@@ -63,6 +68,7 @@ function Login() {
   };
 
   const handleError = (err: unknown) => {
+    setIsLoggingIn(false);
     const error = err as AxiosError;
     const result = error.response?.data as ErrorResponse;
     const errors: ErrorInterface[] = result.errors ?? [];
@@ -83,6 +89,7 @@ function Login() {
 
   const handleSuccess = (data: User) => {
     queryClient.setQueryData(["userData"], data);
+    setIsLoggingIn(false);
   };
 
   const mutation = useMutation({
@@ -102,6 +109,8 @@ function Login() {
   };
 
   async function handleGuestLogin() {
+    setIsLoggingInGuest(true);
+
     const data = { username: "Guest User", password: "guest" };
     const encodedData = Object.entries(data)
       .map(
@@ -120,6 +129,7 @@ function Login() {
       }
     );
     queryClient.setQueryData(["userData"], response.data.user);
+    setIsLoggingInGuest(false);
   }
 
   return (
@@ -269,14 +279,30 @@ function Login() {
           "&:hover": {
             bgcolor: "#155e75",
           },
+          "&:disabled": {
+            color: theme.creamy,
+          },
           borderRadius: 10,
           textTransform: "none",
           fontSize: "1rem",
           width: "100%",
           mt: 1,
         }}
+        disabled={isLoggingIn || isLoggingInGuest}
       >
-        Login
+        {isLoggingIn ? (
+          <PulseLoader
+            color="white"
+            cssOverride={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "28px",
+            }}
+          />
+        ) : (
+          "Login"
+        )}
       </Button>
       <Button
         variant="outlined"
@@ -287,15 +313,31 @@ function Login() {
           "&:hover": {
             bgcolor: "#155e75",
           },
+          "&:disabled": {
+            color: theme.creamy,
+          },
           borderRadius: 10,
           mt: 2,
           textTransform: "none",
           fontSize: "1rem",
           width: "100%",
         }}
+        disabled={isLoggingInGuest || isLoggingIn}
         onClick={() => void handleGuestLogin()}
       >
-        Guest login
+        {isLoggingInGuest ? (
+          <PulseLoader
+            color="white"
+            cssOverride={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "28px",
+            }}
+          />
+        ) : (
+          "Continue as guest"
+        )}
       </Button>
     </form>
   );

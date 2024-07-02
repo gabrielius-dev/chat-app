@@ -19,6 +19,7 @@ import { User, UserResponse } from "../types/User";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { transformError } from "../utils/transformError";
 import CustomTextField from "../UtilityComponents/CustomTextField";
+import { PulseLoader } from "react-spinners";
 
 interface IFormInput {
   username: string;
@@ -47,8 +48,10 @@ function SignUp() {
   });
 
   const queryClient = useQueryClient();
+  const [pending, setPending] = useState(false);
 
   const signUpUser = async (data: IFormInput) => {
+    setPending(true);
     const encodedData = Object.entries(data)
       .map(
         ([key, value]) =>
@@ -69,6 +72,7 @@ function SignUp() {
   };
 
   const handleError = (err: unknown) => {
+    setPending(false);
     const error = err as AxiosError;
     const result = error.response?.data as ErrorResponse;
     const errors: ErrorInterface[] = result.errors ?? [];
@@ -95,6 +99,7 @@ function SignUp() {
 
   const handleSuccess = (data: User) => {
     queryClient.setQueryData(["userData"], data);
+    setPending(false);
   };
 
   const mutation = useMutation({
@@ -365,8 +370,21 @@ function SignUp() {
           width: "100%",
           mt: 1,
         }}
+        disabled={pending}
       >
-        Sign up
+        {pending ? (
+          <PulseLoader
+            color="white"
+            cssOverride={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "28px",
+            }}
+          />
+        ) : (
+          "Sign up"
+        )}
       </Button>
     </form>
   );
