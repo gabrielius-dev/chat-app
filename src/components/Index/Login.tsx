@@ -336,7 +336,7 @@ function Login() {
             }}
           />
         ) : (
-          "Continue as guest"
+          "Demo account"
         )}
       </Button>
     </form>
